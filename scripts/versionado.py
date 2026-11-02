@@ -29,7 +29,7 @@ TITULO_VERSION = re.compile(r"^## \[([^\]]+)\](?: - (\d{4}-\d{2}-\d{2}))?\s*$", 
 
 
 def git(*args):
-    r = subprocess.run(["git", *args], cwd=RAIZ, capture_output=True, text=True)
+    r = subprocess.run(["git", *args], cwd=RAIZ, capture_output=True, text=True, encoding="utf-8", errors="replace")
     return r.returncode, r.stdout
 
 
@@ -228,6 +228,10 @@ def cmd_pendientes(_):
 
 
 def main():
+    # La consola de Windows usa cp1252 por defecto y no puede imprimir «→» ni otros caracteres.
+    for flujo in (sys.stdout, sys.stderr):
+        if hasattr(flujo, "reconfigure"):
+            flujo.reconfigure(encoding="utf-8", errors="replace")
     p = argparse.ArgumentParser(description="Versionado de los agentes (ver VERSIONADO.md).")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("listar", help="muestra cada agente con su versión")
