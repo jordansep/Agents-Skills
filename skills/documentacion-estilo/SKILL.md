@@ -17,11 +17,17 @@ Carga solo la referencia que necesites:
 - `references/plantillas/`: diseños tomados de documentos que el usuario entregó como modelo (Trabajo de campo UNC, informe técnico, informe de auditoría, proforma de entrevista, ficha 1-pager, arquitectura en láminas y diagramas). Mandan sobre `estilo-visual.md` cuando el prompt los declara en `plantilla`. El `README.md` de la carpeta dice cuál usar.
 - `scripts/extraer_estilo_docx.py`: extrae el diseño de un .docx de referencia (página, fuentes, títulos, tablas, leyendas, pie) para crear o revisar una plantilla.
 - `references/memoria.md`: qué hacer cuando algo no está definido y cómo se guarda la memoria.
-- `memoria/decisiones.md`: registro de decisiones del usuario. Se lee en el Paso 4 y en los casos no definidos.
+- `memoria/decisiones.md`: memoria del agente, con las decisiones que valen para todos los documentos. Se lee en el Paso 4 y en los casos no definidos.
+- `assets/plantilla-decisiones-proyecto.md`: plantilla de la memoria de un proyecto (`decisiones-estilo.md`).
 
 ## Regla principal: no decidir por cuenta propia
 
-Este agente trabaja siempre con el mismo estilo, y ese estilo vive en su memoria: la carpeta `memoria/` de este skill. Las reglas son del agente, no del repositorio donde se instale. No elijas, infieras ni apliques por defecto nada que el usuario no haya definido. Si algo no está definido, pregunta, registra las preguntas y las respuestas en la memoria, incorpora la regla al skill y envía la memoria al repositorio del agente con un PR. El procedimiento completo está en `references/memoria.md`.
+No elijas, infieras ni apliques por defecto nada que el usuario no haya definido. Si algo no está definido, pregunta, registra las preguntas y las respuestas en la memoria e incorpora la regla. El procedimiento completo está en `references/memoria.md`.
+
+La memoria tiene dos niveles, cada uno en su repositorio:
+
+- **Agente**: `memoria/decisiones.md` de este skill (IDs `DEC-NNN`). Solo reglas para todos los documentos. Se envía al repositorio del agente con un PR.
+- **Proyecto**: `decisiones-estilo.md` en el repositorio que se documenta, junto a su prompt de estilo (IDs `DP-NNN`). Las decisiones de ese proyecto se commitean ahí y nunca se escriben en la memoria del agente.
 
 ## Paso 1 (siempre primero): abrir el configurador
 
@@ -60,7 +66,7 @@ Cuando el usuario diga que terminó:
 
 ## Paso 4: actualizar la memoria
 
-1. Lee `memoria/decisiones.md`.
+1. Lee `memoria/decisiones.md` y, si existe, `decisiones-estilo.md` del proyecto (en la carpeta del prompt).
 2. Los parámetros del prompt responden las decisiones pendientes:
    - DEC-001: `variante` y `tratamiento`.
    - DEC-002: `decimal`, `miles`, `porcentaje_con_espacio` y `formato_fecha`.
@@ -68,10 +74,12 @@ Cuando el usuario diga que terminó:
    - DEC-004: `citas`.
    - DEC-005: `prompt` y `salida`.
    - DEC-006: `comillas`.
-3. El alcance lo indica `alcance_decisiones`: `agente` (todos los documentos) o `documento` (solo este).
-4. Si una decisión **confirmada** de la memoria contradice el prompt, no elijas tú: pregunta al usuario cuál prevalece.
-5. Las **excepciones locales** (sección 8 del prompt) son ajustes que el usuario hizo solo sobre una parte de su documento. Regístralas con alcance de documento y pregunta si alguna debe pasar a ser regla del agente.
-6. Registra todo y envíalo con un PR según `references/memoria.md`.
+3. El alcance lo indica `alcance_decisiones`:
+   - `agente`: confirma esas DEC en `memoria/decisiones.md` y envíalas con un PR al repositorio del agente.
+   - `documento`: las DEC del agente siguen pendientes. Registra los parámetros como una entrada `DP-NNN` en `decisiones-estilo.md` del proyecto y commitéala en ese repositorio.
+4. Si una decisión **confirmada** de alguna memoria contradice el prompt, no elijas tú: pregunta al usuario cuál prevalece.
+5. Las **excepciones locales** (sección 8 del prompt) son ajustes que el usuario hizo solo sobre una parte de su documento. Regístralas en la memoria del proyecto y pregunta si alguna debe pasar a ser regla del agente.
+6. Guarda cada memoria en su repositorio según `references/memoria.md` (§3.5 proyecto, §3.6 agente).
 
 ## Documentos de referencia del usuario
 
@@ -87,9 +95,9 @@ Si un paso necesita algo que no está en la memoria ni en las referencias (una m
 
 1. Detén solo la parte afectada y márcala con `[PENDIENTE: estilo no definido, ver DEC-NNN]`.
 2. Si el caso es un parámetro que cubre el configurador, ábrelo (Paso 1) en lugar de preguntar en la terminal. Si no, haz de una a cuatro preguntas cerradas con opciones y ejemplos. Incluye una pregunta sobre el alcance: solo este documento o todos los documentos del agente.
-3. Registra las preguntas en `memoria/decisiones.md` con estado `pendiente` antes de esperar la respuesta.
-4. Con la respuesta, confirma la entrada, escribe la regla en la referencia o en el prompt según el alcance y márcala con `(DEC-NNN)`.
-5. Envía la memoria al repositorio del agente en un PR, con el cuerpo de `assets/plantilla-pr.md` (secciones Qué, Por qué y Cómo).
+3. Registra las preguntas con estado `pendiente` antes de esperar la respuesta: en `decisiones-estilo.md` del proyecto si el caso es propio de ese proyecto, o en `memoria/decisiones.md` si puede valer para todo el agente.
+4. Con la respuesta, confirma la entrada en la memoria que corresponda al alcance. Escribe la regla en la referencia del skill (agente, `(DEC-NNN)`) o en el prompt del proyecto (proyecto, `(DP-NNN)`).
+5. La memoria del proyecto se commitea en el repositorio del proyecto. La del agente se envía a su repositorio en un PR, con el cuerpo de `assets/plantilla-pr.md` (secciones Qué, Por qué y Cómo).
 
 ## Reglas no negociables
 

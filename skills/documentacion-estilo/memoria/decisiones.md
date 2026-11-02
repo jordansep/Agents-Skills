@@ -2,6 +2,8 @@
 
 Memoria persistente del agente de documentación (skills `documentacion-estilo` y `documentacion-generar`). Vale para todos los documentos que produzca el agente, en cualquier proyecto. El procedimiento está en `../references/memoria.md`.
 
+Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se guardan en `decisiones-estilo.md` del repositorio de ese proyecto, junto a su prompt de estilo, con IDs `DP-NNN`.
+
 - Las decisiones **confirmadas** mandan sobre las referencias del skill.
 - Las decisiones **pendientes** son preguntas que el usuario todavía no respondió. Si el documento en curso las necesita, se hacen antes de escribir la parte afectada.
 
