@@ -15,6 +15,11 @@ Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documenta
 
 - Configurador: nuevo diseño con encabezado fijo y resumen en píldoras, secciones abiertas con contador, listas desplegables convertidas en tarjetas de elección y contadores − / + en los campos numéricos
 
+### Corregido
+
+- Configurador: sin opciones redundantes ni sin efecto. Los tipos de aviso solo aparecen con el componente Avisos; el resultado tras cada paso, con Pasos numerados; borde y marcadores de capturas, con Figuras en un manual; los tipos de Diátaxis, en un manual con Diátaxis; y los ajustes de diagramas, con al menos una notación. Ocultarlas no borra su valor.
+- Configurador: Avisos tiene ícono propio (era igual al de Advertencia) y su «Útil para» coincide con el de sus tipos.
+
 ## [0.7.0] - 2026-11-02
 
 ### Agregado

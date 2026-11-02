@@ -123,6 +123,7 @@ textarea.alta { min-height: 170px; }
 .fila3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .fila.apilada, .fila3.apilada { grid-template-columns: 1fr; }
 .campo-oculto { display: none !important; }
+.dep-oculta { display: none !important; }
 
 /* ===== Paso − / + (contador de la referencia) ===== */
 .step { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--fg); background: var(--control2); padding: 4px 6px; border-radius: 20px; justify-self: start; }
@@ -501,7 +502,6 @@ pre.texto-salida {
           <label class="item"><input type="checkbox" data-k="capturas_borde"><span><b>Borde de 1 px en capturas</b><small>Separa la captura del fondo blanco de la página.</small></span></label>
           <label class="item"><input type="checkbox" data-k="capturas_marcadores"><span><b>Marcadores numerados en capturas</b><small>Círculos numerados que el texto referencia.</small></span></label>
         </div>
-        <p class="nota-ui">Los tipos de Diátaxis y las opciones de capturas solo se aplican a manuales.</p>
       </div>
     </section>
 
@@ -519,6 +519,7 @@ pre.texto-salida {
           <label class="item"><input type="checkbox" value="er"><span><b>Entidad-relación</b><small>Entidades de datos, atributos y cardinalidades.</small></span></label>
           <label class="item"><input type="checkbox" value="c4"><span><b>C4</b><small>Arquitectura por niveles: contexto, contenedores, componentes.</small></span></label>
         </div>
+        <p class="nota-ui" id="nota-sin-notacion" hidden>Elige al menos una notación para configurar los diagramas.</p>
         <div class="fila">
           <label class="campo"><span>Herramienta de origen</span>
             <select data-k="diag_herramienta">
@@ -2221,7 +2222,7 @@ actualizar();
   const DOCS = ["manual", "tesis", "especificacion", "informe", "arquitectura"];
   /* Para qué tipo de documento sirve cada elemento. Sin entrada: sirve para todos. */
   const UTIL = {
-    tablas: DOCS, figuras: [...DOCS, "diagrama"], avisos: ["manual", "especificacion", "arquitectura"], pasos: ["manual"],
+    tablas: DOCS, figuras: [...DOCS, "diagrama"], avisos: ["manual", "especificacion", "arquitectura", "informe"], pasos: ["manual"],
     codigo: ["manual", "arquitectura", "informe"], ecuaciones: ["tesis", "informe"], requisitos: ["especificacion", "arquitectura"],
     historias: ["especificacion"], glosario: DOCS,
     nota: ["manual", "especificacion", "arquitectura", "informe"], consejo: ["manual"], advertencia: ["manual", "especificacion"], peligro: ["manual"],
@@ -2275,7 +2276,7 @@ actualizar();
   const ICONOS = {
     tablas: '<rect x="11" y="12" width="22" height="20" rx="2"/><path d="M11 18.5h22M11 25h22M18.5 12v20"/>',
     figuras: '<rect x="10" y="12" width="24" height="20" rx="2.5"/><circle cx="17" cy="18.5" r="2.4"/><path d="M11 30l7-7 5 5 4-4 6 6"/>',
-    avisos: '<path d="M22 11l11 20H11z"/><path d="M22 19v5.5"/><circle cx="22" cy="28" r=".6" fill="currentColor"/>',
+    avisos: '<rect x="10" y="13" width="24" height="18" rx="2.5"/><path d="M14.5 13v18M19 19h10.5M19 25h7"/>',
     pasos: '<circle cx="14" cy="15" r="2.4"/><circle cx="14" cy="22" r="2.4"/><circle cx="14" cy="29" r="2.4"/><path d="M20 15h11M20 22h11M20 29h8"/>',
     codigo: '<path d="M17 15l-6 7 6 7M27 15l6 7-6 7M24.5 12.5l-5 19"/>',
     ecuaciones: '<path d="M29 13H14l8 9-8 9h15"/>',
@@ -2368,7 +2369,7 @@ actualizar();
       lab.classList.toggle("hidden", !ver);
     });
     secciones.forEach(s => {
-      const n = s.querySelectorAll(".opciones label.item:not(.hidden)").length;
+      const n = [...s.querySelectorAll(".opciones label.item:not(.hidden)")].filter(l => !l.closest(".dep-oculta")).length;
       s.querySelector(":scope > h2 .cnt").textContent = n || "";
     });
   }
@@ -2438,11 +2439,30 @@ actualizar();
   const editarOriginal = editarAjuste;
   editarAjuste = function (id) { plegar(document.getElementById("grupo-tipografia"), false); guardarPlegadas(); editarOriginal(id); };
 
-  /* 9. Mantener tarjetas, filtro y resumen al día con el estado */
+  /* 9. Opciones que dependen de otra: solo se muestran cuando tienen efecto en el prompt.
+     Ocultarlas no borra su valor: si se vuelve a activar la opción de la que dependen, reaparecen como estaban. */
+  const tarjetaK = k => form.querySelector(`input[data-k="${k}"]`).closest("label");
+  const conTitulo = g => { const el = form.querySelector(`[data-grupo="${g}"]`); return [el.previousElementSibling, el]; };
+  const notaNotacion = document.getElementById("nota-sin-notacion");
+  const ajustesDiagrama = [];
+  for (let el = notaNotacion.nextElementSibling; el; el = el.nextElementSibling) ajustesDiagrama.push(el);
+  const DEPENDENCIAS = [
+    { els: conTitulo("avisos"), si: () => S.componentes.includes("avisos") },
+    { els: [tarjetaK("pasos_resultado")], si: () => S.componentes.includes("pasos") },
+    { els: [tarjetaK("capturas_borde"), tarjetaK("capturas_marcadores")], si: () => S.componentes.includes("figuras") && S.tipo === "manual" },
+    { els: conTitulo("diataxis"), si: () => S.tipo === "manual" && S.metodologia === "diataxis" },
+    { els: ajustesDiagrama, si: () => S.notaciones.length > 0 }
+  ];
+  function dependencias() {
+    DEPENDENCIAS.forEach(d => { const ver = d.si(); d.els.forEach(el => el.classList.toggle("dep-oculta", !ver)); });
+    notaNotacion.hidden = S.notaciones.length > 0;
+  }
+
+  /* 10. Mantener tarjetas, dependencias, filtro y resumen al día con el estado */
   const pintarOriginal = pintarFormulario;
-  pintarFormulario = function () { pintarOriginal(); sincronizar(); filtrar(); resumen(); };
-  form.addEventListener("input", () => { sincronizar(); filtrar(); resumen(); });
-  sincronizar(); filtrar(); resumen();
+  pintarFormulario = function () { pintarOriginal(); sincronizar(); dependencias(); filtrar(); resumen(); };
+  form.addEventListener("input", () => { sincronizar(); dependencias(); filtrar(); resumen(); });
+  sincronizar(); dependencias(); filtrar(); resumen();
 })();
 /* ===== Tema claro / oscuro ===== */
 (function () {
