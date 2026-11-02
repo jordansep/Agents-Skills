@@ -2,6 +2,12 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.8.1] - 2026-11-02
+
+### Corregido
+
+- Configurador: al cambiar tipografía, tamaños, color o comillas con bloques seleccionados, el cambio se aplica solo a la selección aunque no se haya apretado «Ajustar estilo de la selección»; antes iba a todo el documento
+
 ## [0.8.0] - 2026-11-02
 
 ### Agregado
