@@ -144,7 +144,61 @@ def leyenda_apa(lineas, i, clase):
     return int(m.group(1)) if m else None
 
 
-def verificar(prompt, archivos, inf):
+ID_MEMORIA = re.compile(r"\b(DEC|DP)-(\d{3})\b")
+
+
+def leer_memoria(ruta):
+    """Devuelve {«DEC-001»: «pendiente», ...} con las entradas de un archivo de memoria, o None si no existe."""
+    if not ruta or not Path(ruta).is_file():
+        return None
+    entradas, actual = {}, None
+    for linea in Path(ruta).read_text(encoding="utf-8").split("\n"):
+        titulo = re.match(r"^##\s+((?:DEC|DP)-\d{3})\b", linea)
+        if titulo:
+            actual = titulo.group(1)
+            entradas[actual] = ""
+            continue
+        estado = re.match(r"^-\s*\*\*Estado\*\*:\s*(\w+)", linea)
+        if estado and actual and not entradas[actual]:
+            entradas[actual] = normalizar(estado.group(1))
+    return entradas
+
+
+def verificar_referencias(lineas, numeros, inf):
+    """Cada «Tabla N» o «Figura N» citada en el texto tiene que existir."""
+    existentes = {clase: {n for _, n in lista} for clase, lista in numeros.items()}
+    for donde, linea, tipo, _ in lineas:
+        if tipo != "texto":
+            continue
+        sin_codigo = re.sub(r"`[^`]*`", "", linea)
+        for m in re.finditer(r"(?<!\*\*)(?<!\w)(Tabla|Figura) (\d+)(?![\d.]*\*\*)(?![\d\w])", sin_codigo, re.I):
+            clase, n = m.group(1).capitalize(), int(m.group(2))
+            if n not in existentes[clase]:
+                inf.error(donde, f"se cita la {clase} {n}, que no existe en el documento")
+
+
+def verificar_memoria(lineas, memorias, inf):
+    """Los DEC-NNN y DP-NNN citados existen en la memoria del agente o del proyecto."""
+    nombres = {"DEC": "la memoria del agente (memoria/decisiones.md)", "DP": "la memoria del proyecto (decisiones-estilo.md)"}
+    sin_archivo = set()
+    for donde, linea, tipo, _ in lineas:
+        if tipo != "texto":
+            continue
+        for m in ID_MEMORIA.finditer(linea):
+            prefijo, ident = m.group(1), m.group(0)
+            entradas = memorias.get(prefijo)
+            if entradas is None:
+                if prefijo not in sin_archivo:
+                    sin_archivo.add(prefijo)
+                    (inf.error if prefijo == "DP" else inf.aviso)(donde, f"se cita {ident} pero no se encontró {nombres[prefijo]}")
+                continue
+            if ident not in entradas:
+                inf.error(donde, f"se cita {ident}, que no existe en {nombres[prefijo]}")
+            elif entradas[ident] == "descartada":
+                inf.aviso(donde, f"se cita {ident}, que está descartada")
+
+
+def verificar(prompt, archivos, inf, memorias=None):
     lineas = bloques(archivos)
     documento = normalizar(prompt.get("documento", ""))
     sin_numerar = SIN_NUMERAR_BASE | {normalizar(s) for s in prompt.get("sin_numerar", []) or []}
@@ -255,6 +309,9 @@ def verificar(prompt, archivos, inf):
             menciones = re.findall(rf"(?<!\*\*){clase} {n}(?![\d.]*\*\*)(?!\d)", texto_plano, re.I)
             if not menciones:
                 inf.aviso(donde, f"{clase} {n} no se menciona en el texto")
+    verificar_referencias(lineas, numeros, inf)
+    if memorias is not None:
+        verificar_memoria(lineas, memorias, inf)
 
     # Siglas, números, pendientes y oraciones
     vistas = set()
@@ -317,7 +374,12 @@ def main():
     p = argparse.ArgumentParser(description="Verifica documentación Markdown contra un prompt de estilo.")
     p.add_argument("--prompt", required=True, help="ruta al prompt-estilo.md")
     p.add_argument("rutas", nargs="+", help="archivos .md o carpetas con el documento")
+    p.add_argument("--memoria-agente", help="memoria del agente (por defecto, memoria/decisiones.md de documentacion-estilo)")
+    p.add_argument("--memoria-proyecto", help="memoria del proyecto (por defecto, decisiones-estilo.md junto al prompt)")
     a = p.parse_args()
+    for flujo in (sys.stdout, sys.stderr):
+        if hasattr(flujo, "reconfigure"):
+            flujo.reconfigure(encoding="utf-8", errors="replace")
 
     prompt_ruta = Path(a.prompt)
     if not prompt_ruta.is_file():
@@ -342,8 +404,12 @@ def main():
         print("ERROR: no se encontraron archivos .md", file=sys.stderr)
         return 2
 
+    agente = Path(a.memoria_agente) if a.memoria_agente else Path(__file__).resolve().parents[2] / "documentacion-estilo" / "memoria" / "decisiones.md"
+    proyecto = Path(a.memoria_proyecto) if a.memoria_proyecto else prompt_ruta.parent / "decisiones-estilo.md"
+    memorias = {"DEC": leer_memoria(agente), "DP": leer_memoria(proyecto)}
+
     inf = Informe()
-    verificar(prompt, archivos, inf)
+    verificar(prompt, archivos, inf, memorias)
     print(f"Documento: {prompt.get('documento')} | archivos: {len(archivos)}")
     for titulo, lista in (("ERRORES", inf.errores), ("ADVERTENCIAS", inf.advertencias), ("PENDIENTES", inf.info)):
         print(f"\n{titulo} ({len(lista)})")

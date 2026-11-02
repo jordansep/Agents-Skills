@@ -2,6 +2,14 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.7.0] - 2026-11-02
+
+### Agregado
+
+- Verificador: error cuando el texto cita una «Tabla N» o «Figura N» que no existe.
+- Verificador: comprueba que los DEC-NNN citados existan en la memoria del agente y los DP-NNN en la del proyecto (opciones --memoria-agente y --memoria-proyecto).
+- Tests del verificador y del configurador (tests/, unittest) y workflow de CI «Tests».
+
 ## [0.6.0] - 2026-11-02
 
 ### Agregado

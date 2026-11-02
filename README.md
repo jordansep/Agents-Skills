@@ -47,6 +47,12 @@ Verificador independiente:
 python3 skills/documentacion-generar/scripts/verificar_doc.py --prompt docs/prompt-estilo.md docs/manual/
 ```
 
+Tests del verificador y del configurador (solo biblioteca estándar; el del configurador necesita `node`). Corren en CI en cada PR:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 Para usar los skills en Claude Code, enlázalos en `~/.claude/skills/` (o en `.claude/skills/` de un proyecto):
 
 ```bash
