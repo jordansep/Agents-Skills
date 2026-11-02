@@ -14,6 +14,8 @@ Carga solo la referencia que necesites:
 - `references/escritura.md`: normas de redacción, ortotipografía, reglas por tipo de documento y ejemplos.
 - `assets/plantilla-prompt-estilo.md`: plantilla del archivo de salida.
 - `assets/configurador.html`: configurador visual para que el usuario elija los parámetros, con vista previa en vivo. Genera el prompt de estilo y las respuestas para la memoria.
+- `references/plantillas/`: diseños tomados de documentos que el usuario entregó como modelo (Trabajo de campo UNC, informe técnico, informe de auditoría, proforma de entrevista, ficha 1-pager, arquitectura en láminas y diagramas). Mandan sobre `estilo-visual.md` cuando el prompt los declara en `plantilla`. El `README.md` de la carpeta dice cuál usar.
+- `scripts/extraer_estilo_docx.py`: extrae el diseño de un .docx de referencia (página, fuentes, títulos, tablas, leyendas, pie) para crear o revisar una plantilla.
 - `references/memoria.md`: qué hacer cuando algo no está definido y cómo se guarda la memoria.
 - `memoria/decisiones.md`: registro de decisiones del usuario. Se lee en el Paso 4 y en los casos no definidos.
 
@@ -70,6 +72,14 @@ Cuando el usuario diga que terminó:
 4. Si una decisión **confirmada** de la memoria contradice el prompt, no elijas tú: pregunta al usuario cuál prevalece.
 5. Las **excepciones locales** (sección 8 del prompt) son ajustes que el usuario hizo solo sobre una parte de su documento. Regístralas con alcance de documento y pregunta si alguna debe pasar a ser regla del agente.
 6. Registra todo y envíalo con un PR según `references/memoria.md`.
+
+## Documentos de referencia del usuario
+
+Si el usuario entrega un documento como modelo («así lo quiero»):
+
+1. Sigue `references/plantillas/README.md`: extrae el diseño con `scripts/extraer_estilo_docx.py` (si es .docx), conviértelo a PDF y mira la portada, una tabla y una figura.
+2. Si coincide con una plantilla existente, compárala: lo que coincide la confirma y lo que difiere va a «Puntos abiertos». Si no coincide, crea una plantilla nueva.
+3. No resuelvas las inconsistencias del documento por tu cuenta: pregúntalas y regístralas en DEC-007.
 
 ## Casos no definidos
 

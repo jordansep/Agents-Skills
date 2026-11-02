@@ -15,6 +15,7 @@ Memoria persistente del agente de documentación (skills `documentacion-estilo` 
 | DEC-004 | Estilo de citas | pendiente | agente |
 | DEC-005 | Ubicación del prompt y de la documentación | pendiente | agente |
 | DEC-006 | Comillas | pendiente | agente |
+| DEC-007 | Plantillas tomadas de documentos de referencia | parcial | agente |
 
 ---
 
@@ -142,4 +143,30 @@ Memoria persistente del agente de documentación (skills `documentacion-estilo` 
 
 **Regla resultante**: —
 **Aplicada en**: —
+**PR**: —
+
+---
+
+## DEC-007 · Plantillas tomadas de documentos de referencia
+
+- **Estado**: parcial (lo uniforme está confirmado; las preguntas siguen abiertas)
+- **Alcance**: agente
+- **Preguntado**: 02/11/2026 · **Respondido**: 02/11/2026 (en parte)
+- **Origen**: el usuario entregó documentos propios y dijo: «Estos documentos son en cuanto a diseño lo que yo quiero o necesito».
+- **Documentos**: *Trabajo de Campo v3.6* (.docx), *TdC v2.2* (.pdf), *Ponderación de metodologías v3* (.docx), *Proforma de entrevista académica* (.pdf), *State 1-pager* (.pdf), *Arquitectura del sistema de gestión y aula virtual* (.pdf), *Informe de relevamiento y diseño de arquitectura* (informe_av_v2.docx), *Informe de completitud — Hemocentro* (.pdf), *mermaid.html* y cinco imágenes de diagramas (contexto, organigrama, dos secuencias AS-IS y casos de uso).
+
+**Respuesta**: el diseño de esos documentos es el que se quiere. Lo que cada uno hace de forma uniforme quedó como regla en `references/plantillas/`.
+
+**Preguntas abiertas** (detalladas en «Puntos abiertos» de cada plantilla):
+
+1. Trabajo de campo: numeración y mayúsculas de los títulos, cuerpo de 11 o 12 pt, color de las notas, alineación del H2, interlineado de las actas, y si la v3.6 (Calibri, A4) reemplaza a la v2.2 (Times, Carta).
+2. Informe técnico: papel Carta o A4, tablas sin leyenda o con APA 7, y si se unifican sus colores con los del Trabajo de campo.
+3. Diagramas: si el de casos de uso estilo Mermaid se redibuja con el estilo de lámina, si se nombra a las personas o solo su rol, y si Mermaid queda solo para la documentación web.
+4. Proforma: dónde va el código del formulario y cuántas líneas de respuesta por pregunta.
+5. Ficha 1-pager: Arial o la familia del documento principal.
+6. Arquitectura en láminas: número de página y pie, y si el formato sirve para otros entregables.
+7. Informe de auditoría: PDF solo, o también Markdown.
+
+**Regla resultante**: cuando el prompt declara `plantilla`, su diseño manda sobre `estilo-visual.md`. El configurador tiene un preajuste para cada plantilla y escribe el campo `plantilla` en el prompt.
+**Aplicada en**: `references/plantillas/`, `SKILL.md`, `references/estilo-visual.md`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `../documentacion-generar/SKILL.md`.
 **PR**: —
