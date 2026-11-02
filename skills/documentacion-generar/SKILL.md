@@ -62,7 +62,19 @@ Sigue el prompt al pie de la letra: estructura, componentes, tratamiento y norma
 - **Pendientes**: `[PENDIENTE: descripción]`, nunca texto inventado.
 - **Glosario y siglas**: anota cada término técnico y cada sigla mientras escribes. Al final, completa el glosario y la lista de siglas.
 
-Si el prompt tiene `plantilla`, lee ese archivo (la ruta es relativa al directorio del skill `documentacion-estilo`) y aplica su diseño: manda sobre las convenciones anteriores donde difieran. Por ejemplo, con *Trabajo de campo UNC* las leyendas siguen APA 7 (`**Tabla N**` y el título en cursiva en la línea siguiente, ambos arriba, y `*Nota.*` debajo, también en las figuras), y el verificador puede marcar esas leyendas como desvío. Los «Puntos abiertos» de la plantilla no se aplican: si el documento los necesita, pregúntalos.
+Si el prompt tiene `plantilla`, lee ese archivo (la ruta es relativa al directorio del skill `documentacion-estilo`) y aplica su diseño: manda sobre las convenciones anteriores donde difieran. Por ejemplo, con *Trabajo de campo UNC* las leyendas siguen APA 7 (`**Tabla N**` y el título en cursiva en la línea siguiente, ambos arriba, y `*Nota.*` debajo, también en las figuras). El verificador reconoce ese formato cuando el prompt declara una plantilla APA 7 o el campo `leyendas: apa7`:
+
+  ```
+  **Tabla 1**
+  *Calificaciones del equipo*
+
+  | Atributo | Promedio |
+  |---|---|
+
+  *Nota.* Escala del 1 al 10.
+  ```
+
+  En las figuras, la leyenda va antes de la imagen o del bloque `mermaid`, y la nota después. Los «Puntos abiertos» de la plantilla no se aplican: si el documento los necesita, pregúntalos.
 
 Si una sección necesita un componente, formato o término que el prompt no define, no lo improvises. Escribe `[PENDIENTE: estilo no definido, ver DEC-NNN]`, haz las preguntas del procedimiento de memoria y sigue con las secciones que no dependen de esa decisión. Cuando llegue la respuesta, vuelve a esa sección.
 

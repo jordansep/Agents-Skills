@@ -83,6 +83,10 @@ class Informe:
         self.advertencias.append(f"{donde}: {msg}")
 
 
+# Plantillas cuyas leyendas siguen APA 7 (references/plantillas/ de documentacion-estilo).
+PLANTILLAS_APA7 = ("trabajo-campo-unc",)
+
+
 def bloques(archivos):
     """Devuelve las líneas de todos los archivos con su ubicación, marcando las que están en código."""
     salida = []
@@ -111,6 +115,35 @@ def siguiente_no_vacia(lineas, i, paso):
     return lineas[j] if 0 <= j < len(lineas) else None
 
 
+def estilo_leyendas(prompt):
+    """«apa7» si el prompt lo pide en `leyendas` o declara una plantilla que usa APA 7; si no, «clasica»."""
+    explicito = normalizar(str(prompt.get("leyendas", "")))
+    if explicito in {"apa7", "apa 7", "apa"}:
+        return "apa7"
+    if explicito:
+        return "clasica"
+    plantilla = normalizar(str(prompt.get("plantilla", "")))
+    return "apa7" if any(p in plantilla for p in PLANTILLAS_APA7) else "clasica"
+
+
+def leyenda_clasica(linea, clase):
+    """«**Tabla N.** Título» en una sola línea. Devuelve N o None."""
+    m = re.match(rf"^\*{{0,2}}{clase} (\d+)\.", linea[1].strip()) if linea else None
+    return int(m.group(1)) if m else None
+
+
+def leyenda_apa(lineas, i, clase):
+    """APA 7: «**Tabla N**» y en la línea siguiente «*Título*», justo antes del elemento i. Devuelve N o None."""
+    j = i - 1
+    while j >= 0 and not lineas[j][1].strip():
+        j -= 1
+    if j < 0 or not re.match(r"^(\*|_)[^*_].*(\*|_)$", lineas[j][1].strip()):
+        return None
+    numero = siguiente_no_vacia(lineas, j, -1)
+    m = re.match(rf"^\*\*{clase} (\d+)\*\*$", numero[1].strip()) if numero else None
+    return int(m.group(1)) if m else None
+
+
 def verificar(prompt, archivos, inf):
     lineas = bloques(archivos)
     documento = normalizar(prompt.get("documento", ""))
@@ -122,6 +155,7 @@ def verificar(prompt, archivos, inf):
         max_palabras = 25
     decimal_coma = normalizar(str(prompt.get("decimal", "coma"))) == "coma"
     digital = normalizar(str(prompt.get("medio", "digital"))) in {"digital", "ambos"}
+    apa = estilo_leyendas(prompt) == "apa7"
 
     # Títulos y numeración
     contadores, capitulos, en_numerado, primer_h1 = [0, 0, 0], [], False, True
@@ -182,10 +216,11 @@ def verificar(prompt, archivos, inf):
             sig = lineas[i + 1][1] if i + 1 < len(lineas) else ""
             prev_es_tabla = i > 0 and lineas[i - 1][1].lstrip().startswith("|")
             if not prev_es_tabla and re.match(r"^\s*\|?\s*:?-{3,}", sig):
-                ant = siguiente_no_vacia(lineas, i, -1)
-                m = re.match(r"^\*{0,2}Tabla (\d+)\.", ant[1].strip()) if ant else None
-                if m:
-                    numeros["Tabla"].append((donde, int(m.group(1))))
+                n = leyenda_apa(lineas, i, "Tabla") if apa else leyenda_clasica(siguiente_no_vacia(lineas, i, -1), "Tabla")
+                if n is not None:
+                    numeros["Tabla"].append((donde, n))
+                elif apa:
+                    inf.error(donde, "tabla sin la leyenda APA 7 antes: «**Tabla N**» y en la línea siguiente «*Título*»")
                 else:
                     inf.error(donde, "tabla sin la línea «**Tabla N.** Título» antes")
         es_imagen = tipo == "texto" and re.search(r"!\[(.*?)\]\(", linea)
@@ -193,10 +228,18 @@ def verificar(prompt, archivos, inf):
         if es_imagen and not es_imagen.group(1).strip():
             (inf.error if digital else inf.aviso)(donde, "imagen sin texto alternativo")
         if es_imagen or es_mermaid:
-            sig = siguiente_no_vacia(lineas, i, 1)
-            m = re.match(r"^\*{0,2}Figura (\d+)\.", sig[1].strip()) if sig else None
-            if m:
-                numeros["Figura"].append((donde, int(m.group(1))))
+            if apa:
+                inicio = i
+                if es_mermaid:
+                    while inicio > 0 and lineas[inicio][2] != "inicio_codigo":
+                        inicio -= 1
+                n = leyenda_apa(lineas, inicio, "Figura")
+            else:
+                n = leyenda_clasica(siguiente_no_vacia(lineas, i, 1), "Figura")
+            if n is not None:
+                numeros["Figura"].append((donde, n))
+            elif apa:
+                inf.error(donde, "figura sin la leyenda APA 7 antes: «**Figura N**» y en la línea siguiente «*Título*»")
             else:
                 inf.error(donde, "figura sin la línea «**Figura N.** Título» después")
         aviso = re.match(r"^>\s*\*\*([^*]+?)[.:]\*\*", linea) if tipo == "texto" else None
