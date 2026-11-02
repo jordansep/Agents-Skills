@@ -48,6 +48,13 @@ python3 skills/documentacion-generar/scripts/verificar_doc.py --prompt docs/prom
 ```
 
 Para usar los skills en Claude Code, instálalos con el script, en PowerShell:
+Tests del verificador y del configurador (solo biblioteca estándar; el del configurador necesita `node`). Corren en CI en cada PR:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Para usar los skills en Claude Code, enlázalos en `~/.claude/skills/` (o en `.claude/skills/` de un proyecto):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\instalar_skills.ps1

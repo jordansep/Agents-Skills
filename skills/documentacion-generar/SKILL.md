@@ -86,6 +86,11 @@ Ejecuta el verificador, que está en la carpeta `scripts/` de este skill:
 python3 <carpeta-de-este-skill>/scripts/verificar_doc.py --prompt docs/prompt-estilo.md <carpeta-salida>/
 ```
 
+Además de títulos, estructura, leyendas, avisos y normas de escritura, comprueba que:
+
+- cada «Tabla N» o «Figura N» citada en el texto exista en el documento;
+- cada `DEC-NNN` citado exista en la memoria del agente y cada `DP-NNN`, en la memoria del proyecto (`decisiones-estilo.md` junto al prompt). Las rutas se pueden cambiar con `--memoria-agente` y `--memoria-proyecto`.
+
 - **Errores**: corrígelos todos y vuelve a ejecutar el script hasta que no quede ninguno.
 - **Advertencias**: corrígelas. Si alguna es un falso positivo (por ejemplo, un número de versión con punto), déjala y menciónala en el informe final.
 - **Pendientes**: el script los lista. Se informan al usuario y no se rellenan inventando.

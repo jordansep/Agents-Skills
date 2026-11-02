@@ -12,6 +12,9 @@ Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documenta
 
 - La carpeta instalada del skill es de solo lectura; desde otro repositorio, las decisiones con alcance de agente quedan como propuesta en decisiones-estilo.md del proyecto y se incorporan desde una sesión en el repositorio del agente
 - Configurador: la pestaña Para la memoria describe el alcance de agente como propuesta y su instrucción ya no pide PRs desde otro repositorio
+- Verificador: error cuando el texto cita una «Tabla N» o «Figura N» que no existe.
+- Verificador: comprueba que los DEC-NNN citados existan en la memoria del agente y los DP-NNN en la del proyecto (opciones --memoria-agente y --memoria-proyecto).
+- Tests del verificador y del configurador (tests/, unittest) y workflow de CI «Tests».
 
 ## [0.6.0] - 2026-11-02
 
