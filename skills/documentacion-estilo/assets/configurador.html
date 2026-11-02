@@ -200,7 +200,12 @@ pre.texto-salida {
 .doc .cuerpo-doc > .editando { box-shadow: -6px 0 0 0 #0969DA; }
 .barra-vista { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--panel); font-size: 13px; }
 .barra-vista .espacio { flex: 1; }
-.opciones-doc label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.opciones-doc label { display: inline-flex; gap: 8px; align-items: flex-start; cursor: pointer; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); max-width: 240px; }
+.opciones-doc label:hover { border-color: var(--accent); }
+.opciones-doc label:has(input:checked) { border-color: var(--accent); background: var(--soft); }
+.opciones-doc label input { margin-top: 2px; flex: none; }
+.opciones-doc label b { display: block; font-weight: 600; font-size: 13px; }
+.opciones-doc label small { display: block; font-size: 11.5px; line-height: 1.3; opacity: .72; }
 .archivo { font-size: 12.5px; color: var(--muted); display: inline-flex; gap: 4px; align-items: center; }
 .archivo button { padding: 2px 7px; }
 button[aria-pressed=true].alternar { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
@@ -532,9 +537,9 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
         <button type="button" id="imprimir">Imprimir / PDF</button>
       </div>
       <div class="barra-vista opciones-doc" id="opciones-doc" hidden>
-        <label><input type="checkbox" data-v="numerar_subido">Numerar títulos</label>
-        <label><input type="checkbox" data-v="aplicar_texto">Aplicar comillas y % al texto</label>
-        <label><input type="checkbox" data-v="marcar_desvios">Marcar desvíos</label>
+        <label><input type="checkbox" data-v="numerar_subido"><span><b>Numerar títulos</b><small>Agrega 1, 1.1, 1.1.1… a los títulos de tu documento.</small></span></label>
+        <label><input type="checkbox" data-v="aplicar_texto"><span><b>Aplicar comillas y % al texto</b><small>Cambia comillas y porcentajes al formato elegido.</small></span></label>
+        <label><input type="checkbox" data-v="marcar_desvios"><span><b>Marcar desvíos</b><small>Resalta lo que no cumple el estilo, con su motivo.</small></span></label>
         <button type="button" id="usar-capitulos">Usar sus capítulos como estructura</button>
         <span class="espacio"></span>
         <button type="button" id="seleccionar" class="alternar" aria-pressed="false" title="Clic: un bloque · Shift+clic: rango · Ctrl/⌘+clic: sumar o quitar · también puedes arrastrar sobre el texto">Seleccionar parte</button>
