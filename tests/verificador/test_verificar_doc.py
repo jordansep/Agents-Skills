@@ -368,6 +368,56 @@ class ElementosAcademicos(Base):
         self.assertSinProblemas(self.verificar(DOC_VALIDO + "\n> Una cita breve.\n\n**H2.** Suelta.\n"))
 
 
+class TablasTecnicas(Base):
+    def tabla(self, cabecera, *filas):
+        sep = "|" + "---|" * len(cabecera)
+        cuerpo = "\n".join("| " + " | ".join(map(str, f)) + " |" for f in filas)
+        return DOC_VALIDO + f"\nLa Tabla 2 resume los datos.\n\n**Tabla 2.** Datos técnicos\n\n| {' | '.join(cabecera)} |\n{sep}\n{cuerpo}\n"
+
+    def con(self, *tipos):
+        return {"tablas": "".join(f"\n  - {t}" for t in tipos)}
+
+    ENDPOINTS = ("Método", "Ruta", "Descripción", "Respuestas")
+    RIESGOS = ("Riesgo", "Probabilidad", "Impacto", "Nivel")
+    TRAZA = ("Requisito", "Descripción", "Caso de prueba")
+
+    def test_endpoints_correctos_pasan(self):
+        doc = self.tabla(self.ENDPOINTS, ("`GET`", "`/api/cursos`", "Lista", "200"), ("`DELETE`", "`/api/cursos/{id}`", "Elimina", "204"))
+        self.assertSinProblemas(self.verificar(doc, **self.con("endpoints")))
+
+    def test_metodo_en_minusculas_o_inexistente_es_advertencia(self):
+        inf = self.verificar(self.tabla(self.ENDPOINTS, ("`get`", "`/api`", "Lista", "200"), ("`FETCH`", "`/api`", "Trae", "200")), **self.con("endpoints"))
+        self.assertMensaje(inf.advertencias, r"método «get»")
+        self.assertMensaje(inf.advertencias, r"método «FETCH»")
+
+    def test_riesgos_correctos_pasan(self):
+        doc = self.tabla(self.RIESGOS, ("Caída", 3, 5, "15 (alto)"), ("Rotación", 2, 4, "8 (medio)"), ("Cambio", 1, 3, "3 (bajo)"))
+        self.assertSinProblemas(self.verificar(doc, **self.con("riesgos")))
+
+    def test_nivel_que_no_es_el_producto_es_advertencia(self):
+        inf = self.verificar(self.tabla(self.RIESGOS, ("Caída", 3, 5, "12 (alto)")), **self.con("riesgos"))
+        self.assertMensaje(inf.advertencias, r"nivel de riesgo 12: con probabilidad 3 e impacto 5 debería ser 15")
+
+    def test_categoria_equivocada_es_advertencia(self):
+        inf = self.verificar(self.tabla(self.RIESGOS, ("Rotación", 2, 4, "8 (alto)")), **self.con("riesgos"))
+        self.assertMensaje(inf.advertencias, r"nivel 8 es «medio», no «alto»")
+
+    def test_riesgos_desordenados_es_advertencia(self):
+        inf = self.verificar(self.tabla(self.RIESGOS, ("Cambio", 1, 3, "3 (bajo)"), ("Caída", 3, 5, "15 (alto)")), **self.con("riesgos"))
+        self.assertMensaje(inf.advertencias, r"no están ordenados de mayor a menor")
+
+    def test_requisito_sin_caso_de_prueba_es_advertencia(self):
+        inf = self.verificar(self.tabla(self.TRAZA, ("RF-001", "Exportar", "CP-012"), ("RF-002", "Anular", "—")), **self.con("trazabilidad"))
+        self.assertMensaje(inf.advertencias, r"«RF-002» no tiene caso de prueba")
+
+    def test_trazabilidad_completa_pasa(self):
+        doc = self.tabla(self.TRAZA, ("RF-001", "Exportar", "CP-012"), ("RF-002", "Anular", "[PENDIENTE: caso de prueba]"))
+        self.assertEqual(self.verificar(doc, **self.con("trazabilidad")).advertencias, [])
+
+    def test_sin_tipos_tecnicos_no_se_revisa(self):
+        self.assertSinProblemas(self.verificar(self.tabla(self.RIESGOS, ("Caída", 3, 5, "12 (bajo)"))))
+
+
 class Pendientes(Base):
     def test_pendientes_se_cuentan(self):
         doc = DOC_VALIDO + "\n[PENDIENTE: dato del cliente]\n\nOtro [PENDIENTE: fecha].\n"

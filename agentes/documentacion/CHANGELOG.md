@@ -2,6 +2,21 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.11.0] - 2026-11-02
+
+### Agregado
+
+- Configurador: tipos de tabla técnicos (matriz de trazabilidad, caso de uso, riesgos y endpoints de API), con ejemplo, «Útil para» y regla en el prompt
+- Verificador: con esos tipos en el prompt, revisa los métodos HTTP de los endpoints, que el nivel de riesgo sea probabilidad × impacto con su categoría y orden, y que cada requisito de la trazabilidad tenga caso de prueba
+
+### Cambiado
+
+- Verificador: GET, POST, PUT, PATCH, DELETE, HEAD y OPTIONS ya no se marcan como siglas sin desarrollar
+
+### Corregido
+
+- Configurador: los identificadores como R-01 o RF-001 ya no se cortan en dos líneas en las tablas de ejemplo
+
 ## [0.10.0] - 2026-11-02
 
 ### Agregado

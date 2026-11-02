@@ -63,9 +63,9 @@ Si un paso puede causar pérdida de datos o daño, usa un aviso de "Advertencia"
 - Texto alineado a la izquierda. Números alineados a la derecha, con el mismo número de decimales.
 - Máximo siete columnas en impreso. Si hay más, divide la tabla.
 
-### Tablas estadísticas y académicas
+### Tablas estadísticas, académicas y técnicas
 
-El configurador ofrece trece tipos de tabla (de datos, frecuencia, contingencia, correlación, regresión, ANOVA, características demográficas, comparación, descriptivos, fiabilidad, pruebas de hipótesis, operacionalización y estado del arte). Los elegidos van en el campo `tablas` del prompt, cada uno con su regla. Las estadísticas siguen APA 7 con el separador decimal del prompt:
+El configurador ofrece diecisiete tipos de tabla. Trece son académicos (de datos, frecuencia, contingencia, correlación, regresión, ANOVA, características demográficas, comparación, descriptivos, fiabilidad, pruebas de hipótesis, operacionalización y estado del arte) y cuatro, técnicos (matriz de trazabilidad, caso de uso, riesgos y endpoints de API). Los elegidos van en el campo `tablas` del prompt, cada uno con su regla. Las estadísticas siguen APA 7 con el separador decimal del prompt:
 
 - Símbolos estadísticos en cursiva: *n*, *M*, *DE*, *p*, *t*, *F*, *r*.
 - Sin cero inicial en los valores que no pueden superar 1 (*p*, *r*, β, α, ω, η²): `,031`.
@@ -74,6 +74,13 @@ El configurador ofrece trece tipos de tabla (de datos, frecuencia, contingencia,
 - La tabla cierra con `*Nota.*`, el *N* y las abreviaturas usadas.
 
 `verificar_doc.py` revisa el cero inicial, el separador decimal y la nota de los asteriscos cuando `tablas` incluye algún tipo estadístico.
+
+Las tablas técnicas siguen estas reglas, que el verificador revisa cuando el tipo está en `tablas`:
+
+- **Matriz de trazabilidad**: una fila por requisito, con ID, Requisito, Origen, Elemento de diseño, Caso de prueba y Estado. (Ningún requisito sin caso de prueba; si falta, `[PENDIENTE: caso de prueba]`.)
+- **Caso de uso**: ficha de dos columnas con ID `CU-NN`, Nombre, Actor principal, Precondiciones, Flujo principal numerado, Flujos alternativos (`2a.`) y Postcondiciones.
+- **Riesgos**: probabilidad e impacto de 1 a 5; Nivel = probabilidad × impacto con su categoría (1 a 4 bajo, 5 a 9 medio, 10 a 16 alto, 20 a 25 crítico); de mayor a menor nivel. (El producto, la categoría y el orden.)
+- **Endpoints de API**: Método, Ruta, Descripción y Respuestas; método en mayúsculas y ruta en código con parámetros entre llaves (`/api/cursos/{id}`). (Que el método sea GET, POST, PUT, PATCH o DELETE.)
 
 ### Figuras (imágenes, diagramas, capturas)
 
