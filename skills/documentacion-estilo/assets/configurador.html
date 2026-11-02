@@ -1015,6 +1015,9 @@ function pintarSelectorDiagrama() {
 }
 form.addEventListener("input", e => {
   const el = e.target;
+  // Con bloques seleccionados, un cambio en un parámetro local crea el ajuste solo: no hace falta
+  // apretar antes «Ajustar estilo de la selección» para que el cambio no vaya a todo el documento.
+  if (!EDIT && (el.dataset.color || (el.dataset.k && LOCALES.has(el.dataset.k)))) iniciarAjusteDeSeleccion();
   if (EDIT) {
     const a = ajusteActual();
     if (a && el.dataset.color) { a.colores[el.dataset.color] = el.value; el.parentElement.querySelector("code").textContent = el.value.toUpperCase(); guardarSubido(); actualizar(); return; }
@@ -1058,6 +1061,7 @@ function cambiarMetodologia() {
 }
 document.getElementById("esqueleto").addEventListener("click", () => { cargarEsqueleto(); pintarFormulario(); actualizar(); aviso("Esqueleto cargado"); });
 document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => {
+  iniciarAjusteDeSeleccion();
   if (EDIT) {
     const a = ajusteActual();
     Object.entries(PRESETS[b.dataset.preset]).forEach(([k, v]) => { if (LOCALES.has(k)) a.valores[k] = v; });
@@ -1073,6 +1077,7 @@ document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("clic
   pintarFormulario(); actualizar(); aviso("Preajuste aplicado: puedes ajustar cada valor");
 }));
 document.getElementById("paleta-base").addEventListener("click", () => {
+  iniciarAjusteDeSeleccion();
   if (EDIT) { ajusteActual().colores = {}; guardarSubido(); pintarFormulario(); actualizar(); return; }
   S.colores = Object.assign({}, PALETA_BASE); pintarFormulario(); actualizar(); });
 document.getElementById("restablecer").addEventListener("click", () => {
@@ -2087,10 +2092,21 @@ document.getElementById("seleccionar").addEventListener("click", () => {
   if (S.seleccionando) aviso("Haz clic en un bloque o arrastra sobre el texto para elegir la parte");
 });
 document.getElementById("cancelar-seleccion").addEventListener("click", () => { SEL = new Set(); pintarBarraDoc(); actualizar(); });
+function crearAjusteDeSeleccion() {
+  const a = { id: "a" + Date.now(), bloques: [...SEL].sort((x, y) => x - y), valores: {}, colores: {} };
+  SUBIDO.ajustes.push(a); return a;
+}
+// Si hay bloques seleccionados y todavía no se está editando un ajuste, lo crea y entra en modo local
+// sin repintar el formulario (el control que disparó el cambio conserva el valor que eligió el usuario).
+function iniciarAjusteDeSeleccion() {
+  if (EDIT || !SEL.size || !SUBIDO || S.fuente_vista !== "documento") return false;
+  EDIT = crearAjusteDeSeleccion().id; SEL = new Set(); S.seleccionando = false;
+  pintarBarraDoc(); aviso("Ajuste creado: el cambio se aplica solo a la selección");
+  return true;
+}
 document.getElementById("ajustar-seleccion").addEventListener("click", () => {
   if (!SEL.size || !SUBIDO) return;
-  const a = { id: "a" + Date.now(), bloques: [...SEL].sort((x, y) => x - y), valores: {}, colores: {} };
-  SUBIDO.ajustes.push(a); editarAjuste(a.id);
+  editarAjuste(crearAjusteDeSeleccion().id);
   aviso("Cambia tipografía, tamaños, color o comillas: solo se aplica a la selección");
 });
 document.getElementById("salir-local").addEventListener("click", salirLocal);
