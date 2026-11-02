@@ -247,7 +247,7 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
 <header class="top">
   <div>
     <h1>Configurador de estilo</h1>
-    <p>Agente de documentación · genera el <code>prompt-estilo.md</code> y las respuestas para la memoria</p>
+    <p>Elige los parámetros, pulsa <b>Descargar prompt-estilo.md</b> y escribe «listo» en la terminal del agente.</p>
   </div>
   <div class="acciones">
     <label class="boton" for="importar" title="Importar un prompt-estilo.md generado con este configurador">Importar prompt…</label>
@@ -1146,7 +1146,7 @@ function generarPrompt() {
     `audiencia: ${y(S.audiencia)}`, `medio: ${S.medio}`, `variante: ${S.variante}`, `tratamiento: ${S.tratamiento}`,
     `citas: ${S.citas}`, `comillas: ${S.comillas}`, `decimal: ${S.decimal}`, `miles: ${S.miles}`,
     `porcentaje_con_espacio: ${S.pct_espacio ? "si" : "no"}`, `formato_fecha: ${y(S.fecha)}`, `max_palabras_oracion: ${S.max_palabras}`,
-    `formato: ${S.formato}`, `salida: ${y(S.salida)}`, `prompt: ${y(rutaPrompt)}`,
+    `formato: ${S.formato}`, `salida: ${y(S.salida)}`, `prompt: ${y(rutaPrompt)}`, `alcance_decisiones: ${S.alcance}`,
     `fuente_titulos: ${y(S.f_titulos)}`, `fuente_cuerpo: ${y(S.f_cuerpo)}`, `fuente_codigo: ${y(S.f_codigo)}`,
     ...(medios.includes("digital") ? [`tamanos_digital_px: ${y(`cuerpo ${S.d_cuerpo}, h1 ${S.d_h1}, h2 ${S.d_h2}, h3 ${S.d_h3}, tablas ${S.d_tabla}, codigo ${S.d_codigo}, notas ${S.d_nota}, interlineado ${S.d_interlineado}, ancho ${S.d_ancho}`)}`] : []),
     ...(medios.includes("impreso") ? [`tamanos_impreso_pt: ${y(`cuerpo ${S.p_cuerpo}, h1 ${S.p_h1}, h2 ${S.p_h2}, h3 ${S.p_h3}, tablas ${S.p_tabla}, codigo ${S.p_codigo}, notas ${S.p_nota}, interlineado ${S.p_interlineado}`)}`, `papel: ${S.p_papel}`, `margenes_cm: ${S.p_margen}`, `sangria_cm: ${S.sangria}`] : []),
