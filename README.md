@@ -1,6 +1,16 @@
 # Agents-Skills
 Agentes Experimentales
 
+| Agente | Versión | Skills |
+|---|---|---|
+| [Documentación](agentes/documentacion/CHANGELOG.md) | ver [`agente.json`](agentes/documentacion/agente.json) | `documentacion-estilo`, `documentacion-generar` |
+
+Cada agente tiene su propia versión SemVer, su changelog y etiquetas `<agente>/vX.Y.Z`. Las reglas y el flujo están en [`VERSIONADO.md`](VERSIONADO.md). Para ver las versiones actuales:
+
+```bash
+python3 scripts/versionado.py listar
+```
+
 ## Agente de documentación
 
 Dos skills que trabajan juntos:

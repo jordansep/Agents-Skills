@@ -1,6 +1,6 @@
 ## Qué
 
-<!-- Qué cambia este PR: decisiones registradas (DEC-NNN), reglas agregadas o modificadas y archivos afectados. -->
+<!-- Qué cambia este PR: decisiones registradas (DEC-NNN), reglas agregadas o modificadas, archivos afectados y versión del agente (anterior → nueva). -->
 
 ## Por qué
 

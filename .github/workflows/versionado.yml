@@ -1,0 +1,46 @@
+name: Versionado de agentes
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  verificar:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verificar versiones y changelogs
+        run: python scripts/versionado.py verificar --base "origin/${{ github.base_ref }}"
+
+  publicar:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verificar versiones y changelogs
+        run: python scripts/versionado.py verificar
+      - name: Crear etiquetas y releases de las versiones nuevas
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/versionado.py pendientes | while read -r agente version etiqueta; do
+            python scripts/versionado.py notas "$agente" "$version" > notas.md
+            gh release create "$etiqueta" --target "$GITHUB_SHA" --title "$agente $version" --notes-file notas.md
+            echo "Publicada $etiqueta"
+          done
