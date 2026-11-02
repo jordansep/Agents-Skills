@@ -1,0 +1,89 @@
+---
+# Parámetros que lee documentacion-generar y su script verificador.
+# Sustituye cada <...>. Las listas usan "- elemento", una por línea.
+documento: <Título exacto del documento>
+version: 1.0
+tipo: <manual | tesis | especificacion | informe | diagrama | arquitectura | otro>
+metodologia: <rup | up | scrum | iso29148 | diataxis | academica | ninguna>
+audiencia: <técnica | no técnica | académica | mixta>
+medio: <digital | impreso | ambos>
+variante: <neutro | rioplatense>
+tratamiento: <usted | tú | vos | impersonal>
+citas: <apa7 | ieee | institucional | ninguna>
+decimal: coma
+max_palabras_oracion: 25
+formato: <markdown | docx | pdf>
+salida: <docs/nombre-del-documento/>
+estructura:
+  - Control de versiones
+  - <Capítulo 1>
+  - <Capítulo 2>
+sin_numerar:
+  - Control de versiones
+  - Glosario
+  - Referencias
+  - Anexos
+siglas_conocidas:
+  - URL
+  - PDF
+---
+
+# Prompt de estilo: <Título exacto del documento>
+
+## 1. Rol e instrucción
+
+Actúas como <redactor técnico | asesor de tesis | analista de requisitos> y vas a escribir "<Título>" para <audiencia concreta: quiénes son y qué necesitan lograr con el documento>. Sigue este prompt al pie de la letra. Si una instrucción del usuario lo contradice, primero actualiza este prompt (nueva versión) y después escribe.
+
+## 2. Parámetros
+
+- **Tipo y metodología**: <tipo> según <metodología>. <Por qué se eligió, en una oración.>
+- **Medio**: <digital | impreso A4 | ambos>.
+- **Idioma**: español <neutro | rioplatense>, ortografía RAE.
+- **Tratamiento**: <usted | tú | vos | impersonal>, igual en todo el documento.
+- **Citas**: <estilo o "sin citas">.
+- **Normas institucionales**: <reglamento que manda sobre este prompt, o "ninguna">.
+
+## 3. Estructura
+
+Escribe los capítulos en este orden, con numeración decimal (1, 1.1, 1.1.1). Las partes de `sin_numerar` llevan título sin número.
+
+| Capítulo | Propósito | Contenido mínimo |
+|---|---|---|
+| Control de versiones | Registrar cambios | Tabla: Versión, Fecha, Autor, Descripción del cambio |
+| 1 <Capítulo> | <Qué responde al lector> | <Secciones o elementos obligatorios> |
+| 2 <Capítulo> | <...> | <...> |
+
+## 4. Componentes visuales
+
+Usa exactamente estos formatos en Markdown:
+
+- **Títulos**: `# 1 Capítulo`, `## 1.1 Sección`, `### 1.1.1 Subsección`. Como máximo cuatro niveles, sin punto final y con mayúscula solo en la primera letra.
+- **Tablas**: la línea `**Tabla N.** Título` va antes de la tabla y `Fuente: ...` después. Las unidades van en el encabezado y los números se alinean a la derecha.
+- **Figuras y diagramas**: después de la imagen o del bloque `mermaid` van `**Figura N.** Título` y luego `Fuente: ...`. Las imágenes llevan texto alternativo.
+- **Avisos**: `> **Nota.**`, `> **Consejo.**`, `> **Advertencia.**` o `> **Peligro.**`, seguidos de hasta tres líneas de texto.
+- **Pasos** (solo en manuales): lista numerada con una acción por paso. El resultado se indica en la línea siguiente con `→`.
+- **Código**: bloque con el lenguaje indicado, de 40 líneas como máximo.
+- **Numeración**: figuras y tablas se numeran de forma continua en todo el documento, y cada una se menciona en el texto antes de aparecer.
+
+Tipografía y color de la versión final (si se exporta): <familias, tamaños y tokens elegidos, o "valores por defecto de documentacion-estilo">.
+
+## 5. Normas de escritura
+
+- Oraciones de <max_palabras_oracion> palabras como máximo, en voz activa, con una idea por párrafo.
+- Números con coma decimal y espacio para miles (`12 500`, `3,5 %`), unidades SI y fechas dd/mm/aaaa en tablas.
+- Cada sigla se desarrolla en su primera aparición: "Interfaz de programación de aplicaciones (API)".
+- Los nombres de la interfaz van en negrita, tal como aparecen en pantalla.
+- <Reglas específicas del tipo, copiadas de escritura.md, sección 4: manual, tesis, requisitos, historias de usuario o proyecto.>
+- Términos preferidos: <término elegido> (no <variante descartada>); <...>.
+
+## 6. Restricciones
+
+- No inventes datos, cifras, nombres, citas ni referencias. Si falta información, escribe `[PENDIENTE: qué falta]`.
+- No mezcles metodologías salvo que este prompt lo declare.
+- <Restricciones propias del proyecto: confidencialidad, extensión máxima, plazos, etc.>
+
+## 7. Criterios de aceptación
+
+- El script `verificar_doc.py` de documentacion-generar termina sin errores.
+- Todos los capítulos de `estructura` están presentes y en orden.
+- <Criterios propios: por ejemplo, "cada requisito tiene un caso de prueba", "cada tarea del manual tiene una captura".>
