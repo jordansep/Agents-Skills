@@ -2,6 +2,18 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.8.0] - 2026-11-02
+
+### Agregado
+
+- Configurador: filtro «Útil para» por tipo de documento, chips «Ir a» por sección e íconos en las tarjetas de opción
+- Configurador: la vista previa se puede cerrar y el formulario pasa a ocupar todo el ancho; se recuerda si quedó abierta
+- Configurador: botón para cambiar entre modo claro y oscuro
+
+### Cambiado
+
+- Configurador: nuevo diseño con encabezado fijo y resumen en píldoras, secciones abiertas con contador, listas desplegables convertidas en tarjetas de elección y contadores − / + en los campos numéricos
+
 ## [0.7.0] - 2026-11-02
 
 ### Agregado
