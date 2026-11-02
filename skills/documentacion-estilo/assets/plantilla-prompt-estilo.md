@@ -28,8 +28,8 @@ sin_numerar:
 siglas_conocidas:
   - URL
   - PDF
-tablas:  # opcional: tipos de tabla del configurador; los estadísticos activan las reglas de APA 7 del verificador
-  - <datos | frecuencia | contingencia | correlacion | regresion | anova | demografica | comparacion | descriptivos | fiabilidad | pruebas | operacionalizacion | estado-arte>
+tablas:  # opcional: tipos de tabla del configurador; los estadísticos activan las reglas de APA 7 del verificador y los técnicos, sus propias revisiones
+  - <datos | frecuencia | contingencia | correlacion | regresion | anova | demografica | comparacion | descriptivos | fiabilidad | pruebas | operacionalizacion | estado-arte | trazabilidad | casos-uso | riesgos | endpoints>
   - omitir si no hay
 ---
 

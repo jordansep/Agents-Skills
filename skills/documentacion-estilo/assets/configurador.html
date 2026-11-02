@@ -985,7 +985,7 @@ function tablaEj(h, titulo, cab, filas, nota) {
   const th = cab.map(c => `<th${c[1] ? ' class="num"' : ""}>${c[0]}</th>`).join("");
   const tr = filas.map(f => typeof f === "string"
     ? `<tr><td colspan="${cab.length}"><b>${f}</b></td></tr>`
-    : `<tr>${f.map((v, i) => `<td${cab[i] && cab[i][1] ? ' class="num"' : ""}>${v}</td>`).join("")}</tr>`).join("");
+    : `<tr>${f.map((v, i) => `<td${cab[i] && cab[i][1] ? ' class="num"' : ""}${/^[A-Z]{1,4}-\d+$/.test(v) ? ' style="white-space:nowrap"' : ""}>${v}</td>`).join("")}</tr>`).join("");
   return h.L(titulo) + `<table style="${h.cap}"><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table><p class="fuente" style="${h.nota}"><i>Nota.</i> ${nota}</p>`;
 }
 const SIG = () => `*${I("p")} < ${sinCero(0.05, 2)}. **${I("p")} < ${sinCero(0.01, 2)}.`;
@@ -1055,7 +1055,30 @@ const TABLAS_ACAD = [
     regla: "columnas Autor (año), Objetivo, Método y Hallazgo principal; orden cronológico; autores citados en el estilo de citas elegido; un hallazgo por fila.",
     ej: h => tablaEj(h, "Antecedentes sobre el uso de plataformas educativas", [["Autor (año)"], ["Objetivo"], ["Método"], ["Hallazgo principal"]],
       [["García y Pérez (2021)", "Medir el uso de plataformas", `Encuesta, ${I("n")} = 340`, "El uso semanal predice el rendimiento"], ["López (2023)", "Comparar modalidades", "Cuasiexperimento", "Sin diferencias en la aprobación"]],
-      "Autores y datos ficticios, solo para mostrar el formato.") }
+      "Autores y datos ficticios, solo para mostrar el formato.") },
+  // Tablas técnicas
+  { k: "trazabilidad", nombre: "Matriz de trazabilidad", desc: "Cada requisito con su origen, el elemento de diseño que lo cubre y su caso de prueba.", util: ["especificacion", "arquitectura"], mencion: "la trazabilidad de los requisitos",
+    regla: "una fila por requisito; columnas ID, Requisito, Origen, Elemento de diseño, Caso de prueba y Estado; ningún requisito queda sin caso de prueba (si falta, `[PENDIENTE: caso de prueba]`).",
+    ej: h => tablaEj(h, "Matriz de trazabilidad del módulo de cursos", [["ID"], ["Requisito"], ["Origen"], ["Elemento de diseño"], ["Caso de prueba"], ["Estado"]],
+      [["RF-001", "Exportar las notas en PDF", "HU-04", "Servicio de informes", "CP-012", "Verificado"], ["RF-002", "Anular una inscripción", "Entrevista con docentes", "Módulo de cursos", "CP-015", "Pendiente"], ["RNF-001", "Responder en menos de 2 s", "Norma interna", "Caché de consultas", "CP-020", "Verificado"]],
+      "RF: requisito funcional; RNF: requisito no funcional; CP: caso de prueba.") },
+  { k: "casos-uso", nombre: "De caso de uso", desc: "Ficha de un caso de uso: actor, precondiciones, flujo principal y alternativos.", util: ["especificacion"], mencion: "el caso de uso Exportar notas",
+    regla: "ficha de dos columnas (Campo y Descripción) con ID `CU-NN`, Nombre (verbo + objeto), Actor principal, Precondiciones, Flujo principal numerado, Flujos alternativos (`2a.`) y Postcondiciones; una ficha por caso de uso.",
+    ej: h => tablaEj(h, "Caso de uso CU-03: Exportar notas", [["Campo"], ["Descripción"]],
+      [["<b>ID</b>", "CU-03"], ["<b>Nombre</b>", "Exportar notas"], ["<b>Actor principal</b>", "Docente"], ["<b>Precondiciones</b>", "El docente tiene una sesión iniciada y el curso tiene notas cargadas."],
+        ["<b>Flujo principal</b>", "1. El docente abre el curso.<br>2. Selecciona «Exportar».<br>3. El sistema genera el PDF y lo descarga."], ["<b>Flujos alternativos</b>", "2a. El curso no tiene notas: el sistema muestra un aviso y no genera el archivo."],
+        ["<b>Postcondiciones</b>", "Queda registrada la exportación en el historial del curso."]],
+      "Caso de uso de ejemplo.") },
+  { k: "riesgos", nombre: "De riesgos", desc: "Probabilidad, impacto, nivel, mitigación y responsable de cada riesgo.", util: ["especificacion", "arquitectura", "informe"], mencion: "los riesgos del proyecto",
+    regla: "columnas ID, Riesgo, Probabilidad (1 a 5), Impacto (1 a 5), Nivel, Mitigación y Responsable; Nivel = probabilidad × impacto con su categoría (1 a 4 bajo, 5 a 9 medio, 10 a 16 alto, 20 a 25 crítico); orden de mayor a menor nivel.",
+    ej: h => tablaEj(h, "Riesgos del proyecto", [["ID"], ["Riesgo"], ["Probabilidad", 1], ["Impacto", 1], ["Nivel", 1], ["Mitigación"], ["Responsable"]],
+      [["R-01", "Caída del servidor durante las inscripciones", 3, 5, "15 (alto)", "Réplica en espera y prueba de carga previa", "Infraestructura"], ["R-02", "Rotación del equipo de desarrollo", 2, 4, "8 (medio)", "Documentar decisiones y revisar código en pares", "Líder técnico"], ["R-03", "Cambio en el reglamento de notas", 1, 3, "3 (bajo)", "Parametrizar las reglas de cálculo", "Analista funcional"]],
+      "Escala de 1 (muy baja) a 5 (muy alta).") },
+  { k: "endpoints", nombre: "De endpoints de API", desc: "Método, ruta, descripción y códigos de respuesta de cada endpoint.", util: ["arquitectura", "manual"], mencion: "los endpoints del servicio de cursos",
+    regla: "columnas Método, Ruta, Descripción y Respuestas; método en mayúsculas (GET, POST, PUT, PATCH, DELETE); ruta en código con los parámetros entre llaves (`/api/cursos/{id}`); ordenados por ruta y, dentro de cada ruta, por método.",
+    ej: h => { const cod = s => `<code>${s}</code>`; return tablaEj(h, "Endpoints del servicio de cursos", [["Método"], ["Ruta"], ["Descripción"], ["Respuestas"]],
+      [[cod("GET"), cod("/api/cursos"), "Lista los cursos del docente", "200, 401"], [cod("POST"), cod("/api/cursos"), "Crea un curso", "201, 400, 401"], [cod("GET"), cod("/api/cursos/{id}"), "Devuelve un curso", "200, 404"], [cod("DELETE"), cod("/api/cursos/{id}"), "Elimina un curso sin inscripciones", "204, 404, 409"]],
+      "Todas las rutas requieren autenticación."); } }
 ];
 const TABLA_ACAD = Object.fromEntries(TABLAS_ACAD.map(t => [t.k, t]));
 // Tipos que siguen las reglas estadísticas de APA 7 (lo mismo usa verificar_doc.py)

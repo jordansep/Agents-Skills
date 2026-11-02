@@ -25,6 +25,8 @@ SIN_NUMERAR_BASE = {
     "referencias", "bibliografia", "anexos", "apendices",
 }
 SIGLAS_BASE = {"URL", "PDF", "HTML", "CSS", "HTTP", "HTTPS", "JSON", "XML", "USB", "ID", "OK", "SI", "PNG", "SVG", "SQL"}
+METODOS_HTTP = {"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+SIGLAS_BASE |= METODOS_HTTP
 AVISOS = {"nota", "consejo", "advertencia", "peligro"}
 ROMANOS = re.compile(r"^[IVXLC]+$")
 CONTEXTO_NUMERO = re.compile(r"(secci[oó]n|apartado|cap[ií]tulo|versi[oó]n|figura|tabla|v)\s*$", re.I)
@@ -165,6 +167,72 @@ def usa_tablas_estadisticas(prompt):
 
 def celdas(linea):
     return [c.strip() for c in re.split(r"(?<!\\)\|", linea.strip().strip("|"))]
+
+
+def tablas_markdown(lineas):
+    """Tablas del documento: [(dónde empieza, cabecera normalizada, [(dónde, celdas)])]."""
+    salida, i = [], 0
+    while i < len(lineas):
+        _, linea, tipo, _ = lineas[i]
+        sig = lineas[i + 1][1] if i + 1 < len(lineas) else ""
+        if tipo == "texto" and linea.lstrip().startswith("|") and re.match(r"^\s*\|?\s*:?-{3,}", sig):
+            cabecera = [normalizar(re.sub(r"[*_`\\]", "", c)) for c in celdas(linea)]
+            j, filas = i + 2, []
+            while j < len(lineas) and lineas[j][2] == "texto" and lineas[j][1].lstrip().startswith("|"):
+                filas.append((lineas[j][0], celdas(lineas[j][1])))
+                j += 1
+            salida.append((lineas[i][0], cabecera, filas))
+            i = j
+        else:
+            i += 1
+    return salida
+
+
+def columna(cabecera, *nombres):
+    """Índice de la primera columna cuyo encabezado empieza con alguno de los nombres, o None."""
+    return next((k for k, c in enumerate(cabecera) if any(c.startswith(n) for n in nombres)), None)
+
+
+NIVELES_RIESGO = ((1, 4, "bajo"), (5, 9, "medio"), (10, 16, "alto"), (20, 25, "critico"))
+
+
+def verificar_tecnicas(lineas, tipos, inf):
+    """Tablas técnicas: métodos HTTP, nivel de riesgo = probabilidad × impacto y casos de prueba en la trazabilidad."""
+    for donde, cab, filas in tablas_markdown(lineas):
+        metodo = columna(cab, "metodo")
+        if "endpoints" in tipos and metodo is not None:
+            for d, fila in filas:
+                valor = re.sub(r"[`*]", "", fila[metodo]).strip() if metodo < len(fila) else ""
+                if valor and valor not in METODOS_HTTP:
+                    inf.aviso(d, f"método «{valor}»: se esperaba GET, POST, PUT, PATCH o DELETE, en mayúsculas")
+
+        prob, imp, nivel = columna(cab, "probabilidad"), columna(cab, "impacto"), columna(cab, "nivel")
+        if "riesgos" in tipos and None not in (prob, imp, nivel):
+            anteriores = []
+            for d, fila in filas:
+                try:
+                    p, i = int(fila[prob]), int(fila[imp])
+                    m = re.match(r"^(\d+)\s*(?:\((\w+)\))?", fila[nivel])
+                except (IndexError, ValueError):
+                    continue
+                if not m:
+                    continue
+                n = int(m.group(1))
+                if n != p * i:
+                    inf.aviso(d, f"nivel de riesgo {n}: con probabilidad {p} e impacto {i} debería ser {p * i}")
+                categoria = next((c for a, b, c in NIVELES_RIESGO if a <= n <= b), None)
+                if m.group(2) and categoria and normalizar(m.group(2)) != categoria:
+                    inf.aviso(d, f"nivel {n} es «{categoria.replace('critico', 'crítico')}», no «{m.group(2)}»")
+                anteriores.append(n)
+            if anteriores != sorted(anteriores, reverse=True):
+                inf.aviso(donde, "los riesgos no están ordenados de mayor a menor nivel")
+
+        caso = columna(cab, "caso de prueba")
+        if "trazabilidad" in tipos and caso is not None:
+            for d, fila in filas:
+                valor = fila[caso].strip() if caso < len(fila) else ""
+                if valor in {"", "—", "-", "–"}:
+                    inf.aviso(d, f"el requisito «{fila[0]}» no tiene caso de prueba (si falta, «[PENDIENTE: caso de prueba]»)")
 
 
 def verificar_estadistica(lineas, decimal_coma, inf):
@@ -464,6 +532,9 @@ def verificar(prompt, archivos, inf, memorias=None):
     verificar_referencias(lineas, numeros, inf)
     if usa_tablas_estadisticas(prompt):
         verificar_estadistica(lineas, decimal_coma, inf)
+    tipos_tabla = {normalizar(str(t)) for t in prompt.get("tablas", []) or []}
+    if tipos_tabla & {"endpoints", "riesgos", "trazabilidad"}:
+        verificar_tecnicas(lineas, tipos_tabla, inf)
     verificar_academicos(lineas, set(prompt.get("componentes", []) or []), numeros, inf)
     if memorias is not None:
         verificar_memoria(lineas, memorias, inf)
