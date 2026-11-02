@@ -2,6 +2,14 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.9.0] - 2026-11-02
+
+### Agregado
+
+- Configurador: «Tipos de tabla» (de datos, frecuencia, contingencia, correlación, regresión, ANOVA, características demográficas, comparación, descriptivos, fiabilidad, pruebas de hipótesis, operacionalización y estado del arte), visibles con «Tablas», cada uno con su ejemplo y su regla en el prompt (campo tablas)
+- Configurador: botón «Ver todo», que agrega a la vista previa un apéndice de prueba con todos los elementos sin cambiar la selección ni el prompt
+- Verificador: si el prompt declara tablas estadísticas, avisa del cero inicial en p, r, β, α, ω y η², del separador decimal y de los asteriscos sin nota (APA 7)
+
 ## [0.8.1] - 2026-11-02
 
 ### Corregido
