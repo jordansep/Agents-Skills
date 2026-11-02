@@ -9,7 +9,7 @@ Este skill escribe el documento. Recibe el **prompt de estilo** que produce `doc
 
 El flujo es siempre el mismo: prompt, contenido, plan, redacción, verificación, exportación e informe.
 
-**No decidas nada por tu cuenta.** Antes de empezar, lee las dos memorias: la del agente (`../documentacion-estilo/memoria/decisiones.md`) y la del proyecto (`decisiones-estilo.md` en la carpeta del prompt de estilo, si existe). Si en cualquier paso aparece algo que el prompt, las memorias y las referencias no definen, aplica `../documentacion-estilo/references/memoria.md`: detén solo la parte afectada, pregunta al usuario (incluido el alcance), registra las preguntas y las respuestas en la memoria que corresponda e incorpora la regla. Las decisiones del proyecto se commitean en el repositorio del proyecto. Solo las de alcance de agente van al repositorio del agente con un PR (secciones Qué, Por qué y Cómo).
+**No decidas nada por tu cuenta.** Antes de empezar, lee las dos memorias: la del agente (`../documentacion-estilo/memoria/decisiones.md`) y la del proyecto (`decisiones-estilo.md` en la carpeta del prompt de estilo, si existe). Si en cualquier paso aparece algo que el prompt, las memorias y las referencias no definen, aplica `../documentacion-estilo/references/memoria.md`: detén solo la parte afectada, pregunta al usuario (incluido el alcance), registra las preguntas y las respuestas en la memoria que corresponda e incorpora la regla. Las decisiones del proyecto se commitean en el repositorio del proyecto. Las de alcance de agente quedan como `propuesta` en esa misma memoria del proyecto: nunca edites la carpeta instalada del skill ni abras PRs en el repositorio del agente desde otro repositorio.
 
 ## Paso 1: obtener el prompt de estilo
 
@@ -106,5 +106,5 @@ Entrega al usuario un mensaje breve con:
 2. Los archivos generados o actualizados.
 3. El resultado del verificador: errores (deben ser 0) y advertencias que quedaron, con su motivo.
 4. La lista de `[PENDIENTE]` con lo que hace falta para completarlos.
-5. Las decisiones de estilo nuevas (DEC-NNN): preguntas, respuestas, estado y enlace al PR que las envió al repositorio del agente.
+5. Las decisiones de estilo nuevas (DP-NNN): preguntas, respuestas y estado. Si hay alguna `propuesta` para el agente, indica que se incorpora abriendo una sesión en el repositorio del agente y pidiendo «incorporar las propuestas de <ruta del decisiones-estilo.md>».
 6. Cualquier desvío del prompt y su motivo.

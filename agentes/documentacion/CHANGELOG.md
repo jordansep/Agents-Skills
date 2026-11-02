@@ -2,6 +2,17 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.7.0] - 2026-11-02
+
+### Agregado
+
+- Instalación aislada: scripts/instalar_skills.ps1 instala los skills desde una copia fija en origin/main (git worktree) con junctions en ~/.claude/skills
+
+### Cambiado
+
+- La carpeta instalada del skill es de solo lectura; desde otro repositorio, las decisiones con alcance de agente quedan como propuesta en decisiones-estilo.md del proyecto y se incorporan desde una sesión en el repositorio del agente
+- Configurador: la pestaña Para la memoria describe el alcance de agente como propuesta y su instrucción ya no pide PRs desde otro repositorio
+
 ## [0.6.0] - 2026-11-02
 
 ### Agregado

@@ -575,9 +575,10 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
     <div class="panel-salida" id="p-memoria" role="tabpanel" aria-labelledby="t-memoria" hidden>
       <div class="barra-salida">
         <label class="campo" style="min-width:220px"><span>Alcance de estas respuestas</span>
-          <select data-k="alcance"><option value="agente">Todos los documentos (memoria del agente)</option><option value="documento">Solo este proyecto (memoria del repositorio)</option></select></label>
+          <select data-k="alcance"><option value="agente">Todos los documentos (propuesta para el agente)</option><option value="documento">Solo este proyecto (memoria del repositorio)</option></select></label>
         <button type="button" id="copiar-memoria">Copiar</button>
       </div>
+      <p class="nota-ui">Desde otro repositorio, las respuestas para todos los documentos quedan como <code>propuesta</code> en <code>decisiones-estilo.md</code> del proyecto. La carpeta instalada del skill es de solo lectura: se incorporan al agente desde una sesión en su repositorio.</p>
       <pre class="texto-salida" id="memoria"></pre>
     </div>
   </section>
@@ -1303,7 +1304,7 @@ function generarMemoria() {
   return `Respuestas del usuario desde el configurador de estilo (${hoy()}).
 Alcance: ${alc}.
 Instrucción para el agente: ${S.alcance === "agente"
-    ? "registra estas respuestas en la memoria del agente (memoria/decisiones.md), marca cada DEC como confirmada, incorpora las reglas en las referencias del skill y envíala al repositorio del agente en un PR con Qué, Por qué y Cómo"
+    ? "si la sesión trabaja en el repositorio del agente, registra estas respuestas en memoria/decisiones.md de esa carpeta de trabajo, marca cada DEC como confirmada, incorpora las reglas en las referencias del skill y envíalas en un PR con Qué, Por qué y Cómo. Si la sesión trabaja en otro repositorio, no edites la carpeta instalada del skill ni abras PRs en el repositorio del agente: regístralas como DP-NNN con estado propuesta y alcance agente en decisiones-estilo.md del proyecto, aplícalas ya en el prompt de este proyecto y avisa en el informe final que hay propuestas para incorporar al agente"
     : "registra estas respuestas como una entrada DP-NNN en la memoria del proyecto (decisiones-estilo.md, junto al prompt de estilo, en el repositorio del proyecto), escribe las reglas solo en el prompt de este proyecto y haz commit ahí. No toques la memoria del agente: las DEC generales siguen pendientes"} según references/memoria.md.
 
 DEC-001 · Tratamiento y variante

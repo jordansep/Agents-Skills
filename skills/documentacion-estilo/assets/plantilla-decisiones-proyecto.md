@@ -5,6 +5,7 @@ Memoria de estilo de **<nombre del proyecto>**. Guarda las decisiones que el usu
 - Prompt de estilo: `<ruta del prompt-estilo.md>`.
 - Las decisiones **confirmadas** de este archivo mandan sobre la memoria del agente, solo dentro de este proyecto.
 - Las decisiones **pendientes** son preguntas que el usuario todavía no respondió.
+- Las **propuestas** son reglas que el usuario quiere para todos los documentos del agente. Se aplican ya en este proyecto y se incorporan al agente desde una sesión en su repositorio.
 
 ## Índice
 
