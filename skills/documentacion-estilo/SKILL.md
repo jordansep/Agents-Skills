@@ -13,6 +13,7 @@ Carga solo la referencia que necesites:
 - `references/estilo-visual.md`: grilla, títulos, componentes, tipografía, paleta de color y diagramas.
 - `references/escritura.md`: normas de redacción, ortotipografía, reglas por tipo de documento y ejemplos.
 - `assets/plantilla-prompt-estilo.md`: plantilla del archivo de salida.
+- `assets/configurador.html`: configurador visual para que el usuario elija los parámetros, con vista previa en vivo. Genera el prompt de estilo y las respuestas para la memoria.
 - `references/memoria.md`: qué hacer cuando algo no está definido y cómo se guarda la memoria.
 - `memoria/decisiones.md`: registro de decisiones del usuario. Siempre se lee.
 
@@ -35,6 +36,12 @@ Fija estos parámetros. Para cada uno:
 - Si no, **pregúntalo**. Ofrece las opciones de la tabla y marca la recomendada, pero no la apliques hasta tener respuesta.
 
 Agrupa las preguntas en una sola tanda, de hasta cuatro preguntas por vez.
+
+Si hay muchos parámetros por definir, ofrece al usuario el configurador visual (`assets/configurador.html`, se abre en cualquier navegador). En él elige metodología, estructura, componentes, diagramas, tipografía, tamaños, color y normas, y ve cómo queda el documento en una vista previa. Lo que el configurador produce cuenta como respuesta del usuario:
+
+- **Prompt generado**: guárdalo tal cual en la ruta indicada y continúa desde el Paso 5, punto 4 (verificar que no queden `[PENDIENTE]`).
+- **Para la memoria**: son las respuestas a las decisiones DEC con su alcance. Regístralas en `memoria/decisiones.md` según `references/memoria.md` y envíalas con un PR.
+- Si el prompt contiene `[PENDIENTE: ...]` (por ejemplo, el propósito de un capítulo nuevo o un color sin contraste suficiente), pregunta esos puntos antes de usarlo.
 
 | Parámetro | Opciones | Recomendado |
 |---|---|---|

@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurador de estilo</title>
+<meta name="description" content="Configurador del prompt de estilo del agente de documentación: metodología, diagramas, manuales, tipografía, tamaños, color y normas, con vista previa.">
+<style>
+:root {
+  --bg: #F3F4F6; --panel: #FFFFFF; --fg: #1F2328; --muted: #57606A; --line: #D0D7DE;
+  --accent: #1F4E79; --accent-fg: #FFFFFF; --soft: #EEF3F8; --ok: #1A7F37; --bad: #CF222E;
+  --radius: 8px;
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1117; --panel: #151B23; --fg: #E6EDF3; --muted: #9198A1; --line: #3D444D;
+    --accent: #79B8FF; --accent-fg: #0D1117; --soft: #1C2633; --ok: #3FB950; --bad: #F85149;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1117; --panel: #151B23; --fg: #E6EDF3; --muted: #9198A1; --line: #3D444D;
+  --accent: #79B8FF; --accent-fg: #0D1117; --soft: #1C2633; --ok: #3FB950; --bad: #F85149;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-size: 14px; line-height: 1.45; }
+header.top {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 5;
+}
+header.top h1 { font-size: 17px; margin: 0; }
+header.top p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+.acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+button, .boton {
+  font: inherit; font-size: 13px; padding: 7px 12px; border-radius: var(--radius);
+  border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer;
+}
+button:hover, .boton:hover { border-color: var(--accent); }
+button.primario { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.layout { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 16px; padding: 16px; align-items: start; }
+.panel { display: flex; flex-direction: column; gap: 10px; }
+details.grupo { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+details.grupo > summary {
+  cursor: pointer; padding: 11px 14px; font-weight: 600; list-style: none; display: flex; align-items: baseline; gap: 6px;
+}
+details.grupo > summary::-webkit-details-marker { display: none; }
+details.grupo > summary::after { content: "＋"; color: var(--muted); margin-left: auto; }
+details.grupo[open] > summary::after { content: "－"; }
+details.grupo > summary small { font-weight: 400; color: var(--muted); }
+.cuerpo-grupo { padding: 2px 14px 14px; display: grid; gap: 10px; }
+label.campo { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); }
+label.campo > span { font-weight: 500; }
+input[type=text], input[type=number], select, textarea {
+  font: inherit; font-size: 13.5px; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; width: 100%;
+}
+textarea { min-height: 70px; resize: vertical; }
+textarea.alta { min-height: 170px; }
+.fila { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fila3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.opciones { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+.opciones label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.subtitulo { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 6px 0 0; font-weight: 600; }
+.nota-ui { font-size: 12px; color: var(--muted); margin: 0; }
+.alerta-ui { font-size: 12px; color: var(--bad); margin: 0; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.presets button { font-size: 12px; padding: 5px 9px; }
+.tamanos { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tamanos th, .tamanos td { padding: 3px 4px; text-align: left; }
+.tamanos th { color: var(--muted); font-weight: 500; }
+.tamanos input { padding: 4px 6px; }
+.colores { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.color { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.color input[type=color] { width: 34px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; flex: none; }
+.color code { font-size: 11.5px; color: var(--muted); }
+.contraste { display: grid; gap: 4px; font-size: 12px; }
+.contraste div { display: flex; justify-content: space-between; gap: 8px; }
+.badge { font-weight: 600; font-variant-numeric: tabular-nums; }
+.badge.ok { color: var(--ok); } .badge.mal { color: var(--bad); }
+
+.salida { position: sticky; top: 72px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
+.pestanas { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.pestanas [role=tab] { border: none; background: none; padding: 7px 12px; border-radius: 6px; color: var(--muted); }
+.pestanas [role=tab][aria-selected=true] { background: var(--soft); color: var(--fg); font-weight: 600; }
+.pestanas .espacio { flex: 1; }
+.vista-modo { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.vista-modo button { border: none; border-radius: 0; padding: 5px 10px; font-size: 12px; }
+.vista-modo button[aria-pressed=true] { background: var(--accent); color: var(--accent-fg); }
+.panel-salida { height: calc(100vh - 150px); overflow: auto; }
+.panel-salida[hidden] { display: none; }
+.lienzo { background: #E5E7EB; padding: 20px; min-height: 100%; }
+:root[data-theme="dark"] .lienzo { background: #2A2F36; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lienzo { background: #2A2F36; } }
+.marco-hoja { margin: 0 auto; }
+pre.texto-salida {
+  margin: 0; padding: 16px; font: 12.5px/1.5 "JetBrains Mono", Consolas, monospace; white-space: pre-wrap; word-break: break-word;
+  color: var(--fg);
+}
+.barra-salida { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); align-items: center; }
+.barra-salida .nota-ui { flex: 1; min-width: 200px; }
+.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.ver { opacity: 1; }
+
+/* ===== Documento de vista previa (siempre en papel claro) ===== */
+.doc {
+  --p: #1F4E79; --t: #1F2328; --s: #57606A; --sup: #F6F8FA; --b: #D0D7DE;
+  --info: #0969DA; --info-f: #DDF4FF; --exito: #1A7F37; --exito-f: #DAFBE1;
+  --adv: #9A6700; --adv-f: #FFF8C5; --pel: #CF222E; --pel-f: #FFEBE9;
+  background: #FFFFFF; color: var(--t); margin: 0 auto; box-shadow: 0 1px 4px rgba(0,0,0,.18);
+  overflow-wrap: break-word; color-scheme: light;
+}
+.doc.digital { padding: 40px 32px 56px; }
+.doc.impreso { transform-origin: top left; }
+.doc h1, .doc h2, .doc h3, .doc h4 { margin: 1.4em 0 .5em; line-height: 1.25; }
+.doc h1 { color: var(--p); }
+.doc h2 { color: var(--p); }
+.doc h3 { color: var(--t); }
+.doc .portada { border-bottom: 2px solid var(--p); padding-bottom: .8em; margin-bottom: 1.2em; }
+.doc .portada h1 { margin: 0 0 .2em; }
+.doc .portada p { margin: 0; color: var(--s); }
+.doc p { margin: 0 0 .8em; }
+.doc .proposito { color: var(--s); font-style: italic; }
+.doc table { border-collapse: collapse; width: 100%; margin: .3em 0; }
+.doc th { text-align: left; font-weight: 700; background: var(--sup); }
+.doc th, .doc td { padding: .4em .6em; border-bottom: 1px solid var(--b); vertical-align: top; }
+.doc td.num, .doc th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.doc .leyenda { margin: .9em 0 .2em; }
+.doc .fuente { color: var(--s); margin: .2em 0 1.1em; }
+.doc .aviso { border-left: 4px solid; padding: .55em .8em; margin: .7em 0; border-radius: 0 4px 4px 0; }
+.doc .aviso b { margin-right: .3em; }
+.doc .aviso.nota { border-color: var(--info); background: var(--info-f); color: var(--info); }
+.doc .aviso.consejo { border-color: var(--exito); background: var(--exito-f); color: var(--exito); }
+.doc .aviso.advertencia { border-color: var(--adv); background: var(--adv-f); color: var(--adv); }
+.doc .aviso.peligro { border-color: var(--pel); background: var(--pel-f); color: var(--pel); }
+.doc pre { position: relative; background: var(--sup); padding: .8em 1em; border-radius: 4px; overflow-x: auto; margin: .5em 0 1em; }
+.doc pre .lang { position: absolute; top: .3em; right: .6em; color: var(--s); font-size: .8em; }
+.doc ol.pasos { padding-left: 1.4em; margin: .3em 0 1em; }
+.doc ol.pasos li { margin-bottom: .45em; }
+.doc ol.pasos .resultado { display: block; color: var(--s); }
+.doc .captura { border: 1px solid var(--b); border-radius: 4px; overflow: hidden; max-width: 420px; }
+.doc .captura .barra { background: var(--sup); border-bottom: 1px solid var(--b); padding: .3em .6em; font-size: .8em; color: var(--s); }
+.doc .captura .contenido { padding: 1em; display: flex; gap: .8em; align-items: center; flex-wrap: wrap; }
+.doc .captura .btn { background: var(--p); color: #fff; padding: .35em .8em; border-radius: 4px; font-size: .85em; }
+.doc .captura .campo-falso { border: 1px solid var(--b); padding: .3em .6em; border-radius: 4px; color: var(--s); font-size: .85em; min-width: 140px; }
+.doc .marcador { display: inline-flex; width: 1.4em; height: 1.4em; border-radius: 50%; background: var(--pel); color: #fff; align-items: center; justify-content: center; font-size: .75em; font-weight: 700; }
+.doc .figura { display: flex; justify-content: center; margin: .6em 0 .2em; }
+.doc .figura svg { max-width: 100%; height: auto; }
+.doc .ecuacion { display: grid; grid-template-columns: 1fr auto; align-items: center; margin: .6em 0; font-style: italic; }
+.doc .ecuacion span:first-child { text-align: center; }
+.doc .ecuacion span:last-child { font-style: normal; }
+.doc dl dt { font-weight: 700; display: inline; }
+.doc dl dd { display: inline; margin: 0; }
+.doc dl div { margin-bottom: .4em; }
+.doc .ficticio { color: var(--s); font-size: .85em; }
+.doc .pendiente { background: #FFF8C5; color: #6B4A00; padding: 0 .3em; border-radius: 3px; }
+.doc .sin-contenido { color: var(--s); }
+
+@media (max-width: 900px) {
+  header.top { position: static; }
+  .layout { grid-template-columns: 1fr; }
+  .salida { position: static; }
+  .panel-salida { height: auto; max-height: 80vh; }
+}
+@media (max-width: 420px) {
+  .fila, .colores { grid-template-columns: 1fr; }
+  .lienzo { padding: 10px; }
+  .doc.digital { padding: 24px 16px 32px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Configurador de estilo</h1>
+    <p>Agente de documentación · genera el <code>prompt-estilo.md</code> y las respuestas para la memoria</p>
+  </div>
+  <div class="acciones">
+    <label class="boton" for="importar" title="Importar un prompt-estilo.md generado con este configurador">Importar prompt…</label>
+    <input id="importar" type="file" accept=".md,.json,text/markdown" hidden>
+    <button id="restablecer" type="button">Restablecer</button>
+    <button id="descargar" class="primario" type="button">Descargar prompt-estilo.md</button>
+  </div>
+</header>
+
+<main class="layout">
+  <form class="panel" id="form" autocomplete="off" onsubmit="return false">
+
+    <details class="grupo" open>
+      <summary>Documento y metodología</summary>
+      <div class="cuerpo-grupo">
+        <label class="campo"><span>Título del documento</span><input type="text" data-k="documento"></label>
+        <div class="fila">
+          <label class="campo"><span>Tipo</span>
+            <select data-k="tipo">
+              <option value="manual">Manual de usuario</option>
+              <option value="tesis">Tesis / trabajo final</option>
+              <option value="especificacion">Especificación de requisitos</option>
+              <option value="informe">Informe técnico</option>
+              <option value="arquitectura">Documento de arquitectura</option>
+              <option value="diagrama">Diagrama</option>
+              <option value="otro">Otro</option>
+            </select></label>
+          <label class="campo"><span>Metodología</span>
+            <select data-k="metodologia">
+              <option value="diataxis">Diátaxis</option>
+              <option value="academica">Académica</option>
+              <option value="iso29148">ISO/IEEE 29148</option>
+              <option value="rup">RUP</option>
+              <option value="up">UP</option>
+              <option value="scrum">Scrum / ágil</option>
+              <option value="ninguna">Ninguna (genérica)</option>
+            </select></label>
+        </div>
+        <p class="nota-ui" id="nota-metodologia"></p>
+        <div class="fila">
+          <label class="campo"><span>Audiencia</span>
+            <select data-k="audiencia">
+              <option>no técnica</option><option>técnica</option><option>académica</option><option>mixta</option>
+            </select></label>
+          <label class="campo"><span>Medio</span>
+            <select data-k="medio">
+              <option value="digital">Digital</option><option value="impreso">Impreso</option><option value="ambos">Ambos</option>
+            </select></label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Formato de salida</span>
+            <select data-k="formato">
+              <option value="markdown">Markdown</option><option value="docx">Word (.docx)</option><option value="pdf">PDF</option>
+            </select></label>
+          <label class="campo"><span>Versión del prompt</span><input type="text" data-k="version"></label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Carpeta del documento</span><input type="text" data-k="salida"></label>
+          <label class="campo"><span>Ubicación del prompt</span>
+            <select data-k="ubicacion_prompt">
+              <option value="proyecto">docs/prompt-estilo.md (uno por proyecto)</option>
+              <option value="documento">Dentro de la carpeta del documento</option>
+            </select></label>
+        </div>
+      </div>
+    </details>
+
+    <details class="grupo">
+      <summary>Estructura <small>capítulos en orden</small></summary>
+      <div class="cuerpo-grupo">
+        <label class="campo"><span>Capítulos (uno por línea, sin número)</span><textarea class="alta" data-k="estructura"></textarea></label>
+        <button type="button" id="esqueleto">Cargar esqueleto de la metodología</button>
+        <label class="campo"><span>Partes sin numerar (uno por línea)</span><textarea data-k="sin_numerar"></textarea></label>
+      </div>
+    </details>
+
+    <details class="grupo">
+      <summary>Componentes y manuales</summary>
+      <div class="cuerpo-grupo">
+        <p class="subtitulo">Componentes que usa el documento</p>
+        <div class="opciones" data-grupo="componentes">
+          <label><input type="checkbox" value="tablas">Tablas</label>
+          <label><input type="checkbox" value="figuras">Figuras y capturas</label>
+          <label><input type="checkbox" value="avisos">Avisos</label>
+          <label><input type="checkbox" value="pasos">Pasos numerados</label>
+          <label><input type="checkbox" value="codigo">Código</label>
+          <label><input type="checkbox" value="ecuaciones">Ecuaciones</label>
+          <label><input type="checkbox" value="requisitos">Requisitos (RF/RNF)</label>
+          <label><input type="checkbox" value="historias">Historias de usuario</label>
+          <label><input type="checkbox" value="glosario">Glosario</label>
+        </div>
+        <p class="subtitulo">Avisos habilitados</p>
+        <div class="opciones" data-grupo="avisos">
+          <label><input type="checkbox" value="nota">Nota</label>
+          <label><input type="checkbox" value="consejo">Consejo</label>
+          <label><input type="checkbox" value="advertencia">Advertencia</label>
+          <label><input type="checkbox" value="peligro">Peligro</label>
+        </div>
+        <p class="subtitulo">Manuales</p>
+        <div class="opciones" data-grupo="diataxis">
+          <label><input type="checkbox" value="tutorial">Tutoriales</label>
+          <label><input type="checkbox" value="guia">Guías prácticas</label>
+          <label><input type="checkbox" value="referencia">Referencia</label>
+          <label><input type="checkbox" value="explicacion">Explicación</label>
+        </div>
+        <div class="opciones">
+          <label><input type="checkbox" data-k="pasos_resultado">Resultado esperado (→) tras cada paso</label>
+          <label><input type="checkbox" data-k="capturas_borde">Borde de 1 px en capturas</label>
+          <label><input type="checkbox" data-k="capturas_marcadores">Marcadores numerados en capturas</label>
+        </div>
+        <p class="nota-ui">Los tipos de Diátaxis y las opciones de capturas solo se aplican a manuales.</p>
+      </div>
+    </details>
+
+    <details class="grupo">
+      <summary>Diagramas</summary>
+      <div class="cuerpo-grupo">
+        <p class="subtitulo">Notaciones permitidas</p>
+        <div class="opciones" data-grupo="notaciones">
+          <label><input type="checkbox" value="uml-casos">UML casos de uso</label>
+          <label><input type="checkbox" value="uml-clases">UML clases</label>
+          <label><input type="checkbox" value="uml-secuencia">UML secuencia</label>
+          <label><input type="checkbox" value="uml-actividad">UML actividad</label>
+          <label><input type="checkbox" value="uml-componentes">UML componentes/despliegue</label>
+          <label><input type="checkbox" value="bpmn">BPMN 2.0</label>
+          <label><input type="checkbox" value="er">Entidad-relación</label>
+          <label><input type="checkbox" value="c4">C4</label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Herramienta de origen</span>
+            <select data-k="diag_herramienta">
+              <option value="mermaid">Mermaid</option><option value="plantuml">PlantUML</option><option value="imagen">Imagen (draw.io, etc.)</option>
+            </select></label>
+          <label class="campo"><span>Formato exportado</span>
+            <select data-k="diag_formato"><option value="svg">SVG</option><option value="png">PNG a 2×</option></select></label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Dirección del flujo</span>
+            <select data-k="diag_direccion"><option value="LR">Izquierda → derecha</option><option value="TB">Arriba → abajo</option></select></label>
+          <label class="campo"><span>Máx. elementos por diagrama</span><input type="number" min="3" max="40" data-k="diag_max"></label>
+        </div>
+        <label class="campo"><span>Notación de la vista previa</span>
+          <select id="diag-vista"></select></label>
+      </div>
+    </details>
+
+    <details class="grupo">
+      <summary>Tipografía y tamaños</summary>
+      <div class="cuerpo-grupo">
+        <div class="presets">
+          <button type="button" data-preset="digital">Digital</button>
+          <button type="button" data-preset="tesis">Tesis impresa</button>
+          <button type="button" data-preset="manual-impreso">Manual impreso</button>
+        </div>
+        <datalist id="fuentes">
+          <option>Inter</option><option>Source Sans 3</option><option>Roboto</option><option>Open Sans</option><option>Lato</option>
+          <option>IBM Plex Sans</option><option>Noto Sans</option><option>Arial</option><option>Calibri</option>
+          <option>Merriweather</option><option>Source Serif 4</option><option>Lora</option><option>Georgia</option>
+          <option>Times New Roman</option><option>Cambria</option>
+          <option>JetBrains Mono</option><option>Fira Code</option><option>IBM Plex Mono</option><option>Source Code Pro</option>
+          <option>Consolas</option><option>Courier New</option>
+        </datalist>
+        <label class="campo"><span>Fuente de títulos</span><input type="text" list="fuentes" data-k="f_titulos"></label>
+        <label class="campo"><span>Fuente del cuerpo</span><input type="text" list="fuentes" data-k="f_cuerpo"></label>
+        <label class="campo"><span>Fuente de código</span><input type="text" list="fuentes" data-k="f_codigo"></label>
+        <p class="nota-ui">Puedes escribir cualquier fuente. Si existe en Google Fonts, se carga para la vista previa.</p>
+
+        <table class="tamanos">
+          <thead><tr><th>Elemento</th><th>Digital (px)</th><th>Impreso (pt)</th></tr></thead>
+          <tbody>
+            <tr><td>Cuerpo</td><td><input type="number" step="0.5" data-k="d_cuerpo"></td><td><input type="number" step="0.5" data-k="p_cuerpo"></td></tr>
+            <tr><td>Título H1</td><td><input type="number" step="0.5" data-k="d_h1"></td><td><input type="number" step="0.5" data-k="p_h1"></td></tr>
+            <tr><td>Título H2</td><td><input type="number" step="0.5" data-k="d_h2"></td><td><input type="number" step="0.5" data-k="p_h2"></td></tr>
+            <tr><td>Título H3</td><td><input type="number" step="0.5" data-k="d_h3"></td><td><input type="number" step="0.5" data-k="p_h3"></td></tr>
+            <tr><td>Tablas y figuras</td><td><input type="number" step="0.5" data-k="d_tabla"></td><td><input type="number" step="0.5" data-k="p_tabla"></td></tr>
+            <tr><td>Código</td><td><input type="number" step="0.5" data-k="d_codigo"></td><td><input type="number" step="0.5" data-k="p_codigo"></td></tr>
+            <tr><td>Fuentes y notas</td><td><input type="number" step="0.5" data-k="d_nota"></td><td><input type="number" step="0.5" data-k="p_nota"></td></tr>
+            <tr><td>Interlineado</td><td><input type="number" step="0.05" data-k="d_interlineado"></td><td><input type="number" step="0.05" data-k="p_interlineado"></td></tr>
+          </tbody>
+        </table>
+        <div class="fila">
+          <label class="campo"><span>Ancho de lectura digital (px)</span><input type="number" step="10" data-k="d_ancho"></label>
+          <label class="campo"><span>Peso de títulos</span>
+            <select data-k="peso_titulos"><option value="600">Semibold (600)</option><option value="700">Bold (700)</option><option value="400">Regular (400)</option></select></label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Papel</span><select data-k="p_papel"><option>A4</option><option>Carta</option></select></label>
+          <label class="campo"><span>Márgenes (cm)</span><input type="number" step="0.1" data-k="p_margen"></label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Alineación</span>
+            <select data-k="alineacion"><option value="izquierda">Izquierda</option><option value="justificado">Justificado</option></select></label>
+          <label class="campo"><span>Sangría 1.ª línea, impreso (cm)</span><input type="number" step="0.05" min="0" data-k="sangria"></label>
+        </div>
+      </div>
+    </details>
+
+    <details class="grupo">
+      <summary>Color</summary>
+      <div class="cuerpo-grupo">
+        <div class="presets"><button type="button" id="paleta-base">Paleta base (AA verificada)</button></div>
+        <div class="colores" id="colores"></div>
+        <p class="subtitulo">Contraste WCAG (mínimo 4,5:1)</p>
+        <div class="contraste" id="contraste"></div>
+      </div>
+    </details>
+
+    <details class="grupo">
+      <summary>Normas de escritura</summary>
+      <div class="cuerpo-grupo">
+        <div class="fila">
+          <label class="campo"><span>Variante</span>
+            <select data-k="variante"><option value="neutro">Español neutro</option><option value="rioplatense">Rioplatense</option></select></label>
+          <label class="campo"><span>Tratamiento</span>
+            <select data-k="tratamiento"><option value="usted">Usted</option><option value="tú">Tú</option><option value="vos">Vos</option><option value="impersonal">Impersonal</option></select></label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Estilo de citas</span>
+            <select data-k="citas">
+              <option value="apa7">APA 7</option><option value="ieee">IEEE</option><option value="iso690">ISO 690</option>
+              <option value="vancouver">Vancouver</option><option value="institucional">Reglamento institucional</option><option value="ninguna">Sin citas</option>
+            </select></label>
+          <label class="campo"><span>Comillas</span>
+            <select data-k="comillas"><option value="dobles">“dobles”</option><option value="angulares">«angulares»</option><option value="rectas">"rectas"</option></select></label>
+        </div>
+        <label class="campo"><span>Reglamento o guía de marca que manda (opcional)</span><input type="text" data-k="reglamento" placeholder="Ej.: Reglamento de trabajo final de la facultad, 2024"></label>
+        <div class="fila3">
+          <label class="campo"><span>Decimal</span><select data-k="decimal"><option value="coma">Coma 3,5</option><option value="punto">Punto 3.5</option></select></label>
+          <label class="campo"><span>Miles</span><select data-k="miles"><option value="espacio">Espacio</option><option value="punto">Punto</option><option value="coma">Coma</option><option value="ninguno">Ninguno</option></select></label>
+          <label class="campo"><span>Fecha</span><select data-k="fecha"><option value="dd/mm/aaaa">dd/mm/aaaa</option><option value="aaaa-mm-dd">aaaa-mm-dd</option></select></label>
+        </div>
+        <p class="alerta-ui" id="alerta-numeros" hidden>El separador de miles no puede ser igual al separador decimal.</p>
+        <div class="fila">
+          <label class="campo"><span>Máx. palabras por oración</span><input type="number" min="10" max="60" data-k="max_palabras"></label>
+          <div class="opciones" style="align-self:end"><label><input type="checkbox" data-k="pct_espacio">Espacio antes de %</label></div>
+        </div>
+        <label class="campo"><span>Siglas que no hace falta desarrollar (una por línea)</span><textarea data-k="siglas"></textarea></label>
+        <label class="campo"><span>Términos preferidos (uno por línea: preferido = descartado)</span><textarea data-k="terminos" placeholder="inicio de sesión = login"></textarea></label>
+      </div>
+    </details>
+
+    <details class="grupo">
+      <summary>Restricciones y criterios</summary>
+      <div class="cuerpo-grupo">
+        <label class="campo"><span>Restricciones del proyecto (una por línea)</span><textarea data-k="restricciones" placeholder="Extensión máxima: 80 páginas"></textarea></label>
+        <label class="campo"><span>Criterios de aceptación propios (uno por línea)</span><textarea data-k="criterios" placeholder="Cada tarea del manual tiene una captura"></textarea></label>
+      </div>
+    </details>
+  </form>
+
+  <section class="salida" aria-label="Resultado">
+    <div class="pestanas" role="tablist">
+      <button role="tab" aria-selected="true" aria-controls="p-vista" id="t-vista">Vista previa</button>
+      <button role="tab" aria-selected="false" aria-controls="p-prompt" id="t-prompt">Prompt generado</button>
+      <button role="tab" aria-selected="false" aria-controls="p-memoria" id="t-memoria">Para la memoria</button>
+      <span class="espacio"></span>
+      <span class="vista-modo" id="modo" aria-label="Ver como">
+        <button type="button" data-modo="digital" aria-pressed="true">Digital</button>
+        <button type="button" data-modo="impreso" aria-pressed="false">Impreso</button>
+      </span>
+    </div>
+    <div class="panel-salida" id="p-vista" role="tabpanel" aria-labelledby="t-vista">
+      <div class="lienzo" id="lienzo"><div class="marco-hoja" id="marco"><article class="doc digital" id="doc"></article></div></div>
+    </div>
+    <div class="panel-salida" id="p-prompt" role="tabpanel" aria-labelledby="t-prompt" hidden>
+      <div class="barra-salida">
+        <p class="nota-ui">Guárdalo como <code id="ruta-prompt">docs/prompt-estilo.md</code>. El agente lo lee como decisión del usuario.</p>
+        <button type="button" id="copiar-prompt">Copiar</button>
+      </div>
+      <pre class="texto-salida" id="prompt"></pre>
+    </div>
+    <div class="panel-salida" id="p-memoria" role="tabpanel" aria-labelledby="t-memoria" hidden>
+      <div class="barra-salida">
+        <label class="campo" style="min-width:220px"><span>Alcance de estas respuestas</span>
+          <select data-k="alcance"><option value="agente">Todos los documentos del agente</option><option value="documento">Solo este documento</option></select></label>
+        <button type="button" id="copiar-memoria">Copiar</button>
+      </div>
+      <pre class="texto-salida" id="memoria"></pre>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ---------- Datos ---------- */
+const ESQUELETOS = {
+  diataxis: [
+    ["Control de versiones", "Registrar los cambios del documento", []],
+    ["Introducción", "Qué es el sistema, para quién es el manual y cómo usarlo", ["Propósito del manual", "Público destinatario", "Convenciones del manual"]],
+    ["Primeros pasos", "Tutorial guiado hasta lograr un primer resultado", ["Requisitos previos", "Crear el primer proyecto"]],
+    ["Tareas frecuentes", "Guías prácticas, una por tarea", []],
+    ["Referencia de la interfaz", "Pantallas, campos y menús", []],
+    ["Conceptos", "Explicación del funcionamiento y sus decisiones", []],
+    ["Solución de problemas", "Síntoma, causa y solución", []],
+    ["Preguntas frecuentes", "Dudas habituales con respuesta breve", []],
+    ["Glosario", "Definir los términos técnicos", []]
+  ],
+  academica: [
+    ["Control de versiones", "Registrar los cambios del documento", []],
+    ["Resumen", "Síntesis del trabajo y palabras clave", []],
+    ["Abstract", "Resumen en inglés", []],
+    ["Índice general", "Índice generado", []],
+    ["Introducción", "Plantear el problema y los objetivos", ["Planteamiento del problema", "Objetivos", "Justificación", "Alcance y limitaciones"]],
+    ["Marco teórico", "Estado del arte y conceptos que sustentan el trabajo", []],
+    ["Marco metodológico", "Enfoque, diseño, muestra, instrumentos y procedimiento", []],
+    ["Resultados", "Presentar los resultados sin interpretarlos", []],
+    ["Discusión", "Interpretar los resultados frente al marco teórico", []],
+    ["Conclusiones y trabajos futuros", "Responder a los objetivos planteados", []],
+    ["Referencias", "Lista de referencias en el estilo de citas elegido", []],
+    ["Anexos", "Material complementario", []]
+  ],
+  iso29148: [
+    ["Control de versiones", "Registrar los cambios del documento", []],
+    ["Introducción", "Propósito, alcance y convenciones de la especificación", ["Propósito", "Alcance", "Definiciones, siglas y abreviaturas", "Referencias", "Visión general del documento"]],
+    ["Descripción general", "Contexto del producto, usuarios y restricciones", ["Perspectiva del producto", "Funciones del producto", "Características de los usuarios", "Restricciones", "Supuestos y dependencias"]],
+    ["Requisitos específicos", "Requisitos verificables con ID único", ["Requisitos funcionales", "Requisitos no funcionales", "Interfaces externas", "Requisitos de datos"]],
+    ["Trazabilidad", "Relación requisito, origen y caso de prueba", []],
+    ["Apéndices", "Material complementario", []]
+  ],
+  rup: [
+    ["Control de versiones", "Registrar los cambios del documento", []],
+    ["Introducción", "Propósito, alcance, definiciones y referencias", ["Propósito", "Alcance", "Definiciones, siglas y abreviaturas", "Referencias"]],
+    ["Representación de la arquitectura", "Vistas que se usan y su notación", []],
+    ["Objetivos y restricciones de la arquitectura", "Requisitos y restricciones que guían el diseño", []],
+    ["Vista de casos de uso", "Casos de uso significativos para la arquitectura", []],
+    ["Vista lógica", "Paquetes, capas y clases clave", ["Paquetes o capas significativos", "Clases o componentes clave"]],
+    ["Vista de procesos", "Concurrencia y comunicación", []],
+    ["Vista de despliegue", "Nodos y distribución", []],
+    ["Vista de implementación", "Organización del código y componentes", []],
+    ["Vista de datos", "Modelo de datos persistentes", []],
+    ["Calidad", "Atributos de calidad y cómo se cumplen", []],
+    ["Riesgos técnicos y decisiones de arquitectura", "Riesgos y decisiones (ADR) con su motivo", []],
+    ["Glosario", "Definir los términos técnicos", []]
+  ],
+  up: [
+    ["Control de versiones", "Registrar los cambios del documento", []],
+    ["Introducción", "Propósito, alcance y referencias", ["Propósito", "Alcance", "Referencias"]],
+    ["Visión", "Problema, usuarios y propuesta de valor", []],
+    ["Modelo de casos de uso", "Actores y casos de uso principales", []],
+    ["Arquitectura", "Vistas principales y decisiones", []],
+    ["Plan de iteraciones", "Fases, iteraciones e hitos", []],
+    ["Lista de riesgos", "Riesgos, impacto y mitigación", []],
+    ["Glosario", "Definir los términos técnicos", []]
+  ],
+  scrum: [
+    ["Control de versiones", "Registrar los cambios del documento", []],
+    ["Objetivo de la iteración", "Resultado esperado en una frase", []],
+    ["Historias comprometidas", "Historias con criterios de aceptación y estado", []],
+    ["Decisiones y cambios", "Qué cambió respecto a la iteración anterior y por qué", []],
+    ["Riesgos y bloqueos", "Riesgos activos y responsables", []],
+    ["Resultados de revisión", "Qué se entregó y qué quedó pendiente", []]
+  ],
+  ninguna: [
+    ["Control de versiones", "Registrar los cambios del documento", []],
+    ["Introducción", "Propósito, alcance y público", ["Propósito", "Alcance"]],
+    ["Desarrollo", "Contenido principal", []],
+    ["Conclusiones", "Síntesis y próximos pasos", []],
+    ["Glosario", "Definir los términos técnicos", []]
+  ]
+};
+const NOTA_METODOLOGIA = {
+  diataxis: "Diátaxis: tutoriales, guías prácticas, referencia y explicación, sin mezclarlos en una misma página.",
+  academica: "Académica: preliminares, cuerpo y finales. El reglamento de la institución manda sobre este esquema.",
+  iso29148: "ISO/IEC/IEEE 29148 (basada en IEEE 830): requisitos verificables con ID único.",
+  rup: "RUP: fases Inicio, Elaboración, Construcción y Transición. Esqueleto del documento de arquitectura (SAD).",
+  up: "UP: mismo marco que RUP con menos artefactos obligatorios.",
+  scrum: "Scrum: documentación mínima y viva, por iteración.",
+  ninguna: "Estructura genérica, sin metodología formal."
+};
+const SIN_NUMERAR_BASE = ["control de versiones","portada","resumen","abstract","agradecimientos","dedicatoria","indice","indice general","indice de figuras","indice de tablas","lista de siglas y abreviaturas","glosario","referencias","bibliografia","anexos","apendices"];
+const NOTACIONES = {
+  "uml-casos": "UML casos de uso", "uml-clases": "UML clases", "uml-secuencia": "UML secuencia", "uml-actividad": "UML actividad",
+  "uml-componentes": "UML componentes/despliegue", "bpmn": "BPMN 2.0", "er": "Entidad-relación", "c4": "C4 (contexto)"
+};
+const DIAG_TITULO = {
+  "uml-casos": "diagrama de casos de uso", "uml-clases": "diagrama de clases", "uml-secuencia": "diagrama de secuencia",
+  "uml-actividad": "diagrama de actividad", "uml-componentes": "diagrama de componentes", "bpmn": "diagrama BPMN",
+  "er": "modelo entidad-relación", "c4": "diagrama de contexto C4"
+};
+const COLORES = [
+  ["primario", "Primario"], ["texto", "Texto"], ["secundario", "Texto secundario"], ["superficie", "Superficie"], ["borde", "Borde"],
+  ["info", "Nota"], ["info_fondo", "Nota · fondo"], ["exito", "Consejo"], ["exito_fondo", "Consejo · fondo"],
+  ["advertencia", "Advertencia"], ["advertencia_fondo", "Advertencia · fondo"], ["peligro", "Peligro"], ["peligro_fondo", "Peligro · fondo"]
+];
+const PALETA_BASE = {
+  primario: "#1F4E79", texto: "#1F2328", secundario: "#57606A", superficie: "#F6F8FA", borde: "#D0D7DE",
+  info: "#0969DA", info_fondo: "#DDF4FF", exito: "#1A7F37", exito_fondo: "#DAFBE1",
+  advertencia: "#9A6700", advertencia_fondo: "#FFF8C5", peligro: "#CF222E", peligro_fondo: "#FFEBE9"
+};
+const PRESETS = {
+  "digital": { f_titulos: "Inter", f_cuerpo: "Inter", f_codigo: "JetBrains Mono", d_cuerpo: 16, d_h1: 30, d_h2: 24, d_h3: 19, d_tabla: 14, d_codigo: 14.5, d_nota: 13, d_interlineado: 1.5, d_ancho: 720, alineacion: "izquierda", sangria: 0, peso_titulos: "600" },
+  "tesis": { f_titulos: "Times New Roman", f_cuerpo: "Times New Roman", f_codigo: "Consolas", p_cuerpo: 12, p_h1: 18, p_h2: 15, p_h3: 13, p_tabla: 10, p_codigo: 10, p_nota: 9, p_interlineado: 1.5, p_margen: 2.5, alineacion: "izquierda", sangria: 1.25, peso_titulos: "700" },
+  "manual-impreso": { f_titulos: "Source Sans 3", f_cuerpo: "Source Sans 3", f_codigo: "JetBrains Mono", p_cuerpo: 11, p_h1: 18, p_h2: 15, p_h3: 13, p_tabla: 10, p_codigo: 9.5, p_nota: 9, p_interlineado: 1.15, p_margen: 2.5, alineacion: "izquierda", sangria: 0, peso_titulos: "600" }
+};
+const REGLAS_TIPO = {
+  manual: [
+    "Imperativo con el tratamiento elegido; los títulos de tareas en infinitivo (\"Exportar un informe\").",
+    "Una acción por paso; si un paso tiene dos acciones, divídelo.",
+    "Describe la pantalla antes de la acción cuando el lector la ve por primera vez.",
+    "Los avisos van antes del paso al que se refieren.",
+    "Sin jerga: cada término técnico necesario se define en el glosario y en su primera aparición."
+  ],
+  tesis: [
+    "Pasado para métodos y resultados; presente para marco teórico, discusión y conclusiones.",
+    "Cautela cuando la evidencia no es concluyente (\"los resultados sugieren\").",
+    "Toda idea ajena lleva cita; cada cita está en la lista de referencias y viceversa.",
+    "Los objetivos empiezan con un verbo en infinitivo; cada objetivo específico corresponde a un capítulo o resultado."
+  ],
+  especificacion: [
+    "Forma: \"El sistema deberá [acción] [condición].\" Usa \"deberá\" (obligatorio) y \"debería\" (deseable).",
+    "Un requisito por enunciado, con ID único y estable: RF-001, RNF-001, RI-001.",
+    "Cada requisito es verificable; sin \"rápido\", \"adecuado\", \"amigable\", \"etc.\" ni \"según corresponda\".",
+    "Los atributos de calidad se cuantifican y cada requisito apunta a su origen y a su caso de prueba."
+  ],
+  informe: [
+    "Empieza por un resumen ejecutivo de media página: decisión, riesgo principal y próximo paso.",
+    "Cada cifra tiene fuente o se marca como estimación.",
+    "Cada decisión indica por qué se tomó y qué alternativa se descartó."
+  ],
+  arquitectura: [
+    "Cada decisión de arquitectura indica motivo, alternativas descartadas y consecuencias.",
+    "Los atributos de calidad se cuantifican.",
+    "Cada vista indica su notación y su leyenda."
+  ],
+  diagrama: [
+    "Etiquetas de hasta cuatro palabras; elementos como sustantivos, acciones en las flechas como verbos en infinitivo.",
+    "El pie de figura explica qué mira el lector; no repite el título."
+  ],
+  otro: []
+};
+const TIPO_NOMBRE = { manual: "manual de usuario", tesis: "tesis", especificacion: "especificación de requisitos", informe: "informe técnico", arquitectura: "documento de arquitectura", diagrama: "diagrama", otro: "documento" };
+const TIPO_CON_ARTICULO = { manual: "un manual de usuario", tesis: "una tesis", especificacion: "una especificación de requisitos", informe: "un informe técnico", arquitectura: "un documento de arquitectura", diagrama: "un diagrama", otro: "un documento" };
+const ROL = { manual: "redactor técnico", tesis: "asesor de tesis y redactor académico", especificacion: "analista de requisitos", informe: "redactor técnico", arquitectura: "arquitecto de software y redactor técnico", diagrama: "diseñador de diagramas técnicos", otro: "redactor técnico" };
+const GOOGLE = ["Inter","Source Sans 3","Roboto","Open Sans","Lato","IBM Plex Sans","Noto Sans","Merriweather","Source Serif 4","Lora","JetBrains Mono","Fira Code","IBM Plex Mono","Source Code Pro"];
+const SISTEMA = ["Arial","Calibri","Georgia","Times New Roman","Cambria","Consolas","Courier New","Segoe UI","Helvetica"];
+
+function esqueleto(m) { return ESQUELETOS[m] || ESQUELETOS.ninguna; }
+/* Propósito y subsecciones por capítulo: la metodología actual tiene prioridad sobre las demás. */
+function datosCapitulos() {
+  const otras = Object.entries(ESQUELETOS).filter(([m]) => m !== S.metodologia).flatMap(([, e]) => e);
+  return Object.fromEntries([...otras, ...esqueleto(S.metodologia)].map(e => [norm(e[0]), e]));
+}
+function sinNumerarDe(caps) { return caps.filter(c => SIN_NUMERAR_BASE.includes(norm(c))); }
+
+const DEF = {
+  documento: "Manual de usuario del Sistema de Gestión", version: "1.0", tipo: "manual", metodologia: "diataxis",
+  audiencia: "no técnica", medio: "digital", formato: "markdown", salida: "docs/manual/", ubicacion_prompt: "proyecto",
+  estructura: esqueleto("diataxis").map(e => e[0]).join("\n"),
+  sin_numerar: sinNumerarDe(esqueleto("diataxis").map(e => e[0])).join("\n"),
+  componentes: ["tablas", "figuras", "avisos", "pasos", "codigo", "glosario"],
+  avisos: ["nota", "consejo", "advertencia", "peligro"],
+  diataxis: ["tutorial", "guia", "referencia", "explicacion"],
+  pasos_resultado: true, capturas_borde: true, capturas_marcadores: true,
+  notaciones: ["uml-casos", "uml-actividad"], diag_herramienta: "mermaid", diag_formato: "svg", diag_direccion: "LR", diag_max: 12, diag_vista: "",
+  f_titulos: "Inter", f_cuerpo: "Inter", f_codigo: "JetBrains Mono",
+  d_cuerpo: 16, d_h1: 30, d_h2: 24, d_h3: 19, d_tabla: 14, d_codigo: 14.5, d_nota: 13, d_interlineado: 1.5, d_ancho: 720,
+  p_cuerpo: 11, p_h1: 18, p_h2: 15, p_h3: 13, p_tabla: 10, p_codigo: 9.5, p_nota: 9, p_interlineado: 1.15, p_margen: 2.5, p_papel: "A4",
+  peso_titulos: "600", alineacion: "izquierda", sangria: 0,
+  colores: Object.assign({}, PALETA_BASE),
+  variante: "neutro", tratamiento: "usted", citas: "apa7", comillas: "dobles", reglamento: "",
+  decimal: "coma", miles: "espacio", fecha: "dd/mm/aaaa", pct_espacio: true, max_palabras: 25,
+  siglas: "URL\nPDF", terminos: "", restricciones: "", criterios: "",
+  alcance: "agente", modo: "digital", estructura_editada: false
+};
+const CLAVE = "configurador-estilo-documentacion-v1";
+let S = cargar();
+
+/* ---------- Utilidades ---------- */
+function norm(t) { return String(t).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " "); }
+function esc(t) { return String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function lineas(t) { return String(t || "").split("\n").map(s => s.trim()).filter(Boolean); }
+function cargar() {
+  let guardado = null;
+  try { guardado = JSON.parse(localStorage.getItem(CLAVE) || "null"); } catch (e) { guardado = null; }
+  return combinar(guardado);
+}
+function combinar(o) {
+  const r = JSON.parse(JSON.stringify(DEF));
+  if (o && typeof o === "object") {
+    for (const k of Object.keys(r)) if (k in o) r[k] = o[k];
+    r.colores = Object.assign({}, PALETA_BASE, o.colores || {});
+  }
+  return r;
+}
+function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch (e) { /* sin almacenamiento */ } }
+function aviso(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("ver"); clearTimeout(aviso.t); aviso.t = setTimeout(() => t.classList.remove("ver"), 1800); }
+
+function lum(hex) {
+  const h = hex.replace("#", ""); const c = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255)
+    .map(x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function contraste(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+function fmtRatio(r) { return (S.decimal === "coma" ? r.toFixed(1).replace(".", ",") : r.toFixed(1)) + " : 1"; }
+
+function num(n, dec) {
+  const [ent, fr] = Number(n).toFixed(dec || 0).split(".");
+  const sepM = { espacio: "\u202F", punto: ".", coma: ",", ninguno: "" }[S.miles];
+  const e = ent.length > 4 && sepM ? ent.replace(/\B(?=(\d{3})+(?!\d))/g, sepM) : ent;
+  return fr ? e + (S.decimal === "coma" ? "," : ".") + fr : e;
+}
+function pct(n, dec) { return num(n, dec) + (S.pct_espacio ? "\u00A0%" : "%"); }
+function q(t) { const [a, b] = { dobles: ["“", "”"], angulares: ["«", "»"], rectas: ['"', '"'] }[S.comillas]; return a + t + b; }
+function hoy() {
+  const d = new Date(); const dd = String(d.getDate()).padStart(2, "0"), mm = String(d.getMonth() + 1).padStart(2, "0"), y = d.getFullYear();
+  return S.fecha === "aaaa-mm-dd" ? `${y}-${mm}-${dd}` : `${dd}/${mm}/${y}`;
+}
+const VERBOS = {
+  seleccionar: { usted: "Seleccione", "tú": "Selecciona", vos: "Seleccioná", impersonal: "Seleccionar" },
+  escribir: { usted: "Escriba", "tú": "Escribe", vos: "Escribí", impersonal: "Escribir" },
+  clic: { usted: "Haga clic", "tú": "Haz clic", vos: "Hacé clic", impersonal: "Hacer clic" },
+  usar: { usted: "Use", "tú": "Usa", vos: "Usá", impersonal: "Se puede usar" },
+  cerrar: { usted: "cierra", "tú": "cierras", vos: "cerrás", impersonal: "se cierra" }
+};
+function v(k) { return VERBOS[k][S.tratamiento]; }
+function cita() { return { apa7: "(García y Pérez, 2021)", ieee: "[1]", iso690: "(García y Pérez 2021)", vancouver: "(1)", institucional: "[cita según el reglamento]", ninguna: "" }[S.citas]; }
+function referencia() {
+  return {
+    apa7: "García, A. y Pérez, L. (2021). <i>Título del libro de ejemplo</i>. Editorial Ejemplo.",
+    ieee: "[1] A. García y L. Pérez, <i>Título del libro de ejemplo</i>. Ciudad: Editorial Ejemplo, 2021.",
+    iso690: "GARCÍA, Ana y PÉREZ, Luis, 2021. <i>Título del libro de ejemplo</i>. Ciudad: Editorial Ejemplo.",
+    vancouver: "1. García A, Pérez L. Título del libro de ejemplo. Ciudad: Editorial Ejemplo; 2021.",
+    institucional: "[Formato según el reglamento institucional]", ninguna: ""
+  }[S.citas];
+}
+const FUENTES_CARGADAS = new Set();
+function cargarFuente(nombre) {
+  const n = String(nombre || "").trim();
+  if (!n || FUENTES_CARGADAS.has(n) || SISTEMA.some(s => norm(s) === norm(n))) return;
+  FUENTES_CARGADAS.add(n);
+  const l = document.createElement("link"); l.rel = "stylesheet";
+  l.href = "https://fonts.googleapis.com/css2?family=" + encodeURIComponent(n).replace(/%20/g, "+") + ":wght@400;600;700&display=swap";
+  document.head.appendChild(l);
+}
+function pila(n, tipo) {
+  const resto = tipo === "mono" ? 'Consolas, "Courier New", monospace' : tipo === "serif" ? 'Georgia, "Times New Roman", serif' : 'Arial, Helvetica, sans-serif';
+  return `"${String(n).replace(/"/g, "")}", ${resto}`;
+}
+function esSerif(n) { return /serif 4|merriweather|lora|georgia|times|cambria/i.test(n) && !/sans/i.test(n); }
+
+/* ---------- Formulario ---------- */
+const form = document.getElementById("form");
+function pintarFormulario() {
+  form.querySelectorAll("[data-k]").forEach(el => {
+    const k = el.dataset.k; if (!(k in S)) return;
+    if (el.type === "checkbox") el.checked = !!S[k]; else el.value = S[k];
+  });
+  document.querySelectorAll("[data-k=alcance]").forEach(el => el.value = S.alcance);
+  form.querySelectorAll("[data-grupo]").forEach(g => {
+    const lista = S[g.dataset.grupo] || [];
+    g.querySelectorAll("input[type=checkbox]").forEach(c => c.checked = lista.includes(c.value));
+  });
+  const cont = document.getElementById("colores");
+  cont.innerHTML = COLORES.map(([k, n]) => `<label class="color"><input type="color" data-color="${k}" value="${S.colores[k]}"><span>${n}<br><code>${S.colores[k].toUpperCase()}</code></span></label>`).join("");
+  pintarSelectorDiagrama();
+}
+function pintarSelectorDiagrama() {
+  const sel = document.getElementById("diag-vista");
+  const lista = S.notaciones.length ? S.notaciones : [];
+  sel.innerHTML = lista.length ? lista.map(n => `<option value="${n}">${NOTACIONES[n]}</option>`).join("") : `<option value="">Ninguna seleccionada</option>`;
+  if (!lista.includes(S.diag_vista)) S.diag_vista = lista[0] || "";
+  sel.value = S.diag_vista;
+}
+form.addEventListener("input", e => {
+  const el = e.target;
+  if (el.dataset.k) {
+    const k = el.dataset.k;
+    if (el.type === "checkbox") S[k] = el.checked;
+    else if (el.type === "number") S[k] = el.value === "" ? "" : Number(el.value);
+    else S[k] = el.value;
+    if (k === "estructura") S.estructura_editada = true;
+    if (k === "metodologia") cambiarMetodologia();
+    if (k === "medio" && S.medio !== "ambos") S.modo = S.medio;
+  } else if (el.closest("[data-grupo]")) {
+    const g = el.closest("[data-grupo]");
+    S[g.dataset.grupo] = [...g.querySelectorAll("input:checked")].map(c => c.value);
+    if (g.dataset.grupo === "notaciones") pintarSelectorDiagrama();
+  } else if (el.dataset.color) {
+    S.colores[el.dataset.color] = el.value;
+    el.parentElement.querySelector("code").textContent = el.value.toUpperCase();
+  } else if (el.id === "diag-vista") {
+    S.diag_vista = el.value;
+  }
+  actualizar();
+});
+form.addEventListener("change", e => { if (e.target.id === "diag-vista") { S.diag_vista = e.target.value; actualizar(); } });
+document.querySelector("[data-k=alcance]").addEventListener("change", e => { S.alcance = e.target.value; actualizar(); });
+
+function cargarEsqueleto() {
+  const caps = esqueleto(S.metodologia).map(e => e[0]);
+  S.estructura = caps.join("\n"); S.sin_numerar = sinNumerarDe(caps).join("\n"); S.estructura_editada = false;
+}
+function cambiarMetodologia() {
+  if (!S.estructura_editada || confirm("¿Reemplazar los capítulos por el esqueleto de la nueva metodología? Se perderán tus cambios en la estructura.")) {
+    cargarEsqueleto(); pintarFormulario();
+  }
+}
+document.getElementById("esqueleto").addEventListener("click", () => { cargarEsqueleto(); pintarFormulario(); actualizar(); aviso("Esqueleto cargado"); });
+document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => {
+  Object.assign(S, PRESETS[b.dataset.preset]);
+  if (b.dataset.preset !== "digital" && S.medio === "digital") { S.modo = "impreso"; }
+  if (b.dataset.preset === "digital") S.modo = "digital";
+  pintarFormulario(); actualizar(); aviso("Preajuste aplicado: puedes ajustar cada valor");
+}));
+document.getElementById("paleta-base").addEventListener("click", () => { S.colores = Object.assign({}, PALETA_BASE); pintarFormulario(); actualizar(); });
+document.getElementById("restablecer").addEventListener("click", () => {
+  if (!confirm("¿Restablecer todos los valores a la configuración inicial?")) return;
+  S = combinar(null); pintarFormulario(); actualizar();
+});
+document.querySelectorAll("#modo button").forEach(b => b.addEventListener("click", () => { S.modo = b.dataset.modo; actualizar(); }));
+
+/* Pestañas */
+const TABS = ["vista", "prompt", "memoria"];
+TABS.forEach(id => document.getElementById("t-" + id).addEventListener("click", () => {
+  TABS.forEach(o => {
+    document.getElementById("t-" + o).setAttribute("aria-selected", String(o === id));
+    document.getElementById("p-" + o).hidden = o !== id;
+  });
+  document.getElementById("modo").style.visibility = id === "vista" ? "visible" : "hidden";
+  if (id === "vista") escalarHoja();
+}));
+
+/* ---------- Diagrama SVG ---------- */
+function diagramaSVG(notacion, c, fuente) {
+  const P = c.primario, T = c.texto, Sx = c.secundario, B = c.borde, SUP = c.superficie;
+  const lr = S.diag_direccion !== "TB";
+  const font = `font-family='${fuente.replace(/'/g, "")}' font-size='13'`;
+  const flecha = `<defs><marker id='fl' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='${T}'/></marker></defs>`;
+  let w, h, cuerpo = "", leyenda;
+  if (notacion === "uml-casos") {
+    w = 460; h = 220;
+    cuerpo += `<rect x='150' y='12' width='290' height='196' rx='4' fill='none' stroke='${P}' stroke-width='1.5'/><text x='295' y='32' text-anchor='middle' ${font} fill='${P}' font-weight='600'>SGA</text>`;
+    cuerpo += `<g stroke='${T}' stroke-width='1.6' fill='none'><circle cx='60' cy='86' r='11'/><line x1='60' y1='97' x2='60' y2='135'/><line x1='38' y1='112' x2='82' y2='112'/><line x1='60' y1='135' x2='42' y2='162'/><line x1='60' y1='135' x2='78' y2='162'/></g><text x='60' y='182' text-anchor='middle' ${font} fill='${T}'>Docente</text>`;
+    cuerpo += `<ellipse cx='295' cy='80' rx='92' ry='24' fill='${SUP}' stroke='${P}' stroke-width='1.5'/><text x='295' y='85' text-anchor='middle' ${font} fill='${T}'>Crear curso</text>`;
+    cuerpo += `<ellipse cx='295' cy='155' rx='92' ry='24' fill='${SUP}' stroke='${P}' stroke-width='1.5'/><text x='295' y='160' text-anchor='middle' ${font} fill='${T}'>Exportar notas</text>`;
+    cuerpo += `<line x1='84' y1='110' x2='203' y2='84' stroke='${T}'/><line x1='84' y1='118' x2='203' y2='151' stroke='${T}'/>`;
+    leyenda = [["Actor", T, "actor"], ["Caso de uso", P, "elipse"], ["Límite del sistema", P, "borde"]];
+  } else if (notacion === "uml-secuencia") {
+    w = 460; h = 230; const xs = [70, 230, 390], ns = ["Docente", "SGA", "Base de datos"];
+    xs.forEach((x, i) => { cuerpo += `<rect x='${x - 58}' y='10' width='116' height='32' rx='3' fill='${i === 1 ? P : SUP}' stroke='${i === 1 ? P : Sx}'/><text x='${x}' y='31' text-anchor='middle' ${font} fill='${i === 1 ? "#fff" : T}'>${ns[i]}</text><line x1='${x}' y1='42' x2='${x}' y2='220' stroke='${Sx}' stroke-dasharray='4 4'/>`; });
+    const msgs = [[0, 1, 80, "exportar notas"], [1, 2, 120, "consultar notas"], [2, 1, 160, "notas", true], [1, 0, 200, "archivo PDF", true]];
+    msgs.forEach(([a, b, y, t, ret]) => { cuerpo += `<line x1='${xs[a]}' y1='${y}' x2='${xs[b] + (b > a ? -2 : 2)}' y2='${y}' stroke='${T}' ${ret ? "stroke-dasharray='5 4'" : ""} marker-end='url(#fl)'/><text x='${(xs[a] + xs[b]) / 2}' y='${y - 6}' text-anchor='middle' ${font} fill='${T}'>${t}</text>`; });
+    leyenda = [["Sistema propio", P, "caja"], ["Participante", Sx, "caja"], ["Respuesta", T, "discontinua"]];
+  } else {
+    const nodos = {
+      "uml-actividad": [["inicio"], ["Cargar notas", "redondo"], ["Revisar notas", "redondo"], ["Publicar notas", "redondo"], ["fin"]],
+      "bpmn": [["inicio"], ["Cargar notas", "redondo"], ["Aprobar notas", "redondo"], ["fin"]],
+      "c4": [["Docente", "persona"], ["SGA", "sistema"], ["Servicio de correo", "externo"]],
+      "er": [["Estudiante", "entidad"], ["Inscripción", "entidad"], ["Curso", "entidad"]],
+      "uml-clases": [["Curso|nombre: texto|inscribir()", "clase"], ["Inscripción|fecha: fecha|anular()", "clase"], ["Estudiante|legajo: texto|inscribirse()", "clase"]],
+      "uml-componentes": [["Aplicación web", "componente"], ["API", "componente"], ["Base de datos", "externo"]]
+    }[notacion] || [["Paso A", "caja"], ["Paso B", "caja"], ["Paso C", "caja"]];
+    const etiquetas = { "c4": ["usa", "notifica"], "er": ["1 : N", "N : 1"], "uml-clases": ["1  0..*", "0..*  1"], "uml-componentes": ["HTTPS", "SQL"] }[notacion] || [];
+    const ancho = 150, alto = notacion === "uml-clases" ? 86 : 54, paso = lr ? 225 : (alto + 52);
+    const n = nodos.length;
+    const tam = (k) => k === "inicio" || k === "fin" ? 30 : null;
+    w = lr ? 40 + (n - 1) * paso + ancho : 360; h = lr ? alto + 70 : 40 + (n - 1) * paso + alto;
+    const centros = nodos.map((nd, i) => lr ? [20 + ancho / 2 + i * paso, 26 + alto / 2] : [w / 2, 20 + alto / 2 + i * paso]);
+    for (let i = 0; i < n - 1; i++) {
+      const [x1, y1] = centros[i], [x2, y2] = centros[i + 1];
+      const r1 = tam(nodos[i][0]) ? 15 : (lr ? ancho / 2 : alto / 2), r2 = tam(nodos[i + 1][0]) ? 15 : (lr ? ancho / 2 : alto / 2);
+      const a = lr ? [x1 + r1, y1, x2 - r2 - 2, y2] : [x1, y1 + r1, x2, y2 - r2 - 2];
+      cuerpo += `<line x1='${a[0]}' y1='${a[1]}' x2='${a[2]}' y2='${a[3]}' stroke='${T}' stroke-width='1.4' marker-end='url(#fl)'/>`;
+      if (etiquetas[i]) cuerpo += `<text x='${(a[0] + a[2]) / 2 + (lr ? 0 : 8)}' y='${(a[1] + a[3]) / 2 - (lr ? 7 : 0)}' text-anchor='${lr ? "middle" : "start"}' ${font} fill='${Sx}'>${etiquetas[i]}</text>`;
+    }
+    nodos.forEach(([txt, k], i) => {
+      const [cx, cy] = centros[i];
+      if (txt === "inicio") { cuerpo += `<circle cx='${cx}' cy='${cy}' r='14' fill='${notacion === "bpmn" ? "#fff" : T}' stroke='${T}' stroke-width='1.6'/>`; return; }
+      if (txt === "fin") { cuerpo += notacion === "bpmn" ? `<circle cx='${cx}' cy='${cy}' r='14' fill='#fff' stroke='${T}' stroke-width='3.5'/>` : `<circle cx='${cx}' cy='${cy}' r='14' fill='#fff' stroke='${T}' stroke-width='1.6'/><circle cx='${cx}' cy='${cy}' r='8' fill='${T}'/>`; return; }
+      const x = cx - ancho / 2, y = cy - alto / 2, ext = k === "externo" || k === "persona";
+      const relleno = k === "sistema" ? P : (ext ? Sx : SUP), trazo = ext ? Sx : P, colorTxt = (k === "sistema" || ext) ? "#fff" : T;
+      const rx = k === "redondo" ? 14 : k === "persona" ? 22 : 4;
+      cuerpo += `<rect x='${x}' y='${y}' width='${ancho}' height='${alto}' rx='${rx}' fill='${relleno}' stroke='${trazo}' stroke-width='1.5'/>`;
+      if (k === "clase") {
+        const [nom, at, op] = txt.split("|");
+        cuerpo += `<text x='${cx}' y='${y + 19}' text-anchor='middle' ${font} font-weight='700' fill='${T}'>${nom}</text><line x1='${x}' y1='${y + 28}' x2='${x + ancho}' y2='${y + 28}' stroke='${P}'/><text x='${x + 8}' y='${y + 47}' ${font} fill='${T}'>${at}</text><line x1='${x}' y1='${y + 57}' x2='${x + ancho}' y2='${y + 57}' stroke='${P}'/><text x='${x + 8}' y='${y + 76}' ${font} fill='${T}'>${op}</text>`;
+      } else {
+        cuerpo += `<text x='${cx}' y='${cy + 5}' text-anchor='middle' ${font} fill='${colorTxt}' ${k === "entidad" ? "font-weight='700'" : ""}>${txt}</text>`;
+        if (k === "componente") cuerpo += `<rect x='${x + ancho - 22}' y='${y + 7}' width='13' height='15' fill='none' stroke='${P}'/><rect x='${x + ancho - 26}' y='${y + 10}' width='8' height='3' fill='${SUP}' stroke='${P}'/><rect x='${x + ancho - 26}' y='${y + 16}' width='8' height='3' fill='${SUP}' stroke='${P}'/>`;
+      }
+    });
+    leyenda = notacion === "c4" || notacion === "uml-componentes"
+      ? [["Sistema propio", P, "caja"], ["Externo", Sx, "caja"]]
+      : notacion === "bpmn" || notacion === "uml-actividad"
+        ? [["Inicio / fin", T, "circulo"], ["Actividad", P, "caja"]]
+        : [["Elemento", P, "caja"], ["Relación", T, "linea"]];
+  }
+  const leyendaSVG = leyenda.map(([t, col, f], i) => {
+    const x = 10 + i * 150, y = h + 18;
+    const icono = f === "linea" || f === "discontinua" ? `<line x1='${x}' y1='${y - 4}' x2='${x + 18}' y2='${y - 4}' stroke='${col}' stroke-width='1.6' ${f === "discontinua" ? "stroke-dasharray='4 3'" : ""}/>`
+      : f === "circulo" || f === "actor" ? `<circle cx='${x + 8}' cy='${y - 4}' r='6' fill='none' stroke='${col}' stroke-width='1.6'/>`
+      : f === "elipse" ? `<ellipse cx='${x + 9}' cy='${y - 4}' rx='9' ry='5' fill='${SUP}' stroke='${col}'/>`
+      : f === "borde" ? `<rect x='${x}' y='${y - 10}' width='18' height='12' fill='none' stroke='${col}'/>`
+      : `<rect x='${x}' y='${y - 10}' width='18' height='12' rx='2' fill='${col}'/>`;
+    return icono + `<text x='${x + 26}' y='${y}' ${font} font-size='12' fill='${Sx}'>${t}</text>`;
+  }).join("");
+  const W = Math.max(w, leyenda.length * 150 + 10), H = h + 30;
+  return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${H}' width='${W}' role='img' aria-label='Diagrama de ejemplo: ${NOTACIONES[notacion] || ""}'>${flecha}${cuerpo}<line x1='0' y1='${h + 2}' x2='${W}' y2='${h + 2}' stroke='${B}'/>${leyendaSVG}</svg>`;
+}
+
+/* ---------- Vista previa ---------- */
+function vistaPrevia() {
+  const doc = document.getElementById("doc");
+  const impreso = S.modo === "impreso";
+  const c = S.colores, comp = new Set(S.componentes);
+  [S.f_titulos, S.f_cuerpo, S.f_codigo].forEach(cargarFuente);
+  const u = impreso ? "pt" : "px";
+  const t = k => (impreso ? S["p_" + k] : S["d_" + k]) + u;
+  const fT = pila(S.f_titulos, esSerif(S.f_titulos) ? "serif" : "sans"), fC = pila(S.f_cuerpo, esSerif(S.f_cuerpo) ? "serif" : "sans"), fM = pila(S.f_codigo, "mono");
+  const vars = { "--p": c.primario, "--t": c.texto, "--s": c.secundario, "--sup": c.superficie, "--b": c.borde, "--info": c.info, "--info-f": c.info_fondo, "--exito": c.exito, "--exito-f": c.exito_fondo, "--adv": c.advertencia, "--adv-f": c.advertencia_fondo, "--pel": c.peligro, "--pel-f": c.peligro_fondo };
+  doc.className = "doc " + (impreso ? "impreso" : "digital");
+  Object.entries(vars).forEach(([k, val]) => doc.style.setProperty(k, val));
+  doc.style.fontFamily = fC; doc.style.fontSize = t("cuerpo"); doc.style.lineHeight = impreso ? S.p_interlineado : S.d_interlineado;
+  doc.style.textAlign = "left";
+  if (impreso) {
+    const papel = S.p_papel === "Carta" ? [215.9, 279.4] : [210, 297];
+    doc.style.width = papel[0] + "mm"; doc.style.minHeight = papel[1] + "mm"; doc.style.padding = S.p_margen + "cm"; doc.style.maxWidth = "none";
+  } else {
+    doc.style.width = "auto"; doc.style.minHeight = "0"; doc.style.padding = ""; doc.style.maxWidth = (Number(S.d_ancho) + 64) + "px"; doc.style.transform = "";
+  }
+  const pStyle = `text-align:${S.alineacion === "justificado" ? "justify" : "left"};${impreso && Number(S.sangria) > 0 ? `text-indent:${S.sangria}cm;` : ""}`;
+  const hStyle = n => `font-family:${esc(fT)};font-size:${t("h" + n)};font-weight:${S.peso_titulos}`;
+  const capStyle = `font-size:${t("tabla")}`, notaStyle = `font-size:${t("nota")}`;
+  const sinNum = new Set(lineas(S.sin_numerar).map(norm));
+  const caps = lineas(S.estructura);
+  const datos = datosCapitulos();
+  let html = `<div class="portada"><h1 style="${hStyle(1)};font-size:calc(${t("h1")} * 1.2)">${esc(S.documento || "Documento sin título")}</h1><p style="${notaStyle}">Versión ${esc(S.version)} · ${hoy()} · ${esc(TIPO_NOMBRE[S.tipo])}</p></div>`;
+  let nCap = 0, nTab = 0, nFig = 0, numerados = 0;
+  const P = (txt) => `<p style="${pStyle}">${txt}</p>`;
+  const leyendaTabla = (titulo) => `<p class="leyenda" style="${capStyle}"><b>Tabla ${++nTab}.</b> ${titulo}</p>`;
+  const leyendaFigura = (titulo) => `<p class="leyenda" style="${capStyle}"><b>Figura ${++nFig}.</b> ${titulo}</p><p class="fuente" style="${notaStyle}">Fuente: elaboración propia.</p>`;
+  const sigla = "Sistema de gestión de aprendizaje (SGA)";
+  const ref = cita();
+  const avisosTxt = {
+    nota: `El asistente guarda un borrador cada ${num(5)} minutos.`,
+    consejo: `${v("usar")} <kbd>Ctrl</kbd> + <kbd>S</kbd> para guardar sin salir.`,
+    advertencia: `Si ${S.tratamiento === "impersonal" ? "se cierra" : v("cerrar")} la ventana sin guardar, se pierden los cambios.`,
+    peligro: "Eliminar un proyecto borra sus archivos y no se puede deshacer."
+  };
+  const ICONO = { nota: "ℹ", consejo: "✔", advertencia: "⚠", peligro: "✖" }, ETQ = { nota: "Nota", consejo: "Consejo", advertencia: "Advertencia", peligro: "Peligro" };
+
+  caps.forEach(cap => {
+    const k = norm(cap), numerado = !sinNum.has(k);
+    const info = datos[k];
+    if (numerado) { nCap++; numerados++; }
+    const titulo = (numerado ? nCap + " " : "") + esc(cap);
+    html += `<h1 style="${hStyle(1)}">${titulo}</h1>`;
+    const subs = (info && info[2]) || [];
+    if (k === "control de versiones") {
+      html += leyendaTabla("Historial de cambios");
+      html += `<table style="${capStyle}"><thead><tr><th>Versión</th><th>Fecha</th><th>Autor</th><th>Descripción del cambio</th></tr></thead><tbody><tr><td>0.1</td><td>${hoy()}</td><td><span class="pendiente">[PENDIENTE: autor]</span></td><td>Borrador inicial</td></tr></tbody></table><p class="fuente" style="${notaStyle}">Fuente: elaboración propia.</p>`;
+      return;
+    }
+    if (numerado && numerados === 1) {
+      html += P(`${S.tratamiento === "impersonal" ? "En este documento se describe" : "Este documento describe"} el ${sigla}. Está dirigido a una audiencia ${esc(S.audiencia)}. Durante el último trimestre, el sistema atendió a ${num(12500)} usuarios, con una tasa de error del ${pct(3.5, 1)}${ref ? " " + ref : ""}.`);
+      html += P(`Según la guía institucional, ${q("la documentación debe poder verificarse")}${ref ? " " + ref : ""}.`);
+      if (subs[0]) html += `<h2 style="${hStyle(2)}">${nCap}.1 ${esc(subs[0])}</h2>` + P(`<span class="proposito">${esc(info[1])}.</span>`);
+      if (subs[1]) html += `<h3 style="${hStyle(3)}">${nCap}.1.1 ${esc(subs[1])}</h3>` + P(`Contenido de ejemplo con una idea por párrafo y oraciones de hasta ${S.max_palabras} palabras.`);
+      if (comp.has("avisos")) S.avisos.forEach(a => { html += `<div class="aviso ${a}"><b>${ICONO[a]} ${ETQ[a]}.</b>${avisosTxt[a]}</div>`; });
+      if (comp.has("ecuaciones")) html += `<div class="ecuacion"><span>T = n / t</span><span>(1)</span></div>` + P(`Donde <i>n</i> es la cantidad de solicitudes y <i>t</i> el tiempo en segundos (ecuación (1)).`);
+      return;
+    }
+    if (numerado && numerados === 2) {
+      if (subs[0]) html += `<h2 style="${hStyle(2)}">${nCap}.1 ${esc(subs[0])}</h2>`;
+      if (comp.has("pasos")) {
+        const res = S.pasos_resultado;
+        html += `<ol class="pasos"><li>${v("seleccionar")} <b>Archivo</b> &gt; <b>Nuevo proyecto</b>.${res ? `<span class="resultado">→ Se abre el asistente de creación.</span>` : ""}</li><li>${v("escribir")} un nombre en el campo <b>Nombre del proyecto</b>.</li><li>${v("clic")} en <b>Guardar</b>.${res ? `<span class="resultado">→ El proyecto aparece en la lista.</span>` : ""}</li></ol>`;
+      }
+      if (comp.has("figuras")) {
+        const mk = S.capturas_marcadores ? ` <span class="marcador">1</span>` : "";
+        html += P(`En la Figura ${nFig + 1} se muestra el asistente de creación.`);
+        html += `<div class="figura"><div class="captura" style="${S.capturas_borde ? "" : "border-color:transparent"};${capStyle}"><div class="barra">Nuevo proyecto</div><div class="contenido"><span class="campo-falso">Nombre del proyecto</span><span class="btn">Guardar</span>${mk}</div></div></div>`;
+        html += leyendaFigura("Asistente de creación de proyectos");
+      }
+      if (!comp.has("pasos") && !comp.has("figuras") && !comp.has("codigo")) html += P(`<span class="proposito">${info ? esc(info[1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
+      if (comp.has("codigo")) html += `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">bash</span>sga exportar --formato pdf --salida informes/</pre>`;
+      return;
+    }
+    if (numerado && numerados === 3) {
+      let extra = "";
+      if (S.diag_vista) {
+        const dt = DIAG_TITULO[S.diag_vista];
+        extra += P(`En la Figura ${nFig + 1} se muestra el ${dt} del módulo de cursos.`);
+        extra += `<div class="figura">${diagramaSVG(S.diag_vista, c, S.f_cuerpo)}</div>` + leyendaFigura(`${dt[0].toUpperCase() + dt.slice(1)} del módulo de cursos`);
+      }
+      if (comp.has("tablas") || comp.has("requisitos")) {
+        extra += P(`En la Tabla ${nTab + 1} se ${comp.has("requisitos") ? "listan los requisitos funcionales" : "comparan los tiempos de respuesta"}.`);
+        if (comp.has("requisitos")) {
+          extra += leyendaTabla("Requisitos funcionales del módulo de cursos") + `<table style="${capStyle}"><thead><tr><th>ID</th><th>Requisito</th><th>Prioridad</th></tr></thead><tbody><tr><td>RF-001</td><td>El sistema deberá exportar las notas en PDF.</td><td>Alta</td></tr><tr><td>RF-002</td><td>El docente deberá poder anular una inscripción.</td><td>Media</td></tr></tbody></table>`;
+        } else {
+          extra += leyendaTabla("Tiempo de respuesta por operación") + `<table style="${capStyle}"><thead><tr><th>Operación</th><th class="num">Solicitudes</th><th class="num">Tiempo medio (ms)</th></tr></thead><tbody><tr><td>Crear curso</td><td class="num">${num(12500)}</td><td class="num">${num(182.4, 1)}</td></tr><tr><td>Exportar notas</td><td class="num">${num(3210)}</td><td class="num">${num(1045.7, 1)}</td></tr></tbody></table>`;
+        }
+        extra += `<p class="fuente" style="${notaStyle}">Fuente: elaboración propia (datos de ejemplo).</p>`;
+      }
+      if (comp.has("historias")) extra += P(`<b>HU-01.</b> Como docente, quiero exportar las notas, para compartirlas con la secretaría.`) + `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">gherkin</span>Dado que el docente tiene una sesión iniciada\nCuando selecciona "Exportar"\nEntonces se descarga un archivo PDF con las notas</pre>`;
+      html += extra || P(`<span class="proposito">${info ? esc(info[1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
+      return;
+    }
+    if (k === "glosario" && comp.has("glosario")) { html += `<dl><div><dt>Curso:</dt> <dd>conjunto de clases con un docente responsable.</dd></div><div><dt>Inscripción:</dt> <dd>vínculo entre un estudiante y un curso.</dd></div></dl>`; return; }
+    if ((k === "referencias" || k === "bibliografia") && S.citas !== "ninguna") { html += `<p style="padding-left:1.25em;text-indent:-1.25em">${referencia()}</p><p class="ficticio">Referencia ficticia, solo para mostrar el formato.</p>`; return; }
+    html += P(`<span class="proposito">${info ? esc(info[1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
+  });
+  if (!caps.length) html += P(`<span class="sin-contenido">Agrega capítulos en "Estructura" para ver la vista previa.</span>`);
+  doc.innerHTML = html;
+  escalarHoja();
+}
+function escalarHoja() {
+  const doc = document.getElementById("doc"), marco = document.getElementById("marco"), lienzo = document.getElementById("lienzo");
+  if (S.modo !== "impreso") { marco.style.height = ""; marco.style.width = ""; doc.style.transform = ""; return; }
+  doc.style.transform = "";
+  const disponible = lienzo.clientWidth - 40, ancho = doc.offsetWidth;
+  if (!ancho) return;
+  const e = Math.min(1, disponible / ancho);
+  doc.style.transform = `scale(${e})`;
+  marco.style.width = ancho * e + "px"; marco.style.height = doc.offsetHeight * e + "px";
+}
+window.addEventListener("resize", escalarHoja);
+
+/* ---------- Contraste ---------- */
+function pintarContraste() {
+  const c = S.colores, pares = [
+    ["Texto / blanco", c.texto, "#FFFFFF"], ["Secundario / blanco", c.secundario, "#FFFFFF"], ["Primario / blanco", c.primario, "#FFFFFF"],
+    ["Texto / superficie", c.texto, c.superficie], ["Nota", c.info, c.info_fondo], ["Consejo", c.exito, c.exito_fondo],
+    ["Advertencia", c.advertencia, c.advertencia_fondo], ["Peligro", c.peligro, c.peligro_fondo]
+  ];
+  document.getElementById("contraste").innerHTML = pares.map(([n, a, b]) => {
+    const r = contraste(a, b), ok = r >= 4.5;
+    return `<div><span>${n}</span><span class="badge ${ok ? "ok" : "mal"}">${fmtRatio(r)} ${ok ? "✔ AA" : "✖ no cumple"}</span></div>`;
+  }).join("");
+}
+
+/* ---------- Prompt ---------- */
+function y(v) { return JSON.stringify(String(v)); }
+function lista(clave, items) { return items.length ? `${clave}:\n` + items.map(i => `  - ${/^[\wÀ-ÿ][\wÀ-ÿ .()/,-]*$/.test(i) ? i : y(i)}`).join("\n") : `${clave}: []`; }
+function generarPrompt() {
+  const caps = lineas(S.estructura), sinNum = lineas(S.sin_numerar), siglas = lineas(S.siglas), comp = new Set(S.componentes);
+  const datos = datosCapitulos();
+  const medios = S.medio === "ambos" ? ["digital", "impreso"] : [S.medio];
+  const rutaPrompt = S.ubicacion_prompt === "documento" ? S.salida.replace(/\/?$/, "/") + "prompt-estilo.md" : "docs/prompt-estilo.md";
+  const fm = [
+    "---",
+    "# Generado con el configurador de estilo (assets/configurador.html).",
+    `documento: ${y(S.documento)}`, `version: ${y(S.version)}`, `tipo: ${S.tipo}`, `metodologia: ${S.metodologia}`,
+    `audiencia: ${y(S.audiencia)}`, `medio: ${S.medio}`, `variante: ${S.variante}`, `tratamiento: ${S.tratamiento}`,
+    `citas: ${S.citas}`, `comillas: ${S.comillas}`, `decimal: ${S.decimal}`, `miles: ${S.miles}`,
+    `porcentaje_con_espacio: ${S.pct_espacio ? "si" : "no"}`, `formato_fecha: ${y(S.fecha)}`, `max_palabras_oracion: ${S.max_palabras}`,
+    `formato: ${S.formato}`, `salida: ${y(S.salida)}`, `prompt: ${y(rutaPrompt)}`,
+    `fuente_titulos: ${y(S.f_titulos)}`, `fuente_cuerpo: ${y(S.f_cuerpo)}`, `fuente_codigo: ${y(S.f_codigo)}`,
+    ...(medios.includes("digital") ? [`tamanos_digital_px: ${y(`cuerpo ${S.d_cuerpo}, h1 ${S.d_h1}, h2 ${S.d_h2}, h3 ${S.d_h3}, tablas ${S.d_tabla}, codigo ${S.d_codigo}, notas ${S.d_nota}, interlineado ${S.d_interlineado}, ancho ${S.d_ancho}`)}`] : []),
+    ...(medios.includes("impreso") ? [`tamanos_impreso_pt: ${y(`cuerpo ${S.p_cuerpo}, h1 ${S.p_h1}, h2 ${S.p_h2}, h3 ${S.p_h3}, tablas ${S.p_tabla}, codigo ${S.p_codigo}, notas ${S.p_nota}, interlineado ${S.p_interlineado}`)}`, `papel: ${S.p_papel}`, `margenes_cm: ${S.p_margen}`, `sangria_cm: ${S.sangria}`] : []),
+    `alineacion: ${S.alineacion}`, `peso_titulos: ${S.peso_titulos}`,
+    ...COLORES.map(([k]) => `color_${k}: ${y(S.colores[k].toUpperCase())}`),
+    `diagramas_herramienta: ${S.diag_herramienta}`, `diagramas_formato: ${S.diag_formato}`, `diagramas_direccion: ${S.diag_direccion}`, `diagramas_max_elementos: ${S.diag_max}`,
+    lista("notaciones", S.notaciones.map(n => NOTACIONES[n])),
+    lista("componentes", S.componentes),
+    lista("estructura", caps), lista("sin_numerar", sinNum), lista("siglas_conocidas", siglas),
+    "---"
+  ].join("\n");
+
+  const sinNumSet = new Set(sinNum.map(norm)); let n = 0;
+  const filas = caps.map(cp => {
+    const info = datos[norm(cp)], num = sinNumSet.has(norm(cp)) ? "" : (++n) + " ";
+    const min = info && info[2].length ? info[2].join("; ") : (norm(cp) === "control de versiones" ? "Tabla: Versión, Fecha, Autor, Descripción del cambio" : "[PENDIENTE: contenido mínimo]");
+    return `| ${num}${cp} | ${info ? info[1] : "[PENDIENTE: propósito]"} | ${min} |`;
+  });
+  const ej = { usted: "Seleccione el archivo", "tú": "Selecciona el archivo", vos: "Seleccioná el archivo", impersonal: "Se propone un modelo" }[S.tratamiento];
+  const comillas = { dobles: "dobles (“así”)", angulares: "angulares («así»)", rectas: 'rectas ("así")' }[S.comillas];
+  const citasTxt = { apa7: "APA 7", ieee: "IEEE", iso690: "ISO 690", vancouver: "Vancouver", institucional: "las del reglamento institucional", ninguna: "sin citas" }[S.citas];
+  const miles = { espacio: "espacio fino (`12 500`)", punto: "punto (`12.500`)", coma: "coma (`12,500`)", ninguno: "sin separador (`12500`)" }[S.miles];
+  const decimal = S.decimal === "coma" ? "coma (`3,5`)" : "punto (`3.5`)";
+  const terminos = lineas(S.terminos).map(l => { const [a, b] = l.split("=").map(s => s.trim()); return b ? `${a} (no ${b})` : a; });
+  const componentes = [];
+  componentes.push("- **Títulos**: `# 1 Capítulo`, `## 1.1 Sección`, `### 1.1.1 Subsección`. Máximo cuatro niveles, sin punto final, mayúscula solo inicial.");
+  if (comp.has("tablas") || comp.has("requisitos")) componentes.push("- **Tablas**: `**Tabla N.** Título` antes de la tabla y `Fuente: ...` después. Unidades en el encabezado; números alineados a la derecha.");
+  if (comp.has("figuras") || S.notaciones.length) componentes.push("- **Figuras y diagramas**: `**Figura N.** Título` y luego `Fuente: ...` después de la imagen o del bloque de diagrama. Las imágenes llevan texto alternativo.");
+  if (comp.has("figuras") && S.tipo === "manual") componentes.push(`- **Capturas**: ${S.capturas_borde ? "borde de 1 px en color de borde" : "sin borde"}${S.capturas_marcadores ? "; marcadores numerados (círculos) explicados en el texto" : ""}.`);
+  if (comp.has("avisos") && S.avisos.length) componentes.push(`- **Avisos**: solo ${S.avisos.map(a => "`> **" + a[0].toUpperCase() + a.slice(1) + ".**`").join(", ")}, con hasta tres líneas.`);
+  if (comp.has("pasos")) componentes.push(`- **Pasos**: lista numerada, una acción por paso${S.pasos_resultado ? "; el resultado va en la línea siguiente con `→`" : ""}.`);
+  if (comp.has("codigo")) componentes.push("- **Código**: bloque con lenguaje indicado, máximo 40 líneas, comentarios en el idioma del documento.");
+  if (comp.has("ecuaciones")) componentes.push("- **Ecuaciones**: centradas, numeradas a la derecha `(1)`, con cada símbolo definido debajo.");
+  if (comp.has("requisitos")) componentes.push("- **Requisitos**: tabla con ID (`RF-001`, `RNF-001`, `RI-001`), enunciado, prioridad, origen y caso de prueba.");
+  if (comp.has("historias")) componentes.push("- **Historias de usuario**: \"Como [rol], quiero [acción], para [beneficio].\" con criterios Dado / Cuando / Entonces.");
+  if (comp.has("glosario")) componentes.push("- **Glosario**: término en negrita, dos puntos y una definición de una oración; orden alfabético.");
+  componentes.push("- **Numeración**: figuras y tablas con numeración continua en todo el documento; cada una se menciona en el texto antes de aparecer.");
+  if (S.notaciones.length) componentes.push(`- **Diagramas**: notaciones permitidas ${S.notaciones.map(x => NOTACIONES[x]).join(", ")}; fuente en ${{ mermaid: "Mermaid", plantuml: "PlantUML", imagen: "imagen editable" }[S.diag_herramienta]}, exportados a ${S.diag_formato === "svg" ? "SVG" : "PNG a 2×"}; flujo ${S.diag_direccion === "LR" ? "de izquierda a derecha" : "de arriba hacia abajo"}; máximo ${S.diag_max} elementos; título, número, leyenda y fuente.`);
+  if (S.tipo === "manual" && S.metodologia === "diataxis") componentes.push(`- **Diátaxis**: el manual incluye ${S.diataxis.map(d => ({ tutorial: "tutoriales", guia: "guías prácticas", referencia: "referencia", explicacion: "explicación" }[d])).join(", ") || "[PENDIENTE: tipos]"}, sin mezclar tipos en una misma página.`);
+
+  const tip = [];
+  if (medios.includes("digital")) tip.push(`- **Digital**: títulos en ${S.f_titulos} (peso ${S.peso_titulos}), cuerpo en ${S.f_cuerpo} ${S.d_cuerpo} px con interlineado ${S.d_interlineado}, código en ${S.f_codigo} ${S.d_codigo} px. H1 ${S.d_h1} px, H2 ${S.d_h2} px, H3 ${S.d_h3} px; tablas y figuras ${S.d_tabla} px; notas ${S.d_nota} px. Ancho de lectura ${S.d_ancho} px.`);
+  if (medios.includes("impreso")) tip.push(`- **Impreso**: papel ${S.p_papel}, márgenes de ${S.p_margen} cm. Títulos en ${S.f_titulos}, cuerpo en ${S.f_cuerpo} ${S.p_cuerpo} pt con interlineado ${S.p_interlineado}, código en ${S.f_codigo} ${S.p_codigo} pt. H1 ${S.p_h1} pt, H2 ${S.p_h2} pt, H3 ${S.p_h3} pt; tablas ${S.p_tabla} pt; notas ${S.p_nota} pt.${Number(S.sangria) > 0 ? ` Sangría de primera línea de ${S.sangria} cm.` : ""}`);
+  tip.push(`- **Alineación**: ${S.alineacion === "justificado" ? "justificado, revisando que no queden espacios grandes entre palabras" : "a la izquierda"}.`);
+  tip.push(`- **Color**: primario ${S.colores.primario.toUpperCase()}, texto ${S.colores.texto.toUpperCase()}, secundario ${S.colores.secundario.toUpperCase()}, superficie ${S.colores.superficie.toUpperCase()}, borde ${S.colores.borde.toUpperCase()}. Avisos: nota ${S.colores.info.toUpperCase()}/${S.colores.info_fondo.toUpperCase()}, consejo ${S.colores.exito.toUpperCase()}/${S.colores.exito_fondo.toUpperCase()}, advertencia ${S.colores.advertencia.toUpperCase()}/${S.colores.advertencia_fondo.toUpperCase()}, peligro ${S.colores.peligro.toUpperCase()}/${S.colores.peligro_fondo.toUpperCase()}. El color nunca es el único portador de significado.`);
+  const malos = [["texto", "#FFFFFF"], ["secundario", "#FFFFFF"], ["info", "info_fondo"], ["exito", "exito_fondo"], ["advertencia", "advertencia_fondo"], ["peligro", "peligro_fondo"]]
+    .filter(([a, b]) => contraste(S.colores[a], b.startsWith("#") ? b : S.colores[b]) < 4.5).map(([a]) => a);
+  if (malos.length) tip.push(`- [PENDIENTE: los colores ${malos.join(", ")} no cumplen contraste 4,5:1; corregir antes de exportar]`);
+
+  const cuerpo = `
+# Prompt de estilo: ${S.documento}
+
+## 1. Rol e instrucción
+
+Actúas como ${ROL[S.tipo]} y vas a escribir «${S.documento}», ${TIPO_CON_ARTICULO[S.tipo]} para una audiencia ${S.audiencia}. Sigue este prompt al pie de la letra. Si una instrucción del usuario lo contradice, primero actualiza este prompt (nueva versión) y después escribe. No decidas nada que este prompt no defina: pregunta al usuario.
+
+## 2. Parámetros
+
+- **Tipo y metodología**: ${TIPO_NOMBRE[S.tipo]} según ${{ diataxis: "Diátaxis", academica: "estructura académica", iso29148: "ISO/IEC/IEEE 29148", rup: "RUP", up: "UP", scrum: "Scrum", ninguna: "una estructura genérica" }[S.metodologia]}.
+- **Medio**: ${{ digital: "digital", impreso: "impreso " + S.p_papel, ambos: "digital e impreso " + S.p_papel }[S.medio]}; formato de entrega ${S.formato}.
+- **Idioma**: español ${S.variante}, ortografía RAE.
+- **Tratamiento**: ${S.tratamiento}, igual en todo el documento (ejemplo: "${ej}").
+- **Citas**: ${citasTxt}.
+- **Normas institucionales**: ${S.reglamento ? S.reglamento + " (manda sobre este prompt)" : "ninguna"}.
+
+## 3. Estructura
+
+Escribe los capítulos en este orden, con numeración decimal (1, 1.1, 1.1.1). Las partes de \`sin_numerar\` llevan título sin número.
+
+| Capítulo | Propósito | Contenido mínimo |
+|---|---|---|
+${filas.join("\n")}
+
+## 4. Componentes visuales
+
+${componentes.join("\n")}
+
+Tipografía y color de la versión final:
+
+${tip.join("\n")}
+
+## 5. Normas de escritura
+
+- Oraciones de hasta ${S.max_palabras} palabras, voz activa, una idea por párrafo.
+- Números: decimal con ${decimal}; miles con ${miles}; porcentaje ${S.pct_espacio ? "con espacio (`15 %`)" : "sin espacio (`15%`)"}; unidades SI con espacio (\`10 km\`); fechas ${S.fecha} en tablas.
+- Comillas ${comillas}.
+- Cada sigla se desarrolla en su primera aparición; no hace falta con: ${siglas.join(", ") || "ninguna"}.
+- Nombres de la interfaz en negrita, tal como aparecen en pantalla.
+${(REGLAS_TIPO[S.tipo] || []).map(r => "- " + r).join("\n")}
+${terminos.length ? "- Términos preferidos: " + terminos.join("; ") + "." : "- Términos preferidos: [PENDIENTE: definir con el usuario a medida que aparezcan]."}
+
+## 6. Restricciones
+
+- No inventes datos, cifras, nombres, citas ni referencias. Si falta información, escribe \`[PENDIENTE: qué falta]\`.
+- No mezcles metodologías salvo que este prompt lo declare.
+${lineas(S.restricciones).map(r => "- " + r).join("\n")}
+
+## 7. Criterios de aceptación
+
+- El script \`verificar_doc.py\` de documentacion-generar termina sin errores.
+- Todos los capítulos de \`estructura\` están presentes y en orden.
+${lineas(S.criterios).map(r => "- " + r).join("\n")}
+`.replace(/\n{3,}/g, "\n\n");
+  const conf = JSON.stringify(Object.assign({}, S, { modo: undefined })).replace(/>/g, "\\u003e").replace(/--/g, "-\\u002d");
+  return fm + "\n" + cuerpo + `\n<!-- configurador:v1 ${conf} -->\n`;
+}
+
+function generarMemoria() {
+  const alc = S.alcance === "agente" ? "agente" : `documento "${S.documento}"`;
+  const trat = { usted: "usted", "tú": "tú", vos: "vos", impersonal: "impersonal" }[S.tratamiento];
+  const citas = { apa7: "APA 7", ieee: "IEEE", iso690: "ISO 690", vancouver: "Vancouver", institucional: "reglamento institucional", ninguna: "sin citas" }[S.citas];
+  return `Respuestas del usuario desde el configurador de estilo (${hoy()}).
+Alcance: ${alc}.
+Instrucción para el agente: ${S.alcance === "agente"
+    ? "registra estas respuestas en memoria/decisiones.md, marca cada DEC como confirmada e incorpora las reglas en las referencias del skill"
+    : "registra estas respuestas en memoria/decisiones.md con alcance de documento (las DEC generales siguen pendientes) y escribe las reglas solo en el prompt de este documento"} según references/memoria.md. Después envía la memoria en un PR con Qué, Por qué y Cómo.
+
+DEC-001 · Tratamiento y variante
+  1. Variante: ${S.variante === "neutro" ? "español neutro" : "rioplatense con voseo"}.
+  2/3. Tratamiento para ${TIPO_NOMBRE[S.tipo]}: ${trat}.${["tesis", "especificacion"].includes(S.tipo) ? "" : " (Tesis y especificaciones: sin responder en esta configuración.)"}
+
+DEC-002 · Convención de números
+  1. Decimal: ${S.decimal === "coma" ? "coma (3,5)" : "punto (3.5)"}.
+  2. Miles: ${{ espacio: "espacio (12 500)", punto: "punto (12.500)", coma: "coma (12,500)", ninguno: "sin separación" }[S.miles]}.
+  3. Porcentaje: ${S.pct_espacio ? "con espacio (15 %)" : "sin espacio (15%)"}.
+  Fechas en tablas: ${S.fecha}.
+
+DEC-003 · Tipografía y paleta de color
+  1. Guía de marca o reglamento: ${S.reglamento || "no indicado"}.
+  2. Fuentes: títulos ${S.f_titulos}; cuerpo ${S.f_cuerpo}; código ${S.f_codigo}.
+  3. Color primario: ${S.colores.primario.toUpperCase()}.
+  Tamaños digitales (px): cuerpo ${S.d_cuerpo}, H1 ${S.d_h1}, H2 ${S.d_h2}, H3 ${S.d_h3}. Tamaños impresos (pt): cuerpo ${S.p_cuerpo}, H1 ${S.p_h1}, H2 ${S.p_h2}, H3 ${S.p_h3}; márgenes ${S.p_margen} cm.
+
+DEC-004 · Estilo de citas
+  1. Estilo: ${citas}.
+  2. Gestor de referencias: sin responder en esta configuración.
+
+DEC-005 · Ubicación del prompt y de la documentación
+  1. Prompt: ${S.ubicacion_prompt === "documento" ? "uno por documento, dentro de su carpeta" : "docs/prompt-estilo.md, uno por proyecto"}.
+  2. Documentos: ${S.salida}.
+
+DEC-006 · Comillas
+  1. ${{ dobles: "Dobles “así”", angulares: "Angulares «así»", rectas: 'Rectas "así"' }[S.comillas]}.
+`;
+}
+
+/* ---------- Salidas ---------- */
+let pendiente = false;
+function actualizar() {
+  if (pendiente) return; pendiente = true;
+  requestAnimationFrame(() => {
+    pendiente = false;
+    document.querySelectorAll("#modo button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === S.modo)));
+    document.getElementById("nota-metodologia").textContent = NOTA_METODOLOGIA[S.metodologia] || "";
+    document.getElementById("alerta-numeros").hidden = !((S.decimal === "coma" && S.miles === "coma") || (S.decimal === "punto" && S.miles === "punto"));
+    document.getElementById("ruta-prompt").textContent = S.ubicacion_prompt === "documento" ? S.salida.replace(/\/?$/, "/") + "prompt-estilo.md" : "docs/prompt-estilo.md";
+    pintarContraste(); vistaPrevia();
+    document.getElementById("prompt").textContent = generarPrompt();
+    document.getElementById("memoria").textContent = generarMemoria();
+    guardar();
+  });
+}
+async function copiar(texto) {
+  try { await navigator.clipboard.writeText(texto); aviso("Copiado al portapapeles"); }
+  catch (e) {
+    const ta = document.createElement("textarea"); ta.value = texto; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); aviso("Copiado al portapapeles"); } catch (e2) { aviso("No se pudo copiar"); }
+    ta.remove();
+  }
+}
+document.getElementById("copiar-prompt").addEventListener("click", () => copiar(generarPrompt()));
+document.getElementById("copiar-memoria").addEventListener("click", () => copiar(generarMemoria()));
+document.getElementById("descargar").addEventListener("click", () => {
+  const blob = new Blob([generarPrompt()], { type: "text/markdown;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "prompt-estilo.md";
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+});
+document.getElementById("importar").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const txt = await f.text(); e.target.value = "";
+  let datos = null;
+  const m = txt.match(/<!-- configurador:v1 ([\s\S]*?) -->/);
+  try { datos = JSON.parse(m ? m[1] : txt); } catch (err) { datos = null; }
+  if (!datos) { aviso("El archivo no tiene una configuración de este configurador"); return; }
+  S = combinar(datos); S.modo = S.medio === "impreso" ? "impreso" : "digital";
+  pintarFormulario(); actualizar(); aviso("Configuración importada");
+});
+
+pintarFormulario();
+actualizar();
+</script>
+</body>
+</html>

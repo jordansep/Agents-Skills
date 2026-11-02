@@ -10,6 +10,7 @@ números y largo de oraciones. Termina con código 1 si encuentra errores.
 Solo usa la biblioteca estándar.
 """
 import argparse
+import json
 import re
 import sys
 import unicodedata
@@ -33,6 +34,19 @@ def normalizar(texto):
     return re.sub(r"\s+", " ", texto)
 
 
+def valor_yaml(crudo):
+    """Quita las comillas de un escalar; las comillas dobles admiten escapes (\\", \\n...)."""
+    crudo = crudo.strip()
+    if len(crudo) >= 2 and crudo[0] == crudo[-1] == '"':
+        try:
+            return json.loads(crudo)
+        except ValueError:
+            return crudo[1:-1]
+    if len(crudo) >= 2 and crudo[0] == crudo[-1] == "'":
+        return crudo[1:-1].replace("''", "'")
+    return crudo
+
+
 def leer_frontmatter(texto):
     """Lee un encabezado YAML simple (claves, valores y listas). Devuelve (datos, resto, líneas_saltadas)."""
     if not texto.startswith("---"):
@@ -49,11 +63,11 @@ def leer_frontmatter(texto):
         if item and clave:
             if not isinstance(datos.get(clave), list):
                 datos[clave] = []
-            datos[clave].append(item.group(1).strip().strip("\"'"))
+            datos[clave].append(valor_yaml(item.group(1)))
             continue
         par = re.match(r"^([\w\-]+):\s*(.*)$", linea)
         if par:
-            clave, valor = par.group(1), par.group(2).strip().strip("\"'")
+            clave, valor = par.group(1), valor_yaml(par.group(2))
             datos[clave] = valor if valor else []
     return datos, "\n".join(lineas[fin + 1:]), fin + 1
 
