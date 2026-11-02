@@ -58,12 +58,16 @@ Cuando el usuario responde:
 El repositorio del agente es el que contiene la carpeta de este skill (por ejemplo, `Agents-Skills`). Puede no ser el proyecto que se está documentando. Si el skill está instalado mediante un enlace simbólico, la ruta real de `memoria/` indica a qué repositorio pertenece. No escribas la memoria ni las reglas del agente en archivos generales del proyecto, como `CLAUDE.md` o plantillas de PR de todo el repositorio.
 
 1. Rama: usa la que indique el entorno de trabajo. Si no indica ninguna, crea `estilo/DEC-NNN-tema` desde la rama principal.
-2. Commit con los archivos de memoria y las referencias modificadas. Mensaje: `estilo: DEC-NNN tema`.
-3. Abre un pull request hacia la rama principal. El título es `Estilo: DEC-NNN tema` y el cuerpo sigue `assets/plantilla-pr.md` de este skill, con tres secciones obligatorias:
-   - **Qué**: las decisiones registradas y las reglas agregadas o modificadas, con sus archivos.
+2. Sube la versión del agente desde la raíz de su repositorio, según `VERSIONADO.md`:
+   - **MINOR** si se confirmó una regla con alcance de agente: `python3 scripts/versionado.py subir documentacion minor --agregado "DEC-NNN: regla"` (o `--cambiado` si modifica una regla existente).
+   - **PATCH** si solo se registraron preguntas pendientes o decisiones de un solo documento: `python3 scripts/versionado.py subir documentacion patch --cambiado "DEC-NNN: preguntas pendientes sobre tema"`.
+   - **Varias decisiones en el mismo PR**: se sube una sola vez, con el nivel más alto que corresponda y una entrada por decisión.
+3. Commit con los archivos de memoria, las referencias modificadas, `agentes/documentacion/agente.json` y `agentes/documentacion/CHANGELOG.md`. Mensaje: `estilo: DEC-NNN tema`.
+4. Abre un pull request hacia la rama principal. El título es `Estilo: DEC-NNN tema` y el cuerpo sigue `assets/plantilla-pr.md` de este skill, con tres secciones obligatorias:
+   - **Qué**: las decisiones registradas, las reglas agregadas o modificadas con sus archivos, y la versión del agente (anterior → nueva).
    - **Por qué**: el caso que surgió, en qué documento, y por qué el estilo no lo cubría.
    - **Cómo**: las preguntas hechas, las respuestas del usuario y dónde se incorporó cada regla.
-4. Si la sesión va a terminar con preguntas sin responder, envía igual la entrada `pendiente` en un pull request. En la nube, lo que no está en el repositorio del agente se pierde.
+5. Si la sesión va a terminar con preguntas sin responder, envía igual la entrada `pendiente` en un pull request. En la nube, lo que no está en el repositorio del agente se pierde.
 
 ## 4. Formato de una entrada en `decisiones.md`
 
