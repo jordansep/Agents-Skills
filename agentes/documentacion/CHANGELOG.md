@@ -2,6 +2,20 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.6.0] - 2026-11-02
+
+### Agregado
+
+- Plantilla de la memoria de proyecto (assets/plantilla-decisiones-proyecto.md).
+
+### Cambiado
+
+- La memoria se separa en dos niveles: la del agente (memoria/decisiones.md, DEC-NNN) guarda solo reglas para todos los documentos, y cada proyecto documentado guarda las suyas en decisiones-estilo.md, junto a su prompt de estilo (DP-NNN). Las decisiones de proyecto se commitean en ese repositorio y no generan PR ni versión del agente.
+
+### Corregido
+
+- Configurador: al cambiar de plantilla o de cualquier opción, la vista previa conserva la parte del documento que se estaba leyendo.
+
 ## [0.5.0] - 2026-11-02
 
 ### Agregado

@@ -9,7 +9,7 @@ Este skill escribe el documento. Recibe el **prompt de estilo** que produce `doc
 
 El flujo es siempre el mismo: prompt, contenido, plan, redacción, verificación, exportación e informe.
 
-**No decidas nada por tu cuenta.** Antes de empezar, lee `../documentacion-estilo/memoria/decisiones.md`. Si en cualquier paso aparece algo que el prompt, la memoria y las referencias no definen, aplica `../documentacion-estilo/references/memoria.md`: detén solo la parte afectada, pregunta al usuario, registra las preguntas y las respuestas en la memoria, incorpora la regla y envía la memoria al repositorio del agente con un PR (secciones Qué, Por qué y Cómo).
+**No decidas nada por tu cuenta.** Antes de empezar, lee las dos memorias: la del agente (`../documentacion-estilo/memoria/decisiones.md`) y la del proyecto (`decisiones-estilo.md` en la carpeta del prompt de estilo, si existe). Si en cualquier paso aparece algo que el prompt, las memorias y las referencias no definen, aplica `../documentacion-estilo/references/memoria.md`: detén solo la parte afectada, pregunta al usuario (incluido el alcance), registra las preguntas y las respuestas en la memoria que corresponda e incorpora la regla. Las decisiones del proyecto se commitean en el repositorio del proyecto. Solo las de alcance de agente van al repositorio del agente con un PR (secciones Qué, Por qué y Cómo).
 
 ## Paso 1: obtener el prompt de estilo
 
@@ -76,7 +76,7 @@ Si el prompt tiene `plantilla`, lee ese archivo (la ruta es relativa al director
 
   En las figuras, la leyenda va antes de la imagen o del bloque `mermaid`, y la nota después. Los «Puntos abiertos» de la plantilla no se aplican: si el documento los necesita, pregúntalos.
 
-Si una sección necesita un componente, formato o término que el prompt no define, no lo improvises. Escribe `[PENDIENTE: estilo no definido, ver DEC-NNN]`, haz las preguntas del procedimiento de memoria y sigue con las secciones que no dependen de esa decisión. Cuando llegue la respuesta, vuelve a esa sección.
+Si una sección necesita un componente, formato o término que el prompt no define, no lo improvises. Escribe `[PENDIENTE: estilo no definido, ver DEC-NNN]` (o `DP-NNN` si es una decisión del proyecto), haz las preguntas del procedimiento de memoria y sigue con las secciones que no dependen de esa decisión. Cuando llegue la respuesta, vuelve a esa sección.
 
 ## Paso 5: verificar
 

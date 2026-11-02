@@ -20,11 +20,11 @@ Las versiones siguen [SemVer](https://semver.org/lang/es/): `MAYOR.MENOR.PARCHE`
 |---|---|---|
 | **MAYOR** | Un cambio obliga a quien usa el agente a cambiar algo de su lado. | Se renombra o elimina un skill; un prompt de estilo anterior deja de servir; cambia una ruta que rompe la instalación. |
 | **MENOR** | Nueva capacidad o cambio de comportamiento, compatible con lo anterior. | Nueva metodología o componente; nueva opción del configurador; una regla de estilo confirmada que vale para todo el agente (DEC confirmada). |
-| **PARCHE** | Corrección sin cambio de comportamiento esperado. | Error del configurador o del verificador; texto o documentación; preguntas pendientes registradas en la memoria; decisiones que valen para un solo documento. |
+| **PARCHE** | Corrección sin cambio de comportamiento esperado. | Error del configurador o del verificador; texto o documentación; preguntas pendientes registradas en la memoria del agente. |
 
 Mientras un agente esté en `0.x`, un cambio incompatible sube MENOR en lugar de MAYOR, como permite SemVer. Pasar a `1.0.0` es una decisión explícita de quien mantiene el agente: significa que su uso se considera estable.
 
-Cualquier cambio dentro de las carpetas de skills de un agente, incluida su memoria, requiere subir la versión. Los cambios que solo tocan `agentes/<agente>/` (por ejemplo, corregir el changelog) no lo requieren.
+Cualquier cambio dentro de las carpetas de skills de un agente, incluida su memoria, requiere subir la versión. Las decisiones de un solo proyecto no cambian el agente: se guardan en `decisiones-estilo.md` del repositorio de ese proyecto y no suben la versión. Los cambios que solo tocan `agentes/<agente>/` (por ejemplo, corregir el changelog) no lo requieren.
 
 ## Flujo
 

@@ -575,7 +575,7 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
     <div class="panel-salida" id="p-memoria" role="tabpanel" aria-labelledby="t-memoria" hidden>
       <div class="barra-salida">
         <label class="campo" style="min-width:220px"><span>Alcance de estas respuestas</span>
-          <select data-k="alcance"><option value="agente">Todos los documentos del agente</option><option value="documento">Solo este documento</option></select></label>
+          <select data-k="alcance"><option value="agente">Todos los documentos (memoria del agente)</option><option value="documento">Solo este proyecto (memoria del repositorio)</option></select></label>
         <button type="button" id="copiar-memoria">Copiar</button>
       </div>
       <pre class="texto-salida" id="memoria"></pre>
@@ -1303,8 +1303,8 @@ function generarMemoria() {
   return `Respuestas del usuario desde el configurador de estilo (${hoy()}).
 Alcance: ${alc}.
 Instrucción para el agente: ${S.alcance === "agente"
-    ? "registra estas respuestas en memoria/decisiones.md, marca cada DEC como confirmada e incorpora las reglas en las referencias del skill"
-    : "registra estas respuestas en memoria/decisiones.md con alcance de documento (las DEC generales siguen pendientes) y escribe las reglas solo en el prompt de este documento"} según references/memoria.md. Después envía la memoria en un PR con Qué, Por qué y Cómo.
+    ? "registra estas respuestas en la memoria del agente (memoria/decisiones.md), marca cada DEC como confirmada, incorpora las reglas en las referencias del skill y envíala al repositorio del agente en un PR con Qué, Por qué y Cómo"
+    : "registra estas respuestas como una entrada DP-NNN en la memoria del proyecto (decisiones-estilo.md, junto al prompt de estilo, en el repositorio del proyecto), escribe las reglas solo en el prompt de este proyecto y haz commit ahí. No toques la memoria del agente: las DEC generales siguen pendientes"} según references/memoria.md.
 
 DEC-001 · Tratamiento y variante
   1. Variante: ${S.variante === "neutro" ? "español neutro" : "rioplatense con voseo"}.
@@ -1875,9 +1875,9 @@ function seccionExcepciones() {
 }
 function memoriaExcepciones() {
   const lista = ajustesConCambios(); if (!lista.length) return "";
-  return `\nExcepciones locales sobre «${SUBIDO.nombre}» (alcance: documento)\n` +
+  return `\nExcepciones locales sobre «${SUBIDO.nombre}» (alcance: proyecto)\n` +
     lista.map((a, k) => { const d = describirAjuste(a); return `  ${k + 1}. ${d.donde}: ${d.cambios.join("; ")}.`; }).join("\n") +
-    `\n  Instrucción: registra cada excepción con alcance de documento y pregunta al usuario si alguna debe pasar a ser regla del agente.\n`;
+    `\n  Instrucción: registra cada excepción en la memoria del proyecto (decisiones-estilo.md) y pregunta al usuario si alguna debe pasar a ser regla del agente.\n`;
 }
 
 /* ---------- Barra del documento, selección y ajustes ---------- */
@@ -1998,6 +1998,45 @@ lienzoEl.addEventListener("drop", e => cargarDocumento(e.dataTransfer.files[0]))
 
 /* ---------- Salidas ---------- */
 let pendiente = false;
+/* Mantener la posición de lectura: al redibujar (p. ej. al elegir una plantilla) cambian papel,
+   márgenes, tamaños y escala, así que se ancla al bloque visible y no a los píxeles de scroll. */
+function contenedorVista() {
+  const p = document.getElementById("p-vista");
+  if (!p || p.hidden) return null;
+  return p.scrollHeight > p.clientHeight ? p : document.scrollingElement;
+}
+function bloquesVista() {
+  const doc = document.getElementById("doc");
+  const subidos = doc.querySelectorAll("[data-b]");
+  return subidos.length ? [...subidos] : [...doc.children];
+}
+function anclaVista() {
+  const sc = contenedorVista(); if (!sc) return null;
+  const tope = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top;
+  const bloques = bloquesVista();
+  for (let i = 0; i < bloques.length; i++) {
+    const r = bloques[i].getBoundingClientRect();
+    if (r.bottom > tope + 1) return { sc, i, frac: r.height ? Math.max(0, (tope - r.top) / r.height) : 0, sobra: Math.max(0, r.top - tope) };
+  }
+  return null;
+}
+function restaurarAncla(a) {
+  if (!a) return;
+  const aplicar = () => {
+    const sc = contenedorVista(); if (!sc) return;
+    const b = bloquesVista()[a.i]; if (!b) return;
+    const tope = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top;
+    const r = b.getBoundingClientRect();
+    sc.scrollTop += (r.top + a.frac * r.height) - tope - a.sobra;
+    return sc.scrollTop;
+  };
+  const pos = aplicar();
+  // Las fuentes nuevas cargan después y vuelven a mover el texto: reajustar si el usuario no se movió.
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
+    const sc = contenedorVista();
+    if (sc && sc.scrollTop === pos) aplicar();
+  });
+}
 function actualizar() {
   if (pendiente) return; pendiente = true;
   requestAnimationFrame(() => {
@@ -2006,7 +2045,8 @@ function actualizar() {
     document.getElementById("nota-metodologia").textContent = NOTA_METODOLOGIA[S.metodologia] || "";
     document.getElementById("alerta-numeros").hidden = !((S.decimal === "coma" && S.miles === "coma") || (S.decimal === "punto" && S.miles === "punto"));
     document.getElementById("ruta-prompt").textContent = S.ubicacion_prompt === "documento" ? S.salida.replace(/\/?$/, "/") + "prompt-estilo.md" : "docs/prompt-estilo.md";
-    pintarContraste(); vistaPrevia();
+    pintarContraste();
+    const ancla = anclaVista(); vistaPrevia(); restaurarAncla(ancla);
     if (SUBIDO && S.fuente_vista === "documento") pintarChips();
     document.getElementById("prompt").textContent = generarPrompt();
     document.getElementById("memoria").textContent = generarMemoria();
