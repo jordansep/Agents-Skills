@@ -22,8 +22,8 @@ Busca el prompt en este orden:
 **Si no hay prompt:**
 
 1. Invoca el skill `documentacion-estilo`. Si no puedes invocarlo, lee `../documentacion-estilo/SKILL.md` y sigue sus pasos.
-2. Toma los parámetros que el usuario ya dio y los que estén confirmados en `../documentacion-estilo/memoria/decisiones.md`. **Pregunta los demás**: no los infieras ni apliques valores por defecto.
-3. Con las respuestas, guarda el prompt en la ruta que fije la memoria (`docs/prompt-estilo.md` mientras DEC-005 esté pendiente) y continúa con el Paso 2.
+2. Ese skill abre primero el configurador visual en el navegador del usuario. **No preguntes los parámetros en la terminal.** Espera a que el usuario descargue el prompt y escriba «listo».
+3. Sigue los pasos 2 a 4 de `documentacion-estilo`: recibir el prompt, completar los `[PENDIENTE]` y actualizar la memoria. Después continúa con el Paso 2 de este skill.
 
 **Si el prompt existe, valídalo.** El encabezado YAML debe tener `documento`, `tipo`, `metodologia`, `medio`, `tratamiento`, `salida` y `estructura`. Si faltan campos, complétalos siguiendo `documentacion-estilo`, sube la versión del prompt y guárdalo.
 

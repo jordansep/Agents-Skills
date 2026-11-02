@@ -38,7 +38,7 @@ Haz una serie de preguntas cerradas, de una a cuatro por caso. Cada pregunta:
 - Puede marcar una opción como recomendada, con el motivo en una línea. Recomendar no es decidir: sin respuesta del usuario, no se aplica.
 - Pregunta también **el alcance**: si la regla vale solo para este documento o para todos los documentos del agente.
 
-Si la herramienta de preguntas está disponible, úsala. Si no, escribe las preguntas numeradas en el chat. Si las preguntas son sobre parámetros que cubre el configurador (`assets/configurador.html`), puedes ofrecérselo al usuario. Las respuestas que copie desde su pestaña "Para la memoria" se registran igual que las del chat.
+Si la herramienta de preguntas está disponible, úsala. Si no, escribe las preguntas numeradas en el chat. Si las preguntas son sobre parámetros que cubre el configurador (`assets/configurador.html`), ábrelo en el navegador del usuario en lugar de preguntar en la terminal (ver el Paso 1 de `SKILL.md`). El prompt que descargue y las respuestas de su pestaña "Para la memoria" se registran igual que las del chat.
 
 ### 3.3 Registrar las preguntas de inmediato
 
