@@ -6,7 +6,9 @@ Uso:
     python3 verificar_doc.py --prompt docs/prompt-estilo.md docs/manual/01-intro.md docs/manual/02-uso.md
 
 Revisa estructura, numeración de títulos, tablas, figuras, avisos, siglas,
-números y largo de oraciones. Termina con código 1 si encuentra errores.
+números y largo de oraciones. Si el prompt declara tablas estadísticas
+(`tablas:`), también revisa las reglas de APA 7 (cero inicial, separador
+decimal y nota de los asteriscos). Termina con código 1 si encuentra errores.
 Solo usa la biblioteca estándar.
 """
 import argparse
@@ -142,6 +144,68 @@ def leyenda_apa(lineas, i, clase):
     numero = siguiente_no_vacia(lineas, j, -1)
     m = re.match(rf"^\*\*{clase} (\d+)\*\*$", numero[1].strip()) if numero else None
     return int(m.group(1)) if m else None
+
+
+# Tipos de tabla del configurador que siguen las reglas estadísticas de APA 7 (ESTADISTICAS en configurador.html).
+TABLAS_ESTADISTICAS = {
+    "frecuencia", "contingencia", "correlacion", "regresion", "anova",
+    "demografica", "descriptivos", "fiabilidad", "pruebas",
+}
+# Símbolos de valores que no pueden superar 1 y van sin cero inicial: p, r, β, α, ω, η², η²p.
+SIMBOLO_SIN_CERO = r"(?:p|r|β|α|ω|η(?:²|2)p?)"
+VALOR_EN_TEXTO = re.compile(rf"(?<![\w])\*{{0,2}}({SIMBOLO_SIN_CERO})\*{{0,2}}\s*([=<>≤≥])\s*(0?)([.,])(\d+)")
+CABECERA_SIN_CERO = re.compile(rf"^{SIMBOLO_SIN_CERO}$")
+CELDA_DECIMAL = re.compile(r"^(?:<\s*)?[−-]?(0?)([.,])\d+(?:\\?\*)*$")
+CON_ASTERISCOS = re.compile(r"\d(?:\\?\*){1,3}$")
+
+
+def usa_tablas_estadisticas(prompt):
+    return bool({normalizar(str(t)) for t in prompt.get("tablas", []) or []} & TABLAS_ESTADISTICAS)
+
+
+def celdas(linea):
+    return [c.strip() for c in re.split(r"(?<!\\)\|", linea.strip().strip("|"))]
+
+
+def verificar_estadistica(lineas, decimal_coma, inf):
+    """APA 7 en tablas estadísticas: sin cero inicial en p, r, β, α, ω y η²; separador decimal; nota de los asteriscos."""
+    malo = "." if decimal_coma else ","
+    nombre = "coma" if decimal_coma else "punto"
+
+    def revisar_valor(donde, texto, simbolo, cero, sep):
+        if cero:
+            inf.aviso(donde, f"«{texto}»: {simbolo} va sin cero inicial (APA 7)")
+        if sep == malo:
+            inf.aviso(donde, f"«{texto}»: el separador decimal del prompt es la {nombre}")
+
+    for donde, linea, tipo, _ in lineas:
+        if tipo == "texto":
+            for m in VALOR_EN_TEXTO.finditer(re.sub(r"`[^`]*`", "", linea)):
+                revisar_valor(donde, m.group(0).replace("*", ""), m.group(1), m.group(3), m.group(4))
+
+    i = 0
+    while i < len(lineas):
+        donde, linea, tipo, _ = lineas[i]
+        sig = lineas[i + 1][1] if i + 1 < len(lineas) else ""
+        if not (tipo == "texto" and linea.lstrip().startswith("|") and re.match(r"^\s*\|?\s*:?-{3,}", sig)):
+            i += 1
+            continue
+        cabecera = [re.sub(r"[*_\\]", "", c) for c in celdas(linea)]
+        sin_cero = {k for k, c in enumerate(cabecera) if CABECERA_SIN_CERO.match(c)}
+        j, asteriscos = i + 2, False
+        while j < len(lineas) and lineas[j][2] == "texto" and lineas[j][1].lstrip().startswith("|"):
+            for k, celda in enumerate(celdas(lineas[j][1])):
+                asteriscos = asteriscos or bool(CON_ASTERISCOS.search(celda))
+                m = CELDA_DECIMAL.match(celda)
+                if m and k in sin_cero:
+                    revisar_valor(lineas[j][0], celda, cabecera[k], m.group(1), m.group(2))
+            j += 1
+        if asteriscos:
+            despues = [l for _, l, t, _ in lineas[j:j + 6] if t == "texto" and l.strip()][:3]
+            if not any(re.search(r"\bp\s*<", re.sub(r"[*_\\]", "", l)) for l in despues):
+                s = "," if decimal_coma else "."
+                inf.aviso(donde, f"la tabla marca significación con asteriscos pero no tiene la nota debajo («*p < {s}05. **p < {s}01.»)")
+        i = j
 
 
 ID_MEMORIA = re.compile(r"\b(DEC|DP)-(\d{3})\b")
@@ -310,6 +374,8 @@ def verificar(prompt, archivos, inf, memorias=None):
             if not menciones:
                 inf.aviso(donde, f"{clase} {n} no se menciona en el texto")
     verificar_referencias(lineas, numeros, inf)
+    if usa_tablas_estadisticas(prompt):
+        verificar_estadistica(lineas, decimal_coma, inf)
     if memorias is not None:
         verificar_memoria(lineas, memorias, inf)
 

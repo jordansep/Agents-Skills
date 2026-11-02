@@ -490,6 +490,8 @@ pre.texto-salida {
           <label class="item"><input type="checkbox" value="advertencia"><span><b>Advertencia</b><small>Puede causar errores o pérdida de trabajo.</small></span></label>
           <label class="item"><input type="checkbox" value="peligro"><span><b>Peligro</b><small>Riesgo grave: daño, pérdida de datos o seguridad.</small></span></label>
         </div>
+        <p class="subtitulo">Tipos de tabla</p>
+        <div class="opciones" data-grupo="tablas_tipos"><!-- se completa desde TABLAS_ACAD --></div>
         <p class="subtitulo">Manuales</p>
         <div class="opciones" data-grupo="diataxis">
           <label class="item"><input type="checkbox" value="tutorial"><span><b>Tutoriales</b><small>Aprender haciendo: lección guiada paso a paso.</small></span></label>
@@ -672,6 +674,7 @@ pre.texto-salida {
           <button type="button" data-fuente="ejemplo" aria-pressed="true">Ejemplo</button>
           <button type="button" data-fuente="documento" aria-pressed="false" disabled>Mi documento</button>
         </span>
+        <button type="button" id="ver-todo" class="alternar" aria-pressed="false" title="Agrega al final del ejemplo un apéndice con todos los elementos del configurador. No cambia lo que marcaste ni el prompt.">Ver todo</button>
         <label class="boton" for="subir-doc" title="Markdown, Word (.docx), HTML o texto. También puedes arrastrarlo sobre la vista previa.">Subir documento…</label>
         <input id="subir-doc" type="file" accept=".md,.markdown,.txt,.html,.htm,.docx" hidden>
         <span class="archivo" id="archivo-doc" hidden><span id="nombre-doc"></span><button type="button" id="quitar-doc" aria-label="Quitar documento">✕</button></span>
@@ -899,6 +902,7 @@ const DEF = {
   sin_numerar: sinNumerarDe(esqueleto("diataxis").map(e => e[0])).join("\n"),
   componentes: ["tablas", "figuras", "avisos", "pasos", "codigo", "glosario"],
   avisos: ["nota", "consejo", "advertencia", "peligro"],
+  tablas_tipos: [],
   diataxis: ["tutorial", "guia", "referencia", "explicacion"],
   pasos_resultado: true, capturas_borde: true, capturas_marcadores: true,
   notaciones: ["uml-casos", "uml-actividad"], diag_herramienta: "mermaid", diag_formato: "svg", diag_direccion: "LR", diag_max: 12, diag_vista: "",
@@ -911,7 +915,7 @@ const DEF = {
   decimal: "coma", miles: "espacio", fecha: "dd/mm/aaaa", pct_espacio: true, max_palabras: 25,
   siglas: "URL\nPDF", terminos: "", restricciones: "", criterios: "",
   alcance: "agente", modo: "digital", estructura_editada: false,
-  fuente_vista: "ejemplo", numerar_subido: true, aplicar_texto: false, marcar_desvios: true, seleccionando: false
+  fuente_vista: "ejemplo", numerar_subido: true, aplicar_texto: false, marcar_desvios: true, seleccionando: false, ver_todo: false
 };
 const CLAVE = "configurador-estilo-documentacion-v1";
 let S = cargar();
@@ -952,6 +956,95 @@ function num(n, dec) {
 }
 function pct(n, dec) { return num(n, dec) + (S.pct_espacio ? "\u00A0%" : "%"); }
 function q(t, st) { const [a, b] = { dobles: ["“", "”"], angulares: ["«", "»"], rectas: ['"', '"'] }[(st || S).comillas]; return a + t + b; }
+
+/* ---------- Tablas académicas (APA 7, con el separador decimal elegido) ---------- */
+// Sin cero inicial para valores que no pueden superar 1 (p, r, β, α, ω, η²): ,031
+function sinCero(x, dec) { const s = num(Math.abs(x), dec).replace(/^0(?=[.,])/, ""); return (x < 0 ? "−" : "") + s; }
+function pv(p) { return p < 0.001 ? "< " + sinCero(0.001, 3) : sinCero(p, 3); }
+const nd = (x, dec) => (x < 0 ? "−" : "") + num(Math.abs(x), dec);
+const I = s => `<i>${s}</i>`;
+// cab: [[texto, numérica?], ...]; filas: arreglos de celdas o un texto (fila de grupo que ocupa todo el ancho)
+function tablaEj(h, titulo, cab, filas, nota) {
+  const th = cab.map(c => `<th${c[1] ? ' class="num"' : ""}>${c[0]}</th>`).join("");
+  const tr = filas.map(f => typeof f === "string"
+    ? `<tr><td colspan="${cab.length}"><b>${f}</b></td></tr>`
+    : `<tr>${f.map((v, i) => `<td${cab[i] && cab[i][1] ? ' class="num"' : ""}>${v}</td>`).join("")}</tr>`).join("");
+  return h.L(titulo) + `<table style="${h.cap}"><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table><p class="fuente" style="${h.nota}"><i>Nota.</i> ${nota}</p>`;
+}
+const SIG = () => `*${I("p")} < ${sinCero(0.05, 2)}. **${I("p")} < ${sinCero(0.01, 2)}.`;
+const TABLAS_ACAD = [
+  { k: "datos", nombre: "De datos (banco de datos)", desc: "Valores de una o más variables para cada individuo de la muestra.", util: ["tesis", "informe"], mencion: "un extracto del banco de datos",
+    regla: "una fila por caso y una columna por variable; identificador anonimizado (`P01`); sin filas de total; si ocupa más de una página va en Anexos.",
+    ej: h => tablaEj(h, "Banco de datos de la muestra (extracto)", [["ID"], ["Edad (años)", 1], ["Género"], ["Nivel educativo"], ["Puntaje", 1]],
+      [["P01", 21, "F", "Secundario", 72], ["P02", 34, "M", "Universitario", 85], ["P03", 27, "F", "Terciario", 64], ["P04", 45, "M", "Secundario", 58]],
+      `Se muestran 4 de los ${num(120)} casos. Datos de ejemplo.`) },
+  { k: "frecuencia", nombre: "De frecuencia / distribución", desc: "Cómo se distribuye una variable: frecuencias absolutas, relativas y acumuladas.", util: ["tesis", "informe"], mencion: "la distribución del nivel educativo",
+    regla: "columnas *f*, %, *F* (acumulada) y % acumulado; fila Total; porcentajes con un decimal que suman 100.",
+    ej: h => tablaEj(h, "Distribución de la muestra según nivel educativo", [["Nivel educativo"], [I("f"), 1], ["%", 1], [I("F"), 1], ["% acumulado", 1]],
+      [["Secundario", 48, num(40, 1), 48, num(40, 1)], ["Terciario", 30, num(25, 1), 78, num(65, 1)], ["Universitario", 42, num(35, 1), 120, num(100, 1)], ["<b>Total</b>", "<b>120</b>", `<b>${num(100, 1)}</b>`, "", ""]],
+      `${I("N")} = 120. Datos de ejemplo.`) },
+  { k: "contingencia", nombre: "De contingencia (doble entrada)", desc: "Cruza dos variables categóricas: frecuencias conjuntas, marginales y condicionales.", util: ["tesis", "informe"], mencion: "el uso de la plataforma según género",
+    regla: "variable independiente en filas; cada celda con *n* (%) de fila; fila y columna Total; la prueba χ² va en la nota con *gl*, *N* y *p*.",
+    ej: h => tablaEj(h, "Uso de la plataforma según género", [["Género"], ["Sí, " + I("n") + " (%)", 1], ["No, " + I("n") + " (%)", 1], ["Total", 1]],
+      [["Femenino", `52 (${num(80, 1)})`, `13 (${num(20, 1)})`, 65], ["Masculino", `33 (${num(60, 1)})`, `22 (${num(40, 1)})`, 55], ["<b>Total</b>", `85 (${num(70.8, 1)})`, `35 (${num(29.2, 1)})`, 120]],
+      `Porcentajes de fila. χ²(1, ${I("N")} = 120) = ${num(5.82, 2)}, ${I("p")} = ${pv(0.016)}.`) },
+  { k: "correlacion", nombre: "De correlación", desc: "Coeficientes de correlación entre pares de variables.", util: ["tesis", "informe"], mencion: "las correlaciones entre las variables del estudio",
+    regla: "solo el triángulo inferior; diagonal con —; variables numeradas en las filas y solo su número en las columnas; *N* y significación en la nota.",
+    ej: h => tablaEj(h, "Correlaciones entre las variables del estudio", [["Variable"], ["1", 1], ["2", 1], ["3", 1], ["4", 1]],
+      [["1. Edad", "—", "", "", ""], ["2. Horas de uso", sinCero(0.32, 2) + "**", "—", "", ""], ["3. Satisfacción", sinCero(0.18, 2) + "*", sinCero(0.45, 2) + "**", "—", ""], ["4. Puntaje", sinCero(0.09, 2), sinCero(0.38, 2) + "**", sinCero(0.52, 2) + "**", "—"]],
+      `${I("N")} = 120. Correlación de Pearson. ${SIG()}`) },
+  { k: "regresion", nombre: "De regresión / resumen de modelo", desc: "Coeficientes, errores estándar, p-valores y estadísticos de ajuste.", util: ["tesis", "informe"], mencion: "el modelo de regresión del puntaje",
+    regla: "columnas *B*, *EE*, β, *t* y *p*; la constante en la primera fila; *R*², *R*² ajustado y *F* del modelo en la nota.",
+    ej: h => tablaEj(h, "Regresión lineal múltiple del puntaje", [["Predictor"], [I("B"), 1], [I("EE"), 1], ["β", 1], [I("t"), 1], [I("p"), 1]],
+      [["Constante", num(21.4, 2), num(4.12, 2), "—", num(5.19, 2), pv(0.0004)], ["Horas de uso", num(1.85, 2), num(0.42, 2), sinCero(0.36, 2), num(4.4, 2), pv(0.0002)], ["Edad", num(0.12, 2), num(0.09, 2), sinCero(0.11, 2), num(1.33, 2), pv(0.186)]],
+      `${I("R")}² = ${sinCero(0.21, 2)}; ${I("R")}² ajustado = ${sinCero(0.2, 2)}; ${I("F")}(2, 117) = ${num(15.6, 1)}, ${I("p")} ${pv(0.0001)}.`) },
+  { k: "anova", nombre: "De ANOVA", desc: "Sumas de cuadrados, grados de libertad, F y p.", util: ["tesis", "informe"], mencion: "el análisis de varianza del puntaje por modalidad",
+    regla: "columnas Fuente, *SC*, *gl*, *MC*, *F*, *p* y η²*p*; filas Entre grupos, Dentro de grupos y Total.",
+    ej: h => tablaEj(h, "ANOVA de un factor del puntaje según modalidad", [["Fuente"], [I("SC"), 1], [I("gl"), 1], [I("MC"), 1], [I("F"), 1], [I("p"), 1], ["η²" + I("p"), 1]],
+      [["Entre grupos", num(1254.3, 2), 2, num(627.15, 2), num(6.84, 2), pv(0.002), sinCero(0.1, 2)], ["Dentro de grupos", num(10728.9, 2), 117, num(91.7, 2), "", "", ""], ["Total", num(11983.2, 2), 119, "", "", "", ""]],
+      `η²${I("p")} = eta cuadrado parcial. Datos de ejemplo.`) },
+  { k: "demografica", nombre: "De características demográficas (Tabla 1)", desc: "Edad, género, nivel educativo y otras características de la muestra.", util: ["tesis", "informe"], mencion: "las características de la muestra",
+    regla: "es la Tabla 1 de Método o Resultados; cada variable con sus categorías sangradas debajo; *n* (%) para categóricas y *M* (*DE*) para continuas; *N* total en la nota.",
+    ej: h => tablaEj(h, "Características sociodemográficas de la muestra", [["Característica"], [I("n"), 1], ["%", 1]],
+      ["Género", ["&emsp;Femenino", 65, num(54.2, 1)], ["&emsp;Masculino", 55, num(45.8, 1)], "Nivel educativo", ["&emsp;Secundario", 48, num(40, 1)], ["&emsp;Terciario", 30, num(25, 1)], ["&emsp;Universitario", 42, num(35, 1)],
+        [`Edad (años), ${I("M")} (${I("DE")})`, `${num(31.4, 1)} (${num(8.9, 1)})`, ""]],
+      `${I("N")} = 120.`) },
+  { k: "comparacion", nombre: "De comparación", desc: "Compara grupos, condiciones o períodos lado a lado.", util: ["tesis", "informe", "arquitectura"], mencion: "los indicadores de 2024 y 2025",
+    regla: "grupos, condiciones o períodos en columnas, en el mismo orden en todo el documento; columna Diferencia con signo (+ o −); unidad en cada indicador.",
+    ej: h => tablaEj(h, "Indicadores académicos por año", [["Indicador"], ["2024", 1], ["2025", 1], ["Diferencia", 1]],
+      [["Aprobación (%)", num(68.5, 1), num(74.2, 1), "+" + num(5.7, 1)], ["Abandono (%)", num(12.3, 1), num(9.8, 1), nd(-2.5, 1)], ["Satisfacción (1 a 5)", num(3.6, 1), num(3.9, 1), "+" + num(0.3, 1)]],
+      "Datos de ejemplo.") },
+  { k: "descriptivos", nombre: "De estadísticos descriptivos", desc: "n, media, desvío estándar, mínimo y máximo de cada variable.", util: ["tesis", "informe"], mencion: "los estadísticos descriptivos",
+    regla: "columnas *n*, *M*, *DE*, mínimo y máximo; *M* y *DE* con dos decimales; *n* por variable cuando hay datos perdidos.",
+    ej: h => tablaEj(h, "Estadísticos descriptivos de las variables del estudio", [["Variable"], [I("n"), 1], [I("M"), 1], [I("DE"), 1], ["Mín.", 1], ["Máx.", 1]],
+      [["Edad (años)", 120, num(31.42, 2), num(8.91, 2), 19, 58], ["Horas de uso semanales", 118, num(6.35, 2), num(3.1, 2), 0, 15], ["Satisfacción (1 a 5)", 120, num(3.84, 2), num(0.72, 2), 2, 5]],
+      "Dos casos sin dato de horas de uso.") },
+  { k: "fiabilidad", nombre: "De fiabilidad", desc: "Consistencia interna de las escalas (alfa de Cronbach, omega).", util: ["tesis"], mencion: "la fiabilidad de las escalas",
+    regla: "columnas Escala, Ítems, α y ω, con dos decimales y sin cero inicial; la nota aclara qué coeficiente es cada uno.",
+    ej: h => tablaEj(h, "Fiabilidad de las escalas", [["Escala"], ["Ítems", 1], ["α", 1], ["ω", 1]],
+      [["Satisfacción", 8, sinCero(0.87, 2), sinCero(0.88, 2)], ["Usabilidad", 10, sinCero(0.91, 2), sinCero(0.92, 2)], ["Autoeficacia", 6, sinCero(0.78, 2), sinCero(0.79, 2)]],
+      "α = alfa de Cronbach; ω = omega de McDonald.") },
+  { k: "pruebas", nombre: "De pruebas de hipótesis (t, χ²)", desc: "Resultado de cada prueba con su estadístico, p y tamaño del efecto.", util: ["tesis", "informe"], mencion: "la comparación entre modalidades",
+    regla: "una fila por variable; *M* (*DE*) de cada grupo, estadístico (*t* o χ²), *gl*, *p* y tamaño del efecto (*d* de Cohen); la prueba usada va en la nota.",
+    ej: h => tablaEj(h, "Comparación del puntaje y la satisfacción según modalidad", [["Variable"], [`Presencial, ${I("M")} (${I("DE")})`, 1], [`Virtual, ${I("M")} (${I("DE")})`, 1], [I("t"), 1], [I("gl"), 1], [I("p"), 1], [I("d"), 1]],
+      [["Puntaje", `${num(68.2, 1)} (${num(9.4, 1)})`, `${num(73.5, 1)} (${num(8.7, 1)})`, nd(-3.21, 2), 118, pv(0.002), num(0.59, 2)], ["Satisfacción", `${num(3.7, 1)} (${num(0.8, 1)})`, `${num(3.9, 1)} (${num(0.7, 1)})`, nd(-1.45, 2), 118, pv(0.15), num(0.26, 2)]],
+      `${I("t")} de Student para muestras independientes; ${I("d")} de Cohen.`) },
+  { k: "operacionalizacion", nombre: "De operacionalización de variables", desc: "Variable, definición, dimensiones, indicadores y escala de medición.", util: ["tesis"], mencion: "la operacionalización de la satisfacción",
+    regla: "columnas Variable, Definición conceptual, Dimensión, Indicador y Escala; en Markdown la variable y su definición se escriben solo en la primera fila de su grupo.",
+    ej: h => tablaEj(h, "Operacionalización de la variable satisfacción", [["Variable"], ["Definición conceptual"], ["Dimensión"], ["Indicador"], ["Escala"]],
+      [["Satisfacción", "Grado en que la plataforma cumple las expectativas del estudiante", "Utilidad", "Percepción de utilidad de los recursos", "Likert 1 a 5"], ["", "", "Facilidad de uso", "Tiempo para completar una tarea", "Razón (minutos)"]],
+      "Elaboración propia.") },
+  { k: "estado-arte", nombre: "De antecedentes / estado del arte", desc: "Estudios previos con su objetivo, método y hallazgo principal.", util: ["tesis"], mencion: "los antecedentes del estudio",
+    regla: "columnas Autor (año), Objetivo, Método y Hallazgo principal; orden cronológico; autores citados en el estilo de citas elegido; un hallazgo por fila.",
+    ej: h => tablaEj(h, "Antecedentes sobre el uso de plataformas educativas", [["Autor (año)"], ["Objetivo"], ["Método"], ["Hallazgo principal"]],
+      [["García y Pérez (2021)", "Medir el uso de plataformas", `Encuesta, ${I("n")} = 340`, "El uso semanal predice el rendimiento"], ["López (2023)", "Comparar modalidades", "Cuasiexperimento", "Sin diferencias en la aprobación"]],
+      "Autores y datos ficticios, solo para mostrar el formato.") }
+];
+const TABLA_ACAD = Object.fromEntries(TABLAS_ACAD.map(t => [t.k, t]));
+// Tipos que siguen las reglas estadísticas de APA 7 (lo mismo usa verificar_doc.py)
+const ESTADISTICAS = new Set(["frecuencia", "contingencia", "correlacion", "regresion", "anova", "demografica", "descriptivos", "fiabilidad", "pruebas"]);
+document.querySelector('[data-grupo="tablas_tipos"]').innerHTML = TABLAS_ACAD.map(t =>
+  `<label class="item"><input type="checkbox" value="${t.k}"><span><b>${t.nombre}</b><small>${t.desc}</small></span></label>`).join("");
 function hoy() {
   const d = new Date(); const dd = String(d.getDate()).padStart(2, "0"), mm = String(d.getMonth() + 1).padStart(2, "0"), y = d.getFullYear();
   return S.fecha === "aaaa-mm-dd" ? `${y}-${mm}-${dd}` : `${dd}/${mm}/${y}`;
@@ -1219,6 +1312,32 @@ function vistaPrevia() {
     peligro: "Eliminar un proyecto borra sus archivos y no se puede deshacer."
   };
   const ICONO = { nota: "ℹ", consejo: "✔", advertencia: "⚠", peligro: "✖" }, ETQ = { nota: "Nota", consejo: "Consejo", advertencia: "Advertencia", peligro: "Peligro" };
+  // Ejemplos de cada componente: los usan los capítulos y el apéndice de «Ver todo»
+  const ej = {
+    avisos: lista => lista.map(a => `<div class="aviso ${a}"><b>${ICONO[a]} ${ETQ[a]}.</b>${avisosTxt[a]}</div>`).join(""),
+    ecuaciones: () => `<div class="ecuacion"><span>T = n / t</span><span>(1)</span></div>` + P(`Donde <i>n</i> es la cantidad de solicitudes y <i>t</i> el tiempo en segundos (ecuación (1)).`),
+    pasos: () => { const res = S.pasos_resultado; return `<ol class="pasos"><li>${v("seleccionar")} <b>Archivo</b> &gt; <b>Nuevo proyecto</b>.${res ? `<span class="resultado">→ Se abre el asistente de creación.</span>` : ""}</li><li>${v("escribir")} un nombre en el campo <b>Nombre del proyecto</b>.</li><li>${v("clic")} en <b>Guardar</b>.${res ? `<span class="resultado">→ El proyecto aparece en la lista.</span>` : ""}</li></ol>`; },
+    figuras: () => {
+      const mk = S.capturas_marcadores ? ` <span class="marcador">1</span>` : "";
+      return P(`En la Figura ${nFig + 1} se muestra el asistente de creación.`) +
+        `<div class="figura"><div class="captura" style="${S.capturas_borde ? "" : "border-color:transparent"};${capStyle}"><div class="barra">Nuevo proyecto</div><div class="contenido"><span class="campo-falso">Nombre del proyecto</span><span class="btn">Guardar</span>${mk}</div></div></div>` +
+        leyendaFigura("Asistente de creación de proyectos");
+    },
+    codigo: () => `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">bash</span>sga exportar --formato pdf --salida informes/</pre>`,
+    diagrama: n => { const dt = DIAG_TITULO[n]; return P(`En la Figura ${nFig + 1} se muestra el ${dt} del módulo de cursos.`) + `<div class="figura">${diagramaSVG(n, c, S.f_cuerpo)}</div>` + leyendaFigura(`${dt[0].toUpperCase() + dt.slice(1)} del módulo de cursos`); },
+    fuente: () => `<p class="fuente" style="${notaStyle}">Fuente: elaboración propia (datos de ejemplo).</p>`,
+    requisitos: () => P(`En la Tabla ${nTab + 1} se listan los requisitos funcionales.`) + leyendaTabla("Requisitos funcionales del módulo de cursos") + `<table style="${capStyle}"><thead><tr><th>ID</th><th>Requisito</th><th>Prioridad</th></tr></thead><tbody><tr><td>RF-001</td><td>El sistema deberá exportar las notas en PDF.</td><td>Alta</td></tr><tr><td>RF-002</td><td>El docente deberá poder anular una inscripción.</td><td>Media</td></tr></tbody></table>`,
+    tablas: () => P(`En la Tabla ${nTab + 1} se comparan los tiempos de respuesta.`) + leyendaTabla("Tiempo de respuesta por operación") + `<table style="${capStyle}"><thead><tr><th>Operación</th><th class="num">Solicitudes</th><th class="num">Tiempo medio (ms)</th></tr></thead><tbody><tr><td>Crear curso</td><td class="num">${num(12500)}</td><td class="num">${num(182.4, 1)}</td></tr><tr><td>Exportar notas</td><td class="num">${num(3210)}</td><td class="num">${num(1045.7, 1)}</td></tr></tbody></table>`,
+    historias: () => P(`<b>HU-01.</b> Como docente, quiero exportar las notas, para compartirlas con la secretaría.`) + `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">gherkin</span>Dado que el docente tiene una sesión iniciada\nCuando selecciona "Exportar"\nEntonces se descarga un archivo PDF con las notas</pre>`,
+    glosario: () => `<dl><div><dt>Curso:</dt> <dd>conjunto de clases con un docente responsable.</dd></div><div><dt>Inscripción:</dt> <dd>vínculo entre un estudiante y un curso.</dd></div></dl>`,
+    referencias: () => `<p style="padding-left:1.25em;text-indent:-1.25em">${referencia()}</p><p class="ficticio">Referencia ficticia, solo para mostrar el formato.</p>`,
+    tablaAcad: k => P(`En la Tabla ${nTab + 1} se presenta${/^(las|los)\b/.test(TABLA_ACAD[k].mencion) ? "n" : ""} ${TABLA_ACAD[k].mencion}.`) + TABLA_ACAD[k].ej({ L: leyendaTabla, cap: capStyle, nota: notaStyle })
+  };
+  // Tipos de tabla marcados: se reparten entre los capítulos numerados desde el tercero
+  const colaTablas = comp.has("tablas") ? TABLAS_ACAD.filter(x => S.tablas_tipos.includes(x.k)).map(x => x.k) : [];
+  const totalNumerados = caps.filter(cp => !sinNum.has(norm(cp))).length;
+  const porCap = Math.ceil(colaTablas.length / Math.max(1, totalNumerados - 2));
+  const tomarTablas = () => colaTablas.splice(0, porCap).map(ej.tablaAcad).join("");
 
   caps.forEach(cap => {
     const k = norm(cap), numerado = !sinNum.has(k);
@@ -1237,51 +1356,45 @@ function vistaPrevia() {
       html += P(`Según la guía institucional, ${q("la documentación debe poder verificarse")}${ref ? " " + ref : ""}.`);
       if (subs[0]) html += `<h2 style="${hStyle(2)}">${nCap}.1 ${esc(subs[0])}</h2>` + P(`<span class="proposito">${esc(info[1])}.</span>`);
       if (subs[1]) html += `<h3 style="${hStyle(3)}">${nCap}.1.1 ${esc(subs[1])}</h3>` + P(`Contenido de ejemplo con una idea por párrafo y oraciones de hasta ${S.max_palabras} palabras.`);
-      if (comp.has("avisos")) S.avisos.forEach(a => { html += `<div class="aviso ${a}"><b>${ICONO[a]} ${ETQ[a]}.</b>${avisosTxt[a]}</div>`; });
-      if (comp.has("ecuaciones")) html += `<div class="ecuacion"><span>T = n / t</span><span>(1)</span></div>` + P(`Donde <i>n</i> es la cantidad de solicitudes y <i>t</i> el tiempo en segundos (ecuación (1)).`);
+      if (comp.has("avisos")) html += ej.avisos(S.avisos);
+      if (comp.has("ecuaciones")) html += ej.ecuaciones();
       return;
     }
     if (numerado && numerados === 2) {
       if (subs[0]) html += `<h2 style="${hStyle(2)}">${nCap}.1 ${esc(subs[0])}</h2>`;
-      if (comp.has("pasos")) {
-        const res = S.pasos_resultado;
-        html += `<ol class="pasos"><li>${v("seleccionar")} <b>Archivo</b> &gt; <b>Nuevo proyecto</b>.${res ? `<span class="resultado">→ Se abre el asistente de creación.</span>` : ""}</li><li>${v("escribir")} un nombre en el campo <b>Nombre del proyecto</b>.</li><li>${v("clic")} en <b>Guardar</b>.${res ? `<span class="resultado">→ El proyecto aparece en la lista.</span>` : ""}</li></ol>`;
-      }
-      if (comp.has("figuras")) {
-        const mk = S.capturas_marcadores ? ` <span class="marcador">1</span>` : "";
-        html += P(`En la Figura ${nFig + 1} se muestra el asistente de creación.`);
-        html += `<div class="figura"><div class="captura" style="${S.capturas_borde ? "" : "border-color:transparent"};${capStyle}"><div class="barra">Nuevo proyecto</div><div class="contenido"><span class="campo-falso">Nombre del proyecto</span><span class="btn">Guardar</span>${mk}</div></div></div>`;
-        html += leyendaFigura("Asistente de creación de proyectos");
-      }
+      if (comp.has("pasos")) html += ej.pasos();
+      if (comp.has("figuras")) html += ej.figuras();
       if (!comp.has("pasos") && !comp.has("figuras") && !comp.has("codigo")) html += P(`<span class="proposito">${info ? esc(info[1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
-      if (comp.has("codigo")) html += `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">bash</span>sga exportar --formato pdf --salida informes/</pre>`;
+      if (comp.has("codigo")) html += ej.codigo();
       return;
     }
     if (numerado && numerados === 3) {
       let extra = "";
-      if (S.diag_vista) {
-        const dt = DIAG_TITULO[S.diag_vista];
-        extra += P(`En la Figura ${nFig + 1} se muestra el ${dt} del módulo de cursos.`);
-        extra += `<div class="figura">${diagramaSVG(S.diag_vista, c, S.f_cuerpo)}</div>` + leyendaFigura(`${dt[0].toUpperCase() + dt.slice(1)} del módulo de cursos`);
-      }
-      if (comp.has("tablas") || comp.has("requisitos")) {
-        extra += P(`En la Tabla ${nTab + 1} se ${comp.has("requisitos") ? "listan los requisitos funcionales" : "comparan los tiempos de respuesta"}.`);
-        if (comp.has("requisitos")) {
-          extra += leyendaTabla("Requisitos funcionales del módulo de cursos") + `<table style="${capStyle}"><thead><tr><th>ID</th><th>Requisito</th><th>Prioridad</th></tr></thead><tbody><tr><td>RF-001</td><td>El sistema deberá exportar las notas en PDF.</td><td>Alta</td></tr><tr><td>RF-002</td><td>El docente deberá poder anular una inscripción.</td><td>Media</td></tr></tbody></table>`;
-        } else {
-          extra += leyendaTabla("Tiempo de respuesta por operación") + `<table style="${capStyle}"><thead><tr><th>Operación</th><th class="num">Solicitudes</th><th class="num">Tiempo medio (ms)</th></tr></thead><tbody><tr><td>Crear curso</td><td class="num">${num(12500)}</td><td class="num">${num(182.4, 1)}</td></tr><tr><td>Exportar notas</td><td class="num">${num(3210)}</td><td class="num">${num(1045.7, 1)}</td></tr></tbody></table>`;
-        }
-        extra += `<p class="fuente" style="${notaStyle}">Fuente: elaboración propia (datos de ejemplo).</p>`;
-      }
-      if (comp.has("historias")) extra += P(`<b>HU-01.</b> Como docente, quiero exportar las notas, para compartirlas con la secretaría.`) + `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">gherkin</span>Dado que el docente tiene una sesión iniciada\nCuando selecciona "Exportar"\nEntonces se descarga un archivo PDF con las notas</pre>`;
+      if (S.diag_vista) extra += ej.diagrama(S.diag_vista);
+      if (comp.has("requisitos")) extra += ej.requisitos() + ej.fuente();
+      else if (comp.has("tablas")) extra += ej.tablas() + ej.fuente();
+      extra += tomarTablas();
+      if (comp.has("historias")) extra += ej.historias();
       html += extra || P(`<span class="proposito">${info ? esc(info[1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
       return;
     }
-    if (k === "glosario" && comp.has("glosario")) { html += `<dl><div><dt>Curso:</dt> <dd>conjunto de clases con un docente responsable.</dd></div><div><dt>Inscripción:</dt> <dd>vínculo entre un estudiante y un curso.</dd></div></dl>`; return; }
-    if ((k === "referencias" || k === "bibliografia") && S.citas !== "ninguna") { html += `<p style="padding-left:1.25em;text-indent:-1.25em">${referencia()}</p><p class="ficticio">Referencia ficticia, solo para mostrar el formato.</p>`; return; }
+    if (k === "glosario" && comp.has("glosario")) { html += ej.glosario(); return; }
+    if ((k === "referencias" || k === "bibliografia") && S.citas !== "ninguna") { html += ej.referencias(); return; }
     html += P(`<span class="proposito">${info ? esc(info[1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
+    if (numerado) html += tomarTablas();
   });
+  if (colaTablas.length) html += colaTablas.splice(0).map(ej.tablaAcad).join("");
   if (!caps.length) html += P(`<span class="sin-contenido">Agrega capítulos en "Estructura" para ver la vista previa.</span>`);
+  if (S.ver_todo) {
+    const sec = (titulo, cont) => `<h2 style="${hStyle(2)}">${esc(titulo)}</h2>` + cont;
+    html += `<h1 style="${hStyle(1)}">Apéndice de prueba</h1>` + P(`<span class="ficticio">Muestra todos los elementos del configurador para probar el estilo. No forma parte del prompt ni cambia lo que marcaste.</span>`) +
+      sec("Avisos", ej.avisos(["nota", "consejo", "advertencia", "peligro"])) + sec("Ecuaciones", ej.ecuaciones()) + sec("Pasos numerados", ej.pasos()) +
+      sec("Figuras y capturas", ej.figuras()) + sec("Código", ej.codigo()) + sec("Tabla general", ej.tablas() + ej.fuente()) +
+      sec("Requisitos", ej.requisitos() + ej.fuente()) + sec("Historias de usuario", ej.historias()) + sec("Glosario", ej.glosario()) +
+      (S.citas !== "ninguna" ? sec("Referencias", ej.referencias()) : "") +
+      sec("Diagramas", Object.keys(DIAG_TITULO).map(ej.diagrama).join("")) +
+      sec("Tipos de tabla", TABLAS_ACAD.map(x => `<h3 style="${hStyle(3)}">${esc(x.nombre)}</h3>` + ej.tablaAcad(x.k)).join(""));
+  }
   doc.innerHTML = html;
   escalarHoja();
 }
@@ -1315,6 +1428,7 @@ function y(v) { return JSON.stringify(String(v)); }
 function lista(clave, items) { return items.length ? `${clave}:\n` + items.map(i => `  - ${/^[\wÀ-ÿ][\wÀ-ÿ .()/,-]*$/.test(i) ? i : y(i)}`).join("\n") : `${clave}: []`; }
 function generarPrompt() {
   const caps = lineas(S.estructura), sinNum = lineas(S.sin_numerar), siglas = lineas(S.siglas), comp = new Set(S.componentes);
+  const tiposTabla = comp.has("tablas") ? TABLAS_ACAD.filter(x => S.tablas_tipos.includes(x.k)) : [];
   const datos = datosCapitulos();
   const medios = S.medio === "ambos" ? ["digital", "impreso"] : [S.medio];
   const rutaPrompt = S.ubicacion_prompt === "documento" ? S.salida.replace(/\/?$/, "/") + "prompt-estilo.md" : "docs/prompt-estilo.md";
@@ -1334,6 +1448,7 @@ function generarPrompt() {
     `diagramas_herramienta: ${S.diag_herramienta}`, `diagramas_formato: ${S.diag_formato}`, `diagramas_direccion: ${S.diag_direccion}`, `diagramas_max_elementos: ${S.diag_max}`,
     lista("notaciones", S.notaciones.map(n => NOTACIONES[n])),
     lista("componentes", S.componentes),
+    ...(tiposTabla.length ? [lista("tablas", tiposTabla.map(x => x.k))] : []),
     lista("estructura", caps), lista("sin_numerar", sinNum), lista("siglas_conocidas", siglas),
     "---"
   ].join("\n");
@@ -1353,6 +1468,11 @@ function generarPrompt() {
   const componentes = [];
   componentes.push("- **Títulos**: `# 1 Capítulo`, `## 1.1 Sección`, `### 1.1.1 Subsección`. Máximo cuatro niveles, sin punto final, mayúscula solo inicial.");
   if (comp.has("tablas") || comp.has("requisitos")) componentes.push("- **Tablas**: `**Tabla N.** Título` antes de la tabla y `Fuente: ...` después. Unidades en el encabezado; números alineados a la derecha.");
+  if (tiposTabla.some(x => ESTADISTICAS.has(x.k))) {
+    const sd = S.decimal === "coma" ? "," : ".";
+    componentes.push(`- **Tablas estadísticas (APA 7)**: símbolos estadísticos en cursiva (*n*, *M*, *DE*, *p*, *t*, *F*, *r*); sin cero inicial en los valores que no pueden superar 1 (*p*, *r*, β, α, ω, η²): \`${sd}031\`; *p* exacto con tres decimales y \`< ${sd}001\` para los menores; asteriscos de significación solo con su nota debajo (\`*p < ${sd}05. **p < ${sd}01.\`); la tabla cierra con \`*Nota.*\` y el *N* y las abreviaturas usadas.`);
+  }
+  if (tiposTabla.length) componentes.push("- **Tipos de tabla**:\n" + tiposTabla.map(x => `  - *${x.nombre}*: ${x.regla}`).join("\n"));
   if (comp.has("figuras") || S.notaciones.length) componentes.push("- **Figuras y diagramas**: `**Figura N.** Título` y luego `Fuente: ...` después de la imagen o del bloque de diagrama. Las imágenes llevan texto alternativo.");
   if (comp.has("figuras") && S.tipo === "manual") componentes.push(`- **Capturas**: ${S.capturas_borde ? "borde de 1 px en color de borde" : "sin borde"}${S.capturas_marcadores ? "; marcadores numerados (círculos) explicados en el texto" : ""}.`);
   if (comp.has("avisos") && S.avisos.length) componentes.push(`- **Avisos**: solo ${S.avisos.map(a => "`> **" + a[0].toUpperCase() + a.slice(1) + ".**`").join(", ")}, con hasta tres líneas.`);
@@ -1429,7 +1549,7 @@ ${lineas(S.restricciones).map(r => "- " + r).join("\n")}
 - Todos los capítulos de \`estructura\` están presentes y en orden.
 ${lineas(S.criterios).map(r => "- " + r).join("\n")}
 ${seccionExcepciones()}`.replace(/\n{3,}/g, "\n\n");
-  const conf = JSON.stringify(Object.assign({}, S, { modo: undefined })).replace(/>/g, "\\u003e").replace(/--/g, "-\\u002d");
+  const conf = JSON.stringify(Object.assign({}, S, { modo: undefined, ver_todo: undefined })).replace(/>/g, "\\u003e").replace(/--/g, "-\\u002d");
   return fm + "\n" + cuerpo + `\n<!-- configurador:v1 ${conf} -->\n`;
 }
 
@@ -2028,6 +2148,8 @@ function pintarBarraDoc() {
   document.getElementById("opciones-doc").hidden = !enDoc;
   document.querySelectorAll("[data-v]").forEach(c => c.checked = !!S[c.dataset.v]);
   document.getElementById("seleccionar").setAttribute("aria-pressed", String(!!S.seleccionando));
+  const verTodo = document.getElementById("ver-todo");
+  verTodo.hidden = enDoc; verTodo.setAttribute("aria-pressed", String(!!S.ver_todo));
   const n = SEL.size;
   document.getElementById("seleccion-info").hidden = !n;
   document.getElementById("seleccion-info").textContent = n ? `${n} bloque${n === 1 ? "" : "s"} seleccionado${n === 1 ? "" : "s"}` : "";
@@ -2090,6 +2212,10 @@ document.getElementById("seleccionar").addEventListener("click", () => {
   if (S.seleccionando && EDIT) salirLocal();
   pintarBarraDoc(); actualizar();
   if (S.seleccionando) aviso("Haz clic en un bloque o arrastra sobre el texto para elegir la parte");
+});
+document.getElementById("ver-todo").addEventListener("click", () => {
+  S.ver_todo = !S.ver_todo; pintarBarraDoc(); actualizar();
+  if (S.ver_todo) aviso("Apéndice de prueba al final del ejemplo: no cambia tu selección ni el prompt");
 });
 document.getElementById("cancelar-seleccion").addEventListener("click", () => { SEL = new Set(); pintarBarraDoc(); actualizar(); });
 function crearAjusteDeSeleccion() {
@@ -2255,6 +2381,7 @@ actualizar();
     "citas:apa7": ["tesis", "informe"], "citas:ieee": ["tesis", "informe", "arquitectura"], "citas:iso690": ["tesis"],
     "citas:vancouver": ["tesis"], "citas:institucional": ["tesis"], "citas:ninguna": ["manual", "especificacion", "arquitectura", "diagrama"]
   };
+  TABLAS_ACAD.forEach(x => { UTIL[x.k] = x.util; });
   /* Descripción breve de cada opción de los selectores convertidos en tarjetas */
   const DESC = {
     "tipo:manual": "Enseña a usar un sistema: tareas, pantallas y problemas frecuentes.",
@@ -2320,6 +2447,7 @@ actualizar();
     c4: '<rect x="10" y="10" width="24" height="24" rx="2"/><rect x="14" y="14" width="16" height="16" rx="2"/><rect x="18" y="18" width="8" height="8" rx="1.5"/>',
     pct_espacio: '<circle cx="15" cy="15" r="3"/><circle cx="29" cy="29" r="3"/><path d="M30 13L14 31"/>'
   };
+  TABLAS_ACAD.forEach(x => { ICONOS[x.k] = ICONOS.tablas; });
   const svg = interior => `<svg class="ico" viewBox="0 0 44 44" aria-hidden="true"><rect x="1.5" y="1.5" width="41" height="41" rx="12" fill="currentColor" fill-opacity="0.12"/><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${interior}</g></svg>`;
   const util = clave => UTIL[clave] ? `Útil para: ${UTIL[clave].map(t => TIPOS[t]).join(" · ")}` : "";
 
@@ -2464,6 +2592,7 @@ actualizar();
   for (let el = notaNotacion.nextElementSibling; el; el = el.nextElementSibling) ajustesDiagrama.push(el);
   const DEPENDENCIAS = [
     { els: conTitulo("avisos"), si: () => S.componentes.includes("avisos") },
+    { els: conTitulo("tablas_tipos"), si: () => S.componentes.includes("tablas") },
     { els: [tarjetaK("pasos_resultado")], si: () => S.componentes.includes("pasos") },
     { els: [tarjetaK("capturas_borde"), tarjetaK("capturas_marcadores")], si: () => S.componentes.includes("figuras") && S.tipo === "manual" },
     { els: conTitulo("diataxis"), si: () => S.tipo === "manual" && S.metodologia === "diataxis" },

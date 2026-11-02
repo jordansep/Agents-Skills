@@ -224,6 +224,73 @@ class Escritura(Base):
         self.assertSinProblemas(self.verificar(DOC_VALIDO + "\n> **Nota.** Guarde antes de salir.\n"))
 
 
+DOC_ESTADISTICO = """\
+# Manual de prueba
+
+# 1 Introducción
+
+La Tabla 1 resume el análisis de varianza.
+
+**Tabla 1.** Análisis de varianza del puntaje
+
+| Fuente | gl | *F* | *p* |
+|---|---|---|---|
+| Entre grupos | 2 | 6,84 | {p} |
+| Dentro de grupos | 117 | | |
+
+*Nota.* {nota}
+
+# 2 Uso
+
+La Tabla 2 presenta las correlaciones.
+
+**Tabla 2.** Correlaciones entre variables
+
+| Variable | 1 | 2 |
+|---|---|---|
+| 1. Edad | — | |
+| 2. Uso | {r} | — |
+
+{nota_r}
+"""
+
+
+class TablasEstadisticas(Base):
+    TABLAS = "\n  - anova\n  - correlacion"
+
+    def doc(self, p=",002", nota="Datos de ejemplo; *p* = ,002.", r=",32\\*\\*", nota_r="*Nota.* \\*\\**p* < ,01."):
+        return DOC_ESTADISTICO.format(p=p, nota=nota, r=r, nota_r=nota_r)
+
+    def test_tablas_bien_formateadas_pasan(self):
+        self.assertSinProblemas(self.verificar(self.doc(), tablas=self.TABLAS))
+
+    def test_cero_inicial_en_columna_p_es_advertencia(self):
+        inf = self.verificar(self.doc(p="0,002"), tablas=self.TABLAS)
+        self.assertMensaje(inf.advertencias, r"0,002.*sin cero inicial")
+
+    def test_cero_inicial_en_el_texto_es_advertencia(self):
+        inf = self.verificar(self.doc(nota="Datos de ejemplo; *p* = 0,002."), tablas=self.TABLAS)
+        self.assertMensaje(inf.advertencias, r"«p = 0,002».*sin cero inicial")
+
+    def test_p_menor_que_con_cero_inicial_es_advertencia(self):
+        inf = self.verificar(self.doc(p="< 0,001"), tablas=self.TABLAS)
+        self.assertMensaje(inf.advertencias, r"< 0,001.*sin cero inicial")
+
+    def test_separador_decimal_distinto_es_advertencia(self):
+        inf = self.verificar(self.doc(p=".002"), tablas=self.TABLAS)
+        self.assertMensaje(inf.advertencias, r"\.002.*separador decimal del prompt es la coma")
+
+    def test_asteriscos_sin_nota_son_advertencia(self):
+        inf = self.verificar(self.doc(nota_r="Fin del capítulo."), tablas=self.TABLAS)
+        self.assertMensaje(inf.advertencias, r"asteriscos pero no tiene la nota")
+
+    def test_sin_tablas_estadisticas_en_el_prompt_no_se_revisa(self):
+        self.assertSinProblemas(self.verificar(self.doc(p="0,002", nota_r="Fin del capítulo.")))
+
+    def test_tipos_no_estadisticos_no_activan_la_revision(self):
+        self.assertSinProblemas(self.verificar(self.doc(p="0,002"), tablas="\n  - datos\n  - estado-arte"))
+
+
 class Pendientes(Base):
     def test_pendientes_se_cuentan(self):
         doc = DOC_VALIDO + "\n[PENDIENTE: dato del cliente]\n\nOtro [PENDIENTE: fecha].\n"

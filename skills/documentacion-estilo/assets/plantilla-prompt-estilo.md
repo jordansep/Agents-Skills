@@ -28,6 +28,9 @@ sin_numerar:
 siglas_conocidas:
   - URL
   - PDF
+tablas:  # opcional: tipos de tabla del configurador; los estadísticos activan las reglas de APA 7 del verificador
+  - <datos | frecuencia | contingencia | correlacion | regresion | anova | demografica | comparacion | descriptivos | fiabilidad | pruebas | operacionalizacion | estado-arte>
+  - omitir si no hay
 ---
 
 # Prompt de estilo: <Título exacto del documento>
@@ -61,6 +64,7 @@ Usa exactamente estos formatos en Markdown:
 
 - **Títulos**: `# 1 Capítulo`, `## 1.1 Sección`, `### 1.1.1 Subsección`. Como máximo cuatro niveles, sin punto final y con mayúscula solo en la primera letra.
 - **Tablas**: la línea `**Tabla N.** Título` va antes de la tabla y `Fuente: ...` después. Las unidades van en el encabezado y los números se alinean a la derecha.
+- **Tablas estadísticas (APA 7)** (solo si `tablas` incluye tipos estadísticos): símbolos en cursiva; sin cero inicial en *p*, *r*, β, α, ω y η²; *p* con tres decimales y `< ,001` para los menores; asteriscos solo con su nota debajo; la tabla cierra con `*Nota.*`. Debajo, una regla por cada tipo de `tablas`, copiada del configurador.
 - **Figuras y diagramas**: después de la imagen o del bloque `mermaid` van `**Figura N.** Título` y luego `Fuente: ...`. Las imágenes llevan texto alternativo.
 - **Avisos**: `> **Nota.**`, `> **Consejo.**`, `> **Advertencia.**` o `> **Peligro.**`, seguidos de hasta tres líneas de texto.
 - **Pasos** (solo en manuales): lista numerada con una acción por paso. El resultado se indica en la línea siguiente con `→`.

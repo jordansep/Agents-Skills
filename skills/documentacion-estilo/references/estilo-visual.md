@@ -63,6 +63,18 @@ Si un paso puede causar pérdida de datos o daño, usa un aviso de "Advertencia"
 - Texto alineado a la izquierda. Números alineados a la derecha, con el mismo número de decimales.
 - Máximo siete columnas en impreso. Si hay más, divide la tabla.
 
+### Tablas estadísticas y académicas
+
+El configurador ofrece trece tipos de tabla (de datos, frecuencia, contingencia, correlación, regresión, ANOVA, características demográficas, comparación, descriptivos, fiabilidad, pruebas de hipótesis, operacionalización y estado del arte). Los elegidos van en el campo `tablas` del prompt, cada uno con su regla. Las estadísticas siguen APA 7 con el separador decimal del prompt:
+
+- Símbolos estadísticos en cursiva: *n*, *M*, *DE*, *p*, *t*, *F*, *r*.
+- Sin cero inicial en los valores que no pueden superar 1 (*p*, *r*, β, α, ω, η²): `,031`.
+- *p* exacto con tres decimales; `< ,001` para los menores.
+- Asteriscos de significación solo con su nota debajo: `*p < ,05. **p < ,01.`
+- La tabla cierra con `*Nota.*`, el *N* y las abreviaturas usadas.
+
+`verificar_doc.py` revisa el cero inicial, el separador decimal y la nota de los asteriscos cuando `tablas` incluye algún tipo estadístico.
+
 ### Figuras (imágenes, diagramas, capturas)
 
 - Título y número debajo: `Figura 3. Pantalla de inicio de sesión`. Fuente debajo, igual que en tablas.
