@@ -65,8 +65,13 @@ textarea { min-height: 70px; resize: vertical; }
 textarea.alta { min-height: 170px; }
 .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .fila3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.opciones { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
-.opciones label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.opciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; font-size: 13px; }
+.opciones label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-height: 44px; transition: border-color .15s, background .15s; }
+.opciones label:hover { border-color: var(--accent); }
+.opciones label:has(input:checked) { border-color: var(--accent); background: var(--soft); }
+.opciones label input { margin-top: 2px; width: 16px; height: 16px; flex: none; }
+.opciones label b { display: block; font-weight: 600; font-size: 13.5px; }
+.opciones label small { display: block; margin-top: 2px; font-size: 12px; line-height: 1.35; opacity: .72; }
 .subtitulo { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 6px 0 0; font-weight: 600; }
 .nota-ui { font-size: 12px; color: var(--muted); margin: 0; }
 .alerta-ui { font-size: 12px; color: var(--bad); margin: 0; }
@@ -195,7 +200,12 @@ pre.texto-salida {
 .doc .cuerpo-doc > .editando { box-shadow: -6px 0 0 0 #0969DA; }
 .barra-vista { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--panel); font-size: 13px; }
 .barra-vista .espacio { flex: 1; }
-.opciones-doc label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.opciones-doc label { display: inline-flex; gap: 8px; align-items: flex-start; cursor: pointer; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); max-width: 240px; }
+.opciones-doc label:hover { border-color: var(--accent); }
+.opciones-doc label:has(input:checked) { border-color: var(--accent); background: var(--soft); }
+.opciones-doc label input { margin-top: 2px; flex: none; }
+.opciones-doc label b { display: block; font-weight: 600; font-size: 13px; }
+.opciones-doc label small { display: block; font-size: 11.5px; line-height: 1.3; opacity: .72; }
 .archivo { font-size: 12.5px; color: var(--muted); display: inline-flex; gap: 4px; align-items: center; }
 .archivo button { padding: 2px 7px; }
 button[aria-pressed=true].alternar { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
@@ -334,34 +344,34 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
       <div class="cuerpo-grupo">
         <p class="subtitulo">Componentes que usa el documento</p>
         <div class="opciones" data-grupo="componentes">
-          <label><input type="checkbox" value="tablas">Tablas</label>
-          <label><input type="checkbox" value="figuras">Figuras y capturas</label>
-          <label><input type="checkbox" value="avisos">Avisos</label>
-          <label><input type="checkbox" value="pasos">Pasos numerados</label>
-          <label><input type="checkbox" value="codigo">Código</label>
-          <label><input type="checkbox" value="ecuaciones">Ecuaciones</label>
-          <label><input type="checkbox" value="requisitos">Requisitos (RF/RNF)</label>
-          <label><input type="checkbox" value="historias">Historias de usuario</label>
-          <label><input type="checkbox" value="glosario">Glosario</label>
+          <label class="item"><input type="checkbox" value="tablas"><span><b>Tablas</b><small>Datos comparables en filas y columnas, con leyenda «Tabla N».</small></span></label>
+          <label class="item"><input type="checkbox" value="figuras"><span><b>Figuras y capturas</b><small>Imágenes y capturas de pantalla con leyenda «Figura N».</small></span></label>
+          <label class="item"><input type="checkbox" value="avisos"><span><b>Avisos</b><small>Recuadros destacados: nota, consejo, advertencia o peligro.</small></span></label>
+          <label class="item"><input type="checkbox" value="pasos"><span><b>Pasos numerados</b><small>Procedimientos en lista numerada, una acción por paso.</small></span></label>
+          <label class="item"><input type="checkbox" value="codigo"><span><b>Código</b><small>Bloques de código y comandos en fuente monoespaciada.</small></span></label>
+          <label class="item"><input type="checkbox" value="ecuaciones"><span><b>Ecuaciones</b><small>Fórmulas matemáticas numeradas.</small></span></label>
+          <label class="item"><input type="checkbox" value="requisitos"><span><b>Requisitos (RF/RNF)</b><small>Requisitos funcionales y no funcionales con identificador.</small></span></label>
+          <label class="item"><input type="checkbox" value="historias"><span><b>Historias de usuario</b><small>«Como… quiero… para…» con criterios de aceptación.</small></span></label>
+          <label class="item"><input type="checkbox" value="glosario"><span><b>Glosario</b><small>Definiciones de términos y siglas del dominio.</small></span></label>
         </div>
         <p class="subtitulo">Avisos habilitados</p>
         <div class="opciones" data-grupo="avisos">
-          <label><input type="checkbox" value="nota">Nota</label>
-          <label><input type="checkbox" value="consejo">Consejo</label>
-          <label><input type="checkbox" value="advertencia">Advertencia</label>
-          <label><input type="checkbox" value="peligro">Peligro</label>
+          <label class="item"><input type="checkbox" value="nota"><span><b>Nota</b><small>Información adicional útil, sin riesgo.</small></span></label>
+          <label class="item"><input type="checkbox" value="consejo"><span><b>Consejo</b><small>Atajo o buena práctica recomendada.</small></span></label>
+          <label class="item"><input type="checkbox" value="advertencia"><span><b>Advertencia</b><small>Puede causar errores o pérdida de trabajo.</small></span></label>
+          <label class="item"><input type="checkbox" value="peligro"><span><b>Peligro</b><small>Riesgo grave: daño, pérdida de datos o seguridad.</small></span></label>
         </div>
         <p class="subtitulo">Manuales</p>
         <div class="opciones" data-grupo="diataxis">
-          <label><input type="checkbox" value="tutorial">Tutoriales</label>
-          <label><input type="checkbox" value="guia">Guías prácticas</label>
-          <label><input type="checkbox" value="referencia">Referencia</label>
-          <label><input type="checkbox" value="explicacion">Explicación</label>
+          <label class="item"><input type="checkbox" value="tutorial"><span><b>Tutoriales</b><small>Aprender haciendo: lección guiada paso a paso.</small></span></label>
+          <label class="item"><input type="checkbox" value="guia"><span><b>Guías prácticas</b><small>Resolver una tarea concreta, para quien ya sabe lo básico.</small></span></label>
+          <label class="item"><input type="checkbox" value="referencia"><span><b>Referencia</b><small>Descripción técnica exacta para consultar.</small></span></label>
+          <label class="item"><input type="checkbox" value="explicacion"><span><b>Explicación</b><small>Contexto, conceptos y el porqué de las decisiones.</small></span></label>
         </div>
         <div class="opciones">
-          <label><input type="checkbox" data-k="pasos_resultado">Resultado esperado (→) tras cada paso</label>
-          <label><input type="checkbox" data-k="capturas_borde">Borde de 1 px en capturas</label>
-          <label><input type="checkbox" data-k="capturas_marcadores">Marcadores numerados en capturas</label>
+          <label class="item"><input type="checkbox" data-k="pasos_resultado"><span><b>Resultado esperado (→) tras cada paso</b><small>Cada paso indica qué debería ver el usuario al terminar.</small></span></label>
+          <label class="item"><input type="checkbox" data-k="capturas_borde"><span><b>Borde de 1 px en capturas</b><small>Separa la captura del fondo blanco de la página.</small></span></label>
+          <label class="item"><input type="checkbox" data-k="capturas_marcadores"><span><b>Marcadores numerados en capturas</b><small>Círculos numerados que el texto referencia.</small></span></label>
         </div>
         <p class="nota-ui">Los tipos de Diátaxis y las opciones de capturas solo se aplican a manuales.</p>
       </div>
@@ -372,14 +382,14 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
       <div class="cuerpo-grupo">
         <p class="subtitulo">Notaciones permitidas</p>
         <div class="opciones" data-grupo="notaciones">
-          <label><input type="checkbox" value="uml-casos">UML casos de uso</label>
-          <label><input type="checkbox" value="uml-clases">UML clases</label>
-          <label><input type="checkbox" value="uml-secuencia">UML secuencia</label>
-          <label><input type="checkbox" value="uml-actividad">UML actividad</label>
-          <label><input type="checkbox" value="uml-componentes">UML componentes/despliegue</label>
-          <label><input type="checkbox" value="bpmn">BPMN 2.0</label>
-          <label><input type="checkbox" value="er">Entidad-relación</label>
-          <label><input type="checkbox" value="c4">C4</label>
+          <label class="item"><input type="checkbox" value="uml-casos"><span><b>UML casos de uso</b><small>Actores y lo que pueden hacer con el sistema.</small></span></label>
+          <label class="item"><input type="checkbox" value="uml-clases"><span><b>UML clases</b><small>Estructura estática: clases, atributos y relaciones.</small></span></label>
+          <label class="item"><input type="checkbox" value="uml-secuencia"><span><b>UML secuencia</b><small>Mensajes entre objetos ordenados en el tiempo.</small></span></label>
+          <label class="item"><input type="checkbox" value="uml-actividad"><span><b>UML actividad</b><small>Flujo de acciones, decisiones y paralelismo.</small></span></label>
+          <label class="item"><input type="checkbox" value="uml-componentes"><span><b>UML componentes/despliegue</b><small>Módulos del sistema y dónde se ejecutan.</small></span></label>
+          <label class="item"><input type="checkbox" value="bpmn"><span><b>BPMN 2.0</b><small>Procesos de negocio con carriles y eventos.</small></span></label>
+          <label class="item"><input type="checkbox" value="er"><span><b>Entidad-relación</b><small>Entidades de datos, atributos y cardinalidades.</small></span></label>
+          <label class="item"><input type="checkbox" value="c4"><span><b>C4</b><small>Arquitectura por niveles: contexto, contenedores, componentes.</small></span></label>
         </div>
         <div class="fila">
           <label class="campo"><span>Herramienta de origen</span>
@@ -487,7 +497,7 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
         <p class="alerta-ui" id="alerta-numeros" hidden>El separador de miles no puede ser igual al separador decimal.</p>
         <div class="fila">
           <label class="campo"><span>Máx. palabras por oración</span><input type="number" min="10" max="60" data-k="max_palabras"></label>
-          <div class="opciones" style="align-self:end"><label><input type="checkbox" data-k="pct_espacio">Espacio antes de %</label></div>
+          <div class="opciones" style="align-self:end"><label class="item"><input type="checkbox" data-k="pct_espacio"><span><b>Espacio antes de %</b><small>Escribe «50 %» en lugar de «50%».</small></span></label></div>
         </div>
         <label class="campo"><span>Siglas que no hace falta desarrollar (una por línea)</span><textarea data-k="siglas"></textarea></label>
         <label class="campo"><span>Términos preferidos (uno por línea: preferido = descartado)</span><textarea data-k="terminos" placeholder="inicio de sesión = login"></textarea></label>
@@ -527,9 +537,9 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
         <button type="button" id="imprimir">Imprimir / PDF</button>
       </div>
       <div class="barra-vista opciones-doc" id="opciones-doc" hidden>
-        <label><input type="checkbox" data-v="numerar_subido">Numerar títulos</label>
-        <label><input type="checkbox" data-v="aplicar_texto">Aplicar comillas y % al texto</label>
-        <label><input type="checkbox" data-v="marcar_desvios">Marcar desvíos</label>
+        <label><input type="checkbox" data-v="numerar_subido"><span><b>Numerar títulos</b><small>Agrega 1, 1.1, 1.1.1… a los títulos de tu documento.</small></span></label>
+        <label><input type="checkbox" data-v="aplicar_texto"><span><b>Aplicar comillas y % al texto</b><small>Cambia comillas y porcentajes al formato elegido.</small></span></label>
+        <label><input type="checkbox" data-v="marcar_desvios"><span><b>Marcar desvíos</b><small>Resalta lo que no cumple el estilo, con su motivo.</small></span></label>
         <button type="button" id="usar-capitulos">Usar sus capítulos como estructura</button>
         <span class="espacio"></span>
         <button type="button" id="seleccionar" class="alternar" aria-pressed="false" title="Clic: un bloque · Shift+clic: rango · Ctrl/⌘+clic: sumar o quitar · también puedes arrastrar sobre el texto">Seleccionar parte</button>
