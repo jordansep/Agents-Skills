@@ -44,7 +44,7 @@ button.primario { background: var(--accent); color: var(--accent-fg); border-col
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
-.layout { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; gap: 16px; padding: 16px; align-items: start; }
+.layout { display: grid; grid-template-columns: minmax(360px, 500px) 1fr; gap: 16px; padding: 16px; align-items: start; }
 .panel { display: flex; flex-direction: column; gap: 10px; }
 details.grupo { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
 details.grupo > summary {
@@ -65,7 +65,8 @@ textarea { min-height: 70px; resize: vertical; }
 textarea.alta { min-height: 170px; }
 .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .fila3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.opciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; font-size: 13px; }
+.opciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; font-size: 13px; }
+.opciones label > span { min-width: 0; overflow-wrap: anywhere; }
 .opciones label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-height: 44px; transition: border-color .15s, background .15s; }
 .opciones label:hover { border-color: var(--accent); }
 .opciones label:has(input:checked) { border-color: var(--accent); background: var(--soft); }
@@ -75,7 +76,7 @@ textarea.alta { min-height: 170px; }
 .subtitulo { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 6px 0 0; font-weight: 600; }
 .nota-ui { font-size: 12px; color: var(--muted); margin: 0; }
 .alerta-ui { font-size: 12px; color: var(--bad); margin: 0; }
-.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
 .presets button { font-size: 12px; padding: 5px 9px; }
 .tamanos { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 .tamanos th, .tamanos td { padding: 3px 4px; text-align: left; }
@@ -200,7 +201,8 @@ pre.texto-salida {
 .doc .cuerpo-doc > .editando { box-shadow: -6px 0 0 0 #0969DA; }
 .barra-vista { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--panel); font-size: 13px; }
 .barra-vista .espacio { flex: 1; }
-.opciones-doc label { display: inline-flex; gap: 8px; align-items: flex-start; cursor: pointer; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); max-width: 240px; }
+.opciones-vista { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; width: 100%; }
+.opciones-doc label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
 .opciones-doc label:hover { border-color: var(--accent); }
 .opciones-doc label:has(input:checked) { border-color: var(--accent); background: var(--soft); }
 .opciones-doc label input { margin-top: 2px; flex: none; }
@@ -547,9 +549,11 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
         <button type="button" id="imprimir">Imprimir / PDF</button>
       </div>
       <div class="barra-vista opciones-doc" id="opciones-doc" hidden>
+        <div class="opciones-vista">
         <label><input type="checkbox" data-v="numerar_subido"><span><b>Numerar títulos</b><small>Agrega 1, 1.1, 1.1.1… a los títulos de tu documento.</small></span></label>
         <label><input type="checkbox" data-v="aplicar_texto"><span><b>Aplicar comillas y % al texto</b><small>Cambia comillas y porcentajes al formato elegido.</small></span></label>
         <label><input type="checkbox" data-v="marcar_desvios"><span><b>Marcar desvíos</b><small>Resalta lo que no cumple el estilo, con su motivo.</small></span></label>
+        </div>
         <button type="button" id="usar-capitulos">Usar sus capítulos como estructura</button>
         <span class="espacio"></span>
         <button type="button" id="seleccionar" class="alternar" aria-pressed="false" title="Clic: un bloque · Shift+clic: rango · Ctrl/⌘+clic: sumar o quitar · también puedes arrastrar sobre el texto">Seleccionar parte</button>
