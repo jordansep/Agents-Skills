@@ -42,6 +42,8 @@ Si hay muchos parámetros por definir, ofrece al usuario el configurador visual 
 - **Prompt generado**: guárdalo tal cual en la ruta indicada y continúa desde el Paso 5, punto 4 (verificar que no queden `[PENDIENTE]`).
 - **Para la memoria**: son las respuestas a las decisiones DEC con su alcance. Regístralas en `memoria/decisiones.md` según `references/memoria.md` y envíalas con un PR.
 - Si el prompt contiene `[PENDIENTE: ...]` (por ejemplo, el propósito de un capítulo nuevo o un color sin contraste suficiente), pregunta esos puntos antes de usarlo.
+- **Documento propio en la vista previa**: el usuario puede subir un documento en el que ya está trabajando (.md, .docx, .html o .txt). Lo ve con el estilo elegido mientras cambia los parámetros, junto con una revisión que marca los desvíos del estilo.
+- **Excepciones locales** (sección 8 del prompt): son ajustes que el usuario hizo solo sobre una parte seleccionada de su documento. Aplícalos solo en esa parte, regístralos en la memoria con alcance de documento y pregunta si alguno debe pasar a ser regla del agente.
 
 | Parámetro | Opciones | Recomendado |
 |---|---|---|
