@@ -1,6 +1,6 @@
 ---
 name: documentacion-generar
-description: Genera la documentación completa (manual de usuario, tesis, especificación de requisitos, informe, documento de arquitectura o diagramas) a partir de un prompt de estilo. Si no hay prompt de estilo, primero lo crea con el skill documentacion-estilo y después redacta el documento, lo verifica con un script y entrega los archivos. Úsalo cuando el usuario pida escribir, generar, redactar, producir o actualizar documentación, con o sin un prompt de estilo previo.
+description: Genera la documentación completa (manual de usuario, tesis, especificación de requisitos, informe, documento de arquitectura o diagramas) a partir de un prompt de estilo. Si no hay prompt de estilo, primero lo crea con el skill documentacion-estilo, preguntando al usuario lo que no esté definido, y después redacta el documento, lo verifica con un script y entrega los archivos. Nunca decide el estilo por su cuenta; lo que no está definido se pregunta y se guarda en la memoria del skill. Úsalo cuando el usuario pida escribir, generar, redactar, producir o actualizar documentación, con o sin un prompt de estilo previo.
 ---
 
 # Documentación: generador
@@ -8,6 +8,8 @@ description: Genera la documentación completa (manual de usuario, tesis, especi
 Este skill escribe el documento. Recibe el **prompt de estilo** que produce `documentacion-estilo`. Si no lo recibe, lo crea primero. Después redacta el contenido, lo verifica con `scripts/verificar_doc.py` y entrega los archivos.
 
 El flujo es siempre el mismo: prompt, contenido, plan, redacción, verificación, exportación e informe.
+
+**No decidas nada por tu cuenta.** Antes de empezar, lee `../documentacion-estilo/memoria/decisiones.md`. Si en cualquier paso aparece algo que el prompt, la memoria y las referencias no definen, aplica `../documentacion-estilo/references/memoria.md`: detén solo la parte afectada, pregunta al usuario, registra las preguntas y las respuestas en la memoria, incorpora la regla y envía la memoria al repositorio del agente con un PR (secciones Qué, Por qué y Cómo).
 
 ## Paso 1: obtener el prompt de estilo
 
@@ -20,9 +22,8 @@ Busca el prompt en este orden:
 **Si no hay prompt:**
 
 1. Invoca el skill `documentacion-estilo`. Si no puedes invocarlo, lee `../documentacion-estilo/SKILL.md` y sigue sus pasos.
-2. Infiere los parámetros del pedido del usuario y del proyecto: tipo de documento, metodología, audiencia y medio. Pregunta solo si no puedes deducir el tipo de documento.
-3. Guarda el prompt en `docs/prompt-estilo.md`.
-4. Avisa al usuario en una línea qué parámetros usaste por defecto. Continúa con el Paso 2 sin esperar respuesta, salvo que el usuario haya pedido aprobar el prompt antes de escribir.
+2. Toma los parámetros que el usuario ya dio y los que estén confirmados en `../documentacion-estilo/memoria/decisiones.md`. **Pregunta los demás**: no los infieras ni apliques valores por defecto.
+3. Con las respuestas, guarda el prompt en la ruta que fije la memoria (`docs/prompt-estilo.md` mientras DEC-005 esté pendiente) y continúa con el Paso 2.
 
 **Si el prompt existe, valídalo.** El encabezado YAML debe tener `documento`, `tipo`, `metodologia`, `medio`, `tratamiento`, `salida` y `estructura`. Si faltan campos, complétalos siguiendo `documentacion-estilo`, sube la versión del prompt y guárdalo.
 
@@ -61,6 +62,8 @@ Sigue el prompt al pie de la letra: estructura, componentes, tratamiento y norma
 - **Pendientes**: `[PENDIENTE: descripción]`, nunca texto inventado.
 - **Glosario y siglas**: anota cada término técnico y cada sigla mientras escribes. Al final, completa el glosario y la lista de siglas.
 
+Si una sección necesita un componente, formato o término que el prompt no define, no lo improvises. Escribe `[PENDIENTE: estilo no definido, ver DEC-NNN]`, haz las preguntas del procedimiento de memoria y sigue con las secciones que no dependen de esa decisión. Cuando llegue la respuesta, vuelve a esa sección.
+
 ## Paso 5: verificar
 
 Ejecuta el verificador, que está en la carpeta `scripts/` de este skill:
@@ -89,4 +92,5 @@ Entrega al usuario un mensaje breve con:
 2. Los archivos generados o actualizados.
 3. El resultado del verificador: errores (deben ser 0) y advertencias que quedaron, con su motivo.
 4. La lista de `[PENDIENTE]` con lo que hace falta para completarlos.
-5. Cualquier desvío del prompt y su motivo.
+5. Las decisiones de estilo nuevas (DEC-NNN): preguntas, respuestas, estado y enlace al PR que las envió al repositorio del agente.
+6. Cualquier desvío del prompt y su motivo.

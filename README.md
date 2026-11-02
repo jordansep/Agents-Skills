@@ -22,6 +22,8 @@ pedido ──► ¿hay prompt-estilo.md? ──no──► documentacion-estilo 
                                          └─ exporta (docx/pdf) si se pide
 ```
 
+Memoria del agente: el agente trabaja siempre con el mismo estilo y no decide nada por su cuenta. Lo que no está definido se lo pregunta al usuario y lo registra en [`memoria/decisiones.md`](skills/documentacion-estilo/memoria/decisiones.md). Luego incorpora la regla al skill y envía la memoria a este repositorio con un PR que explica qué cambió, por qué y cómo ([procedimiento](skills/documentacion-estilo/references/memoria.md)).
+
 Verificador independiente:
 
 ```bash

@@ -65,7 +65,7 @@ Usa exactamente estos formatos en Markdown:
 - **Código**: bloque con el lenguaje indicado, de 40 líneas como máximo.
 - **Numeración**: figuras y tablas se numeran de forma continua en todo el documento, y cada una se menciona en el texto antes de aparecer.
 
-Tipografía y color de la versión final (si se exporta): <familias, tamaños y tokens elegidos, o "valores por defecto de documentacion-estilo">.
+Tipografía y color de la versión final (si se exporta): <familias, tamaños y tokens confirmados por el usuario (ver DEC-003 en memoria/decisiones.md)>.
 
 ## 5. Normas de escritura
 

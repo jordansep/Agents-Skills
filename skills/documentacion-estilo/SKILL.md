@@ -1,6 +1,6 @@
 ---
 name: documentacion-estilo
-description: Prompteador de estilo para documentación técnica y académica. Produce un "prompt de estilo" (archivo prompt-estilo.md) que fija la estructura del documento según la metodología elegida (RUP, UP, Scrum/ágil, ISO/IEEE 29148, Diátaxis o académica), cómo se muestra cada componente (títulos, tablas, figuras, código, avisos, diagramas), la tipografía, la paleta de color y las normas de escritura. Úsalo cuando el usuario quiera definir, acordar o revisar el estilo, la estructura o las normas de un manual, tesis, especificación, informe o diagrama. Para escribir el documento completo usa documentacion-generar, que consume este prompt.
+description: Prompteador de estilo para documentación técnica y académica. Produce un "prompt de estilo" (archivo prompt-estilo.md) que fija la estructura del documento según la metodología elegida (RUP, UP, Scrum/ágil, ISO/IEEE 29148, Diátaxis o académica), cómo se muestra cada componente (títulos, tablas, figuras, código, avisos, diagramas), la tipografía, la paleta de color y las normas de escritura. Úsalo cuando el usuario quiera definir, acordar o revisar el estilo, la estructura o las normas de un manual, tesis, especificación, informe o diagrama. No decide nada por su cuenta; lo que no esté definido lo pregunta al usuario y lo guarda en su memoria (memoria/decisiones.md) para mejorar el estilo de forma incremental. Para escribir el documento completo usa documentacion-generar, que consume este prompt.
 ---
 
 # Documentación: prompteador de estilo
@@ -13,12 +13,30 @@ Carga solo la referencia que necesites:
 - `references/estilo-visual.md`: grilla, títulos, componentes, tipografía, paleta de color y diagramas.
 - `references/escritura.md`: normas de redacción, ortotipografía, reglas por tipo de documento y ejemplos.
 - `assets/plantilla-prompt-estilo.md`: plantilla del archivo de salida.
+- `references/memoria.md`: qué hacer cuando algo no está definido y cómo se guarda la memoria.
+- `memoria/decisiones.md`: registro de decisiones del usuario. Siempre se lee.
+
+## Regla principal: no decidir por cuenta propia
+
+Este agente trabaja siempre con el mismo estilo, y ese estilo vive en su memoria: la carpeta `memoria/` de este skill. Las reglas son del agente, no del repositorio donde se instale. No elijas, infieras ni apliques por defecto nada que el usuario no haya definido. Si algo no está definido, pregunta, registra las preguntas y las respuestas en la memoria, incorpora la regla al skill y envía la memoria al repositorio del agente con un PR. El procedimiento completo está en `references/memoria.md`.
+
+## Paso 0: leer la memoria
+
+Lee `memoria/decisiones.md`.
+
+- Las decisiones **confirmadas** mandan sobre las referencias y sobre la columna "Recomendado" de la tabla del Paso 1.
+- Si el documento necesita una decisión que figura como **pendiente**, haz esas preguntas antes de usarla.
 
 ## Paso 1: definir el encargo
 
-Fija estos parámetros. Si el usuario ya los dio, úsalos. Si no, aplica el valor por defecto y declaralo. Pregunta solo si no puedes inferir el tipo de documento.
+Fija estos parámetros. Para cada uno:
 
-| Parámetro | Opciones | Por defecto |
+- Si el usuario ya lo dio, o hay una decisión confirmada en la memoria, úsalo.
+- Si no, **pregúntalo**. Ofrece las opciones de la tabla y marca la recomendada, pero no la apliques hasta tener respuesta.
+
+Agrupa las preguntas en una sola tanda, de hasta cuatro preguntas por vez.
+
+| Parámetro | Opciones | Recomendado |
 |---|---|---|
 | Tipo de documento | manual, tesis, especificación, informe, diagrama, arquitectura, otro | informe |
 | Metodología | RUP, UP, Scrum, ISO/IEEE 29148, Diátaxis, académica, ninguna | Diátaxis (manual), académica (tesis), ISO 29148 (especificación); en otro caso, ninguna |
@@ -29,7 +47,7 @@ Fija estos parámetros. Si el usuario ya los dio, úsalos. Si no, aplica el valo
 | Citas | APA 7, IEEE, institucional, ninguna | APA 7 si hay citas |
 | Formato de salida | Markdown, docx, pdf | Markdown |
 
-Si hay un reglamento institucional o una guía de marca, esa norma manda sobre los valores por defecto. Pide el documento si existe.
+Pregunta siempre si hay un reglamento institucional o una guía de marca. Si existe, manda sobre las recomendaciones y hay que pedir el documento.
 
 ## Paso 2: elegir la estructura
 
@@ -52,6 +70,16 @@ Desde `references/escritura.md`, copia las reglas generales y las específicas d
 3. El cuerpo debe poder leerse sin las referencias: quien lo use no necesita abrir este skill.
 4. Guárdalo en `docs/prompt-estilo.md`, salvo que el usuario indique otra ruta. Si ya existe, léelo, súbele la versión y conserva las decisiones que el usuario no pidió cambiar.
 5. Muestra al usuario un resumen de una línea por parámetro y la ruta del archivo.
+
+## Casos no definidos
+
+Si un paso necesita algo que no está en la memoria ni en las referencias (una metodología nueva, un componente sin formato, una notación, una norma, una contradicción entre reglas), aplica `references/memoria.md`:
+
+1. Detén solo la parte afectada y márcala con `[PENDIENTE: estilo no definido, ver DEC-NNN]`.
+2. Haz de una a cuatro preguntas cerradas con opciones y ejemplos. Incluye una pregunta sobre el alcance: solo este documento o todos los documentos del agente.
+3. Registra las preguntas en `memoria/decisiones.md` con estado `pendiente` antes de esperar la respuesta.
+4. Con la respuesta, confirma la entrada, escribe la regla en la referencia o en el prompt según el alcance y márcala con `(DEC-NNN)`.
+5. Envía la memoria al repositorio del agente en un PR, con el cuerpo de `assets/plantilla-pr.md` (secciones Qué, Por qué y Cómo).
 
 ## Reglas no negociables
 
