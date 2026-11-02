@@ -96,6 +96,13 @@ section.grupo > h2 { font-size: 13px; text-transform: uppercase; letter-spacing:
 section.grupo > h2 small { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); font-size: 12.5px; margin-left: 4px; }
 section.grupo > h2 .cnt { color: color-mix(in srgb, var(--c) 45%, var(--cnt)); margin-left: 6px; }
 section.grupo > h2 .cnt:empty { display: none; }
+/* Secciones desplegables: el título es el botón */
+section.grupo > h2 .plegar { display: flex; align-items: baseline; gap: 0; width: 100%; padding: 0; border-radius: 0; background: none; color: inherit; font: inherit; text-transform: inherit; letter-spacing: inherit; text-align: left; }
+section.grupo > h2 .plegar:hover { background: none; box-shadow: none; color: inherit; filter: brightness(.9); }
+section.grupo > h2 .plegar::after { content: ""; margin-left: auto; align-self: center; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); transition: transform .15s; opacity: .8; }
+section.grupo.plegada > h2 .plegar::after { transform: rotate(-45deg); }
+section.grupo.plegada > h2 { margin-bottom: 0; }
+section.grupo.plegada > .cuerpo-grupo { display: none; }
 :root[data-theme="dark"] section.grupo > h2, :root[data-theme="dark"] .grouphdr { color: color-mix(in srgb, var(--c) 62%, #fff); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) section.grupo > h2, :root:not([data-theme="light"]) .grouphdr { color: color-mix(in srgb, var(--c) 62%, #fff); } }
 .cuerpo-grupo { display: grid; gap: 12px; }
@@ -2408,7 +2415,30 @@ actualizar();
   };
   document.getElementById("descargar").addEventListener("click", () => aviso("✓ Descargado. Ahora escribe «listo» en la terminal del agente."));
 
-  /* 8. Mantener tarjetas, filtro y resumen al día con el estado */
+  /* 8. Secciones desplegables: se recuerda cuáles quedaron plegadas */
+  const CLAVE_PLEGADAS = "configurador-secciones-plegadas";
+  let plegadas = [];
+  try { plegadas = JSON.parse(localStorage.getItem(CLAVE_PLEGADAS) || "[]"); } catch (e) { plegadas = []; }
+  function plegar(s, cerrada) {
+    s.classList.toggle("plegada", cerrada);
+    s.querySelector(":scope > h2 .plegar").setAttribute("aria-expanded", String(!cerrada));
+  }
+  function guardarPlegadas() {
+    try { localStorage.setItem(CLAVE_PLEGADAS, JSON.stringify(secciones.filter(s => s.classList.contains("plegada")).map(s => s.dataset.sec))); } catch (e) { /* sin almacenamiento */ }
+  }
+  secciones.forEach((s, i) => {
+    const h2 = s.querySelector(":scope > h2"), cuerpo = s.querySelector(":scope > .cuerpo-grupo");
+    cuerpo.id = cuerpo.id || "cuerpo-sec-" + i;
+    h2.innerHTML = `<button type="button" class="plegar" aria-controls="${cuerpo.id}">${h2.innerHTML}</button>`;
+    h2.firstChild.addEventListener("click", () => { plegar(s, !s.classList.contains("plegada")); guardarPlegadas(); });
+    plegar(s, plegadas.includes(s.dataset.sec));
+  });
+  /* Saltar a una sección o editar una selección la despliega */
+  document.querySelectorAll("#saltos .salto").forEach(b => b.addEventListener("click", () => { plegar(secciones[+b.dataset.i], false); guardarPlegadas(); }, true));
+  const editarOriginal = editarAjuste;
+  editarAjuste = function (id) { plegar(document.getElementById("grupo-tipografia"), false); guardarPlegadas(); editarOriginal(id); };
+
+  /* 9. Mantener tarjetas, filtro y resumen al día con el estado */
   const pintarOriginal = pintarFormulario;
   pintarFormulario = function () { pintarOriginal(); sincronizar(); filtrar(); resumen(); };
   form.addEventListener("input", () => { sincronizar(); filtrar(); resumen(); });

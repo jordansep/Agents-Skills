@@ -9,6 +9,7 @@ Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documenta
 - Configurador: filtro «Útil para» por tipo de documento, chips «Ir a» por sección e íconos en las tarjetas de opción
 - Configurador: la vista previa se puede cerrar y el formulario pasa a ocupar todo el ancho; se recuerda si quedó abierta
 - Configurador: botón para cambiar entre modo claro y oscuro
+- Configurador: las secciones se pliegan y despliegan desde su título; se recuerda cuáles quedaron plegadas y saltar a una sección la despliega
 
 ### Cambiado
 
