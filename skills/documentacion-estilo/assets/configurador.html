@@ -5,114 +5,209 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Configurador de estilo</title>
 <meta name="description" content="Configurador del prompt de estilo del agente de documentación: metodología, diagramas, manuales, tipografía, tamaños, color y normas, con vista previa.">
+<script>
+/* aplica el tema antes de pintar para que no parpadee */
+(function(){ try { var t = localStorage.getItem("configurador-tema"); if (t) document.documentElement.setAttribute("data-theme", t); } catch(e){} })();
+</script>
 <style>
 :root {
-  --bg: #F3F4F6; --panel: #FFFFFF; --fg: #1F2328; --muted: #57606A; --line: #D0D7DE;
-  --accent: #1F4E79; --accent-fg: #FFFFFF; --soft: #EEF3F8; --ok: #1A7F37; --bad: #CF222E;
-  --radius: 8px;
-  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+  --bg: #f6f7fb; --panel: #ffffff; --fg: #1c1e2b; --muted: #6b7080; --line: #e6e8f0;
+  --accent: #5b4bdc; --accent-ink: #5b4bdc; --accent-fg: #ffffff; --soft: #efedfc;
+  --control: #eef0f7; --control2: #f1f2f8; --raised: #ffffff; --cnt: #b9bdce; --foot: #aeb2c4;
+  --shadow: rgba(20,20,50,.06); --ok: #1a7f37; --bad: #c0361f; --warn: #c0561f;
+  --radius: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0D1117; --panel: #151B23; --fg: #E6EDF3; --muted: #9198A1; --line: #3D444D;
-    --accent: #79B8FF; --accent-fg: #0D1117; --soft: #1C2633; --ok: #3FB950; --bad: #F85149;
+    --bg: #0f1117; --panel: #171a23; --fg: #e7e9f2; --muted: #9aa0b4; --line: #2a2f3e;
+    --accent: #6d5cf0; --accent-ink: #a99bff; --accent-fg: #ffffff; --soft: #262243;
+    --control: #222634; --control2: #1d212d; --raised: #2c3242; --cnt: #5a6076; --foot: #5a6076;
+    --shadow: rgba(0,0,0,.45); --ok: #3fb950; --bad: #f85149; --warn: #e08a4a;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0D1117; --panel: #151B23; --fg: #E6EDF3; --muted: #9198A1; --line: #3D444D;
-  --accent: #79B8FF; --accent-fg: #0D1117; --soft: #1C2633; --ok: #3FB950; --bad: #F85149;
+  --bg: #0f1117; --panel: #171a23; --fg: #e7e9f2; --muted: #9aa0b4; --line: #2a2f3e;
+  --accent: #6d5cf0; --accent-ink: #a99bff; --accent-fg: #ffffff; --soft: #262243;
+  --control: #222634; --control2: #1d212d; --raised: #2c3242; --cnt: #5a6076; --foot: #5a6076;
+  --shadow: rgba(0,0,0,.45); --ok: #3fb950; --bad: #f85149; --warn: #e08a4a;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font-size: 14px; line-height: 1.45; }
-header.top {
-  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
-  padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
-  position: sticky; top: 0; z-index: 5;
-}
-header.top h1 { font-size: 17px; margin: 0; }
-header.top p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
-.acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+body { margin: 0; font-size: 15px; line-height: 1.5; background: var(--bg); color: var(--fg); }
+
+/* ===== Botones ===== */
 button, .boton {
-  font: inherit; font-size: 13px; padding: 7px 12px; border-radius: var(--radius);
-  border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer;
+  font: inherit; font-size: 13.5px; font-weight: 600; padding: 8px 14px; border-radius: 8px;
+  border: 0; background: var(--control); color: var(--fg); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  transition: background .12s, color .12s, filter .12s, box-shadow .12s;
 }
-button:hover, .boton:hover { border-color: var(--accent); }
-button.primario { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+button:hover, .boton:hover { background: var(--raised); color: var(--accent-ink); box-shadow: 0 1px 3px var(--shadow); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.primario { background: var(--accent); color: #fff; padding: 9px 22px; font-size: 14px; font-weight: 700; }
+button.primario:hover { background: var(--accent); color: #fff; filter: brightness(1.07); }
+button[aria-pressed=true].alternar { background: var(--accent); color: #fff; }
+.themebtn { flex: none; width: 36px; height: 36px; padding: 0; justify-content: center; font-size: 17px; line-height: 1; border-radius: 9px; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .boton:focus-within {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
-.layout { display: grid; grid-template-columns: minmax(360px, 500px) 1fr; gap: 16px; padding: 16px; align-items: start; }
-.panel { display: flex; flex-direction: column; gap: 10px; }
-details.grupo { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
-details.grupo > summary {
-  cursor: pointer; padding: 11px 14px; font-weight: 600; list-style: none; display: flex; align-items: baseline; gap: 6px;
-}
-details.grupo > summary::-webkit-details-marker { display: none; }
-details.grupo > summary::after { content: "＋"; color: var(--muted); margin-left: auto; }
-details.grupo[open] > summary::after { content: "－"; }
-details.grupo > summary small { font-weight: 400; color: var(--muted); }
-.cuerpo-grupo { padding: 2px 14px 14px; display: grid; gap: 10px; }
-label.campo { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); }
-label.campo > span { font-weight: 500; }
+
+/* ===== Encabezado y compositor (como la referencia) ===== */
+header.top { position: sticky; top: 0; z-index: 5; background: var(--panel); padding: 20px 0 12px; border-bottom: 1px solid var(--line); box-shadow: 0 2px 12px var(--shadow); }
+.hwrap { max-width: 1600px; margin: 0 auto; padding: 0 24px; }
+body.sin-vista .hwrap { max-width: 1120px; }
+.titlerow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+header.top h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: -.02em; }
+.sub { margin: 0 0 12px; color: var(--muted); font-size: 14px; max-width: 74ch; }
+.acciones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.composer { display: flex; flex-direction: column; gap: 9px; margin: 6px 0 12px; }
+.grp { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.glabel { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); min-width: 74px; }
+.pill { font-size: 13px; color: var(--muted); background: var(--control); padding: 6px 12px; border-radius: 20px; }
+.pill b { color: var(--accent-ink); }
+.empuje { margin-left: auto; display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.bar { display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+.goals { display: flex; gap: 7px; flex-wrap: wrap; }
+.goal { font-size: 12px; padding: 5px 12px; border-radius: 16px; background: var(--control); color: var(--muted); font-weight: 600; }
+.goal:hover { color: var(--fg); }
+.goal.on, .goal.on:hover { background: var(--accent); color: #fff; }
+.chips { flex: 1 1 320px; min-width: 0; display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.salto { font-size: 12px; padding: 4px 11px; border-radius: 16px; color: #fff; background: var(--cc); font-weight: 600; }
+.salto:hover { background: var(--cc); color: #fff; filter: brightness(1.08); }
+.banner { max-height: 0; overflow: hidden; transition: max-height .25s ease, padding .22s ease, margin .22s ease; background: linear-gradient(90deg, var(--accent), #8275f2); color: #fff; border-radius: 10px; font-weight: 700; text-align: center; padding: 0 14px; }
+.banner.show { max-height: 64px; padding: 13px 14px; margin-top: 10px; }
+.banner.fail { background: linear-gradient(90deg, var(--warn), #e0894a); }
+.toast { display: none; }
+
+/* ===== Distribución: formulario + vista previa que se puede cerrar ===== */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(440px, 46%); gap: 24px; padding: 18px 24px 40px; max-width: 1600px; margin: 0 auto; align-items: start; }
+body.sin-vista .layout { grid-template-columns: minmax(0, 1fr); max-width: 1120px; }
+body.sin-vista .salida { display: none; }
+.panel { min-width: 0; }
+footer { text-align: center; color: var(--foot); font-size: 12px; padding: 24px; }
+
+/* ===== Secciones (categorías) ===== */
+.grouphdr { margin: 30px 0 12px; font-size: 12px; text-transform: uppercase; letter-spacing: .14em; font-weight: 700; color: var(--c); opacity: .92; border-bottom: 1px solid color-mix(in srgb, var(--c) 22%, var(--line)); padding-bottom: 7px; }
+.panel > .grouphdr:first-of-type { margin-top: 2px; }
+section.grupo { --c: var(--accent); margin: 0 0 26px; scroll-margin-top: calc(var(--alto-header, 0px) + 12px); }
+section.grupo > h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--c); margin: 0 0 12px; border-bottom: 1px solid color-mix(in srgb, var(--c) 24%, var(--line)); padding-bottom: 6px; }
+section.grupo > h2 small { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); font-size: 12.5px; margin-left: 4px; }
+section.grupo > h2 .cnt { color: color-mix(in srgb, var(--c) 45%, var(--cnt)); margin-left: 6px; }
+section.grupo > h2 .cnt:empty { display: none; }
+/* Secciones desplegables: el título es el botón */
+section.grupo > h2 .plegar { display: flex; align-items: baseline; gap: 0; width: 100%; padding: 0; border-radius: 0; background: none; color: inherit; font: inherit; text-transform: inherit; letter-spacing: inherit; text-align: left; }
+section.grupo > h2 .plegar:hover { background: none; box-shadow: none; color: inherit; filter: brightness(.9); }
+section.grupo > h2 .plegar::after { content: ""; margin-left: auto; align-self: center; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); transition: transform .15s; opacity: .8; }
+section.grupo.plegada > h2 .plegar::after { transform: rotate(-45deg); }
+section.grupo.plegada > h2 { margin-bottom: 0; }
+section.grupo.plegada > .cuerpo-grupo { display: none; }
+:root[data-theme="dark"] section.grupo > h2, :root[data-theme="dark"] .grouphdr { color: color-mix(in srgb, var(--c) 62%, #fff); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) section.grupo > h2, :root:not([data-theme="light"]) .grouphdr { color: color-mix(in srgb, var(--c) 62%, #fff); } }
+.cuerpo-grupo { display: grid; gap: 12px; }
+
+/* ===== Campos ===== */
+label.campo { display: grid; gap: 5px; font-size: 11px; color: var(--muted); }
+label.campo > span { font-weight: 600; text-transform: uppercase; letter-spacing: .07em; }
 input[type=text], input[type=number], select, textarea {
-  font: inherit; font-size: 13.5px; color: var(--fg); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; width: 100%;
+  font: inherit; font-size: 14px; color: var(--fg); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%;
+  transition: border-color .12s, box-shadow .12s;
 }
+input[type=text]:hover, input[type=number]:hover, select:hover, textarea:hover { border-color: color-mix(in srgb, var(--c, var(--accent)) 45%, var(--line)); }
+input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus { border-color: var(--c, var(--accent)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--c, var(--accent)) 25%, transparent); outline: none; }
 textarea { min-height: 70px; resize: vertical; }
 textarea.alta { min-height: 170px; }
-.fila { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.fila3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.opciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; font-size: 13px; }
-.opciones label > span { min-width: 0; overflow-wrap: anywhere; }
-.opciones label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-height: 44px; transition: border-color .15s, background .15s; }
-.opciones label:hover { border-color: var(--accent); }
-.opciones label:has(input:checked) { border-color: var(--accent); background: var(--soft); }
-.opciones label input { margin-top: 2px; width: 16px; height: 16px; flex: none; }
-.opciones label b { display: block; font-weight: 600; font-size: 13.5px; }
-.opciones label small { display: block; margin-top: 2px; font-size: 12px; line-height: 1.35; opacity: .72; }
-.subtitulo { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 6px 0 0; font-weight: 600; }
-.nota-ui { font-size: 12px; color: var(--muted); margin: 0; }
-.alerta-ui { font-size: 12px; color: var(--bad); margin: 0; }
-.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
-.presets button { font-size: 12px; padding: 5px 9px; }
-.tamanos { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.tamanos th, .tamanos td { padding: 3px 4px; text-align: left; }
-.tamanos th { color: var(--muted); font-weight: 500; }
-.tamanos input { padding: 4px 6px; }
-.colores { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.color { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
-.color input[type=color] { width: 34px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; flex: none; }
+.fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fila3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.fila.apilada, .fila3.apilada { grid-template-columns: 1fr; }
+.campo-oculto { display: none !important; }
+.dep-oculta { display: none !important; }
+
+/* ===== Paso − / + (contador de la referencia) ===== */
+.step { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--fg); background: var(--control2); padding: 4px 6px; border-radius: 20px; justify-self: start; }
+.step input[type=number] { width: 64px; padding: 2px 4px; border: 0; background: transparent; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
+.step input[type=number]::-webkit-inner-spin-button, .step input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.step input[type=number]:focus { box-shadow: none; }
+.step button { width: 24px; height: 24px; padding: 0; justify-content: center; border-radius: 50%; background: var(--raised); color: var(--muted); font-size: 17px; line-height: 22px; box-shadow: 0 1px 2px var(--shadow); }
+.step button:hover { color: var(--accent-ink); }
+
+/* ===== Tarjetas (técnicas de la referencia) ===== */
+.opciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.opciones.compacta { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.opciones label {
+  display: flex; gap: 12px; align-items: flex-start; cursor: pointer; padding: 11px 13px;
+  background: color-mix(in srgb, var(--c, var(--accent)) 5%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--c, var(--accent)) 18%, var(--line)); border-radius: 10px;
+  transition: border-color .12s, box-shadow .12s, background .12s;
+}
+.opciones label:hover { border-color: color-mix(in srgb, var(--c, var(--accent)) 45%, var(--panel)); }
+.opciones label:has(input:checked) {
+  border-color: var(--c, var(--accent)); background: color-mix(in srgb, var(--c, var(--accent)) 12%, var(--panel));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c, var(--accent)) 30%, transparent);
+}
+:root[data-theme="dark"] .opciones label:has(input:checked) { border-color: color-mix(in srgb, var(--c, var(--accent)) 60%, #fff); }
+.opciones label input { margin-top: 2px; width: 17px; height: 17px; flex: none; accent-color: var(--c, var(--accent)); }
+.opciones label > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.opciones label b { display: block; font-weight: 600; font-size: 14.5px; }
+.opciones label small { display: block; margin-top: 2px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.opciones label .gf { display: block; margin-top: 5px; font-size: 11px; color: var(--accent-ink); opacity: .85; }
+.opciones label.hidden { display: none; }
+.ic2 { display: flex; gap: 5px; flex: none; }
+.ico { width: 40px; height: 40px; flex: none; color: var(--c, var(--accent)); }
+:root[data-theme="dark"] .ico { color: color-mix(in srgb, var(--c, var(--accent)) 68%, #fff); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ico { color: color-mix(in srgb, var(--c, var(--accent)) 68%, #fff); } }
+.subtitulo { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 8px 0 0; font-weight: 700; }
+.eleccion-campo { display: grid; gap: 7px; }
+.eleccion-campo > .subtitulo { margin: 0; }
+.nota-ui { font-size: 13px; color: var(--muted); margin: 0; font-style: italic; }
+.nota-ui:empty { display: none; }
+.alerta-ui { font-size: 13px; color: var(--warn); margin: 0; font-weight: 600; }
+
+/* ===== Plantillas como píldoras ===== */
+.presets { display: flex; flex-wrap: wrap; gap: 7px; }
+.presets button { font-size: 12.5px; padding: 6px 13px; border-radius: 16px; }
+.presets button:hover { background: var(--c, var(--accent)); color: #fff; }
+
+.tamanos { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tamanos th, .tamanos td { padding: 4px 5px; text-align: left; }
+.tamanos th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
+.tamanos input { padding: 5px 7px; }
+.colores { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.color { display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.color input[type=color] { width: 36px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: none; flex: none; cursor: pointer; }
 .color code { font-size: 11.5px; color: var(--muted); }
-.contraste { display: grid; gap: 4px; font-size: 12px; }
-.contraste div { display: flex; justify-content: space-between; gap: 8px; }
-.badge { font-weight: 600; font-variant-numeric: tabular-nums; }
+.contraste { display: grid; gap: 4px; font-size: 13px; }
+.contraste div { display: flex; justify-content: space-between; gap: 8px; padding: 5px 10px; background: var(--control2); border-radius: 8px; }
+.badge { font-weight: 700; font-variant-numeric: tabular-nums; }
 .badge.ok { color: var(--ok); } .badge.mal { color: var(--bad); }
 
-.salida { position: sticky; top: 72px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
-.pestanas { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--line); }
-.pestanas [role=tab] { border: none; background: none; padding: 7px 12px; border-radius: 6px; color: var(--muted); }
-.pestanas [role=tab][aria-selected=true] { background: var(--soft); color: var(--fg); font-weight: 600; }
+/* ===== Panel de vista previa ===== */
+.salida { position: sticky; top: calc(var(--alto-header, 0px) + 12px); background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; box-shadow: 0 2px 12px var(--shadow); overflow: hidden; }
+.pestanas { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.pestanas [role=tab] { background: transparent; padding: 7px 13px; border-radius: 7px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.pestanas [role=tab]:hover { background: var(--control); color: var(--fg); box-shadow: none; }
+.pestanas [role=tab][aria-selected=true] { background: var(--control); color: var(--accent-ink); }
 .pestanas .espacio { flex: 1; }
-.vista-modo { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-.vista-modo button { border: none; border-radius: 0; padding: 5px 10px; font-size: 12px; }
-.vista-modo button[aria-pressed=true] { background: var(--accent); color: var(--accent-fg); }
-.panel-salida { height: calc(100vh - 150px); overflow: auto; }
+.cerrar-vista { width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: 8px; font-size: 15px; color: var(--muted); }
+.vista-modo { display: inline-flex; background: var(--control); border-radius: 9px; padding: 3px; gap: 2px; }
+.vista-modo button { background: transparent; border-radius: 7px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.vista-modo button:hover { box-shadow: none; background: transparent; color: var(--fg); }
+.vista-modo button[aria-pressed=true] { background: var(--raised); color: var(--accent-ink); box-shadow: 0 1px 3px var(--shadow); }
+.panel-salida { height: calc(100vh - var(--alto-header, 0px) - 90px); min-height: 360px; overflow: auto; }
 .panel-salida[hidden] { display: none; }
-.lienzo { background: #E5E7EB; padding: 20px; min-height: 100%; }
-:root[data-theme="dark"] .lienzo { background: #2A2F36; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lienzo { background: #2A2F36; } }
+.lienzo { background: #e4e6ee; padding: 24px; min-height: 100%; }
+:root[data-theme="dark"] .lienzo { background: #0b0d12; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lienzo { background: #0b0d12; } }
 .marco-hoja { margin: 0 auto; }
 pre.texto-salida {
-  margin: 0; padding: 16px; font: 12.5px/1.5 "JetBrains Mono", Consolas, monospace; white-space: pre-wrap; word-break: break-word;
-  color: var(--fg);
+  margin: 0; padding: 18px 20px; font: 12.5px/1.6 "JetBrains Mono", Consolas, monospace; white-space: pre-wrap; word-break: break-word;
+  color: var(--fg); background: var(--control2); min-height: 100%;
 }
-.barra-salida { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); align-items: center; }
+.barra-salida { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); align-items: center; }
 .barra-salida .nota-ui { flex: 1; min-width: 200px; }
-.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
-.toast.ver { opacity: 1; }
+.barra-salida code, .nota-ui code { font-style: normal; color: var(--accent-ink); background: var(--control); padding: 1px 6px; border-radius: 6px; }
 
 /* ===== Documento de vista previa (siempre en papel claro) ===== */
 .doc {
@@ -199,49 +294,59 @@ pre.texto-salida {
 .doc.seleccionando .cuerpo-doc > [data-b]:hover { box-shadow: 0 0 0 2px rgba(9, 105, 218, .35); }
 .doc .cuerpo-doc > .seleccionado { box-shadow: 0 0 0 2px #0969DA !important; background: rgba(221, 244, 255, .55); }
 .doc .cuerpo-doc > .editando { box-shadow: -6px 0 0 0 #0969DA; }
-.barra-vista { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--panel); font-size: 13px; }
+.barra-vista { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--panel); font-size: 13px; }
 .barra-vista .espacio { flex: 1; }
-.opciones-vista { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; width: 100%; }
-.opciones-doc label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
-.opciones-doc label:hover { border-color: var(--accent); }
-.opciones-doc label:has(input:checked) { border-color: var(--accent); background: var(--soft); }
-.opciones-doc label input { margin-top: 2px; flex: none; }
+.opciones-vista { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; width: 100%; }
+.opciones-doc label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transition: border-color .12s, box-shadow .12s, background .12s; }
+.opciones-doc label:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--panel)); }
+.opciones-doc label:has(input:checked) { border-color: var(--accent); background: var(--soft); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+.opciones-doc label input { margin-top: 2px; flex: none; accent-color: var(--accent); }
 .opciones-doc label b { display: block; font-weight: 600; font-size: 13px; }
-.opciones-doc label small { display: block; font-size: 11.5px; line-height: 1.3; opacity: .72; }
-.archivo { font-size: 12.5px; color: var(--muted); display: inline-flex; gap: 4px; align-items: center; }
-.archivo button { padding: 2px 7px; }
-button[aria-pressed=true].alternar { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-.seleccion-info { font-size: 12.5px; color: var(--muted); }
-.ajustes { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+.opciones-doc label small { display: block; font-size: 12px; line-height: 1.35; color: var(--muted); }
+.archivo { font-size: 12.5px; color: var(--fg); display: inline-flex; gap: 6px; align-items: center; background: var(--control2); padding: 3px 4px 3px 12px; border-radius: 20px; }
+.archivo button { width: 24px; height: 24px; padding: 0; justify-content: center; border-radius: 50%; background: var(--raised); color: var(--muted); font-size: 12px; box-shadow: 0 1px 2px var(--shadow); }
+.seleccion-info { font-size: 13px; color: var(--muted); background: var(--control); padding: 6px 12px; border-radius: 20px; }
+.ajustes { display: flex; flex-wrap: wrap; gap: 7px; width: 100%; }
 .ajustes:empty { display: none; }
-.chip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 12px; background: var(--bg); }
-.chip.activo { border-color: var(--accent); background: var(--soft); }
-.chip button { padding: 2px 8px; font-size: 11.5px; border-radius: 999px; }
+.chip { display: inline-flex; gap: 6px; align-items: center; border-radius: 16px; padding: 3px 4px 3px 12px; font-size: 12px; font-weight: 600; background: var(--control); color: var(--fg); }
+.chip.activo { background: var(--accent); color: #fff; }
+.chip button { padding: 2px 9px; font-size: 11.5px; border-radius: 12px; background: var(--raised); color: var(--fg); }
 .revision { border-bottom: 1px solid var(--line); background: var(--panel); font-size: 13px; }
-.revision summary { padding: 8px 12px; cursor: pointer; font-weight: 600; }
-.revision ol { margin: 0; padding: 0 16px 10px 36px; max-height: 200px; overflow: auto; }
-.revision li button { border: none; background: none; padding: 2px 0; text-align: left; color: var(--fg); font-size: 12.5px; }
-.revision li button:hover { color: var(--accent); text-decoration: underline; }
-.lienzo.arrastrando { outline: 3px dashed var(--accent); outline-offset: -10px; }
-.banner-local { background: var(--soft); border: 1px solid var(--accent); border-radius: var(--radius); padding: 10px 12px; font-size: 13px; display: grid; gap: 8px; position: sticky; top: 64px; z-index: 3; }
+.revision summary { padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--warn); }
+.revision ol { margin: 0; padding: 0 16px 12px 36px; max-height: 200px; overflow: auto; }
+.revision li button { background: none; padding: 2px 0; text-align: left; color: var(--fg); font-size: 13px; font-weight: 400; }
+.revision li button:hover { background: none; box-shadow: none; color: var(--accent-ink); text-decoration: underline; }
+.lienzo.arrastrando { outline: 3px dashed var(--accent); outline-offset: -12px; }
+.banner-local {
+  background: linear-gradient(90deg, var(--accent), #8275f2); color: #fff; border-radius: var(--radius);
+  padding: 13px 14px; font-size: 13.5px; display: grid; gap: 8px; position: sticky; top: calc(var(--alto-header, 0px) + 10px); z-index: 3;
+  box-shadow: 0 6px 24px rgba(40,30,120,.25); margin-bottom: 18px;
+}
+.banner-local .nota-ui { color: rgba(255,255,255,.85); }
+.banner-local button.primario { background: #fff; color: var(--accent); }
 .banner-local[hidden] { display: none; }
-.editando-local details.sin-local { opacity: .5; }
+.editando-local .sin-local { opacity: .45; }
 
 @media (max-width: 900px) {
   header.top { position: static; }
-  .layout { grid-template-columns: 1fr; }
+  .hwrap { padding: 0 16px; }
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 16px 16px 40px; }
   .salida { position: static; }
   .panel-salida { height: auto; max-height: 80vh; }
+  .banner-local { top: 8px; }
+  section.grupo { scroll-margin-top: 12px; }
 }
-@media (max-width: 420px) {
-  .fila, .colores { grid-template-columns: 1fr; }
+@media (max-width: 520px) {
+  .fila, .fila3 { grid-template-columns: 1fr; }
+  .opciones, .opciones.compacta { grid-template-columns: 1fr; }
   .lienzo { padding: 10px; }
   .doc.digital { padding: 24px 16px 32px; }
+  .empuje { margin-left: 0; }
 }
 
 @media print {
   body { background: #fff; }
-  header.top, .panel, .pestanas, .barra-vista, .revision, .toast, #p-prompt, #p-memoria { display: none !important; }
+  header.top, .panel, footer, .pestanas, .barra-vista, .revision, .toast, #p-prompt, #p-memoria { display: none !important; }
   .layout { display: block; padding: 0; }
   .salida { border: 0; position: static; }
   .panel-salida { height: auto !important; max-height: none !important; overflow: visible !important; }
@@ -257,15 +362,36 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
 </head>
 <body>
 <header class="top">
-  <div>
+  <div class="hwrap">
+  <div class="titlerow">
     <h1>Configurador de estilo</h1>
-    <p>Elige los parámetros, pulsa <b>Descargar prompt-estilo.md</b> y escribe «listo» en la terminal del agente.</p>
+    <div class="acciones">
+      <label class="boton" for="importar" title="Importar un prompt-estilo.md generado con este configurador">Importar prompt…</label>
+      <input id="importar" type="file" accept=".md,.json,text/markdown" hidden>
+      <button id="restablecer" type="button">Restablecer</button>
+      <button id="tema" class="themebtn" type="button" aria-label="Cambiar entre modo claro y oscuro" title="Cambiar entre modo claro y oscuro"></button>
+    </div>
   </div>
-  <div class="acciones">
-    <label class="boton" for="importar" title="Importar un prompt-estilo.md generado con este configurador">Importar prompt…</label>
-    <input id="importar" type="file" accept=".md,.json,text/markdown" hidden>
-    <button id="restablecer" type="button">Restablecer</button>
-    <button id="descargar" class="primario" type="button">Descargar prompt-estilo.md</button>
+  <p class="sub">Elige los parámetros, pulsa <strong>Descargar prompt-estilo.md</strong> y escribe «listo» en la terminal del agente.</p>
+
+  <div class="composer">
+    <div class="grp">
+      <span class="glabel">Documento</span>
+      <span class="pill">Tipo <b id="r-tipo"></b></span>
+      <span class="pill">Metodología <b id="r-metodologia"></b></span>
+      <span class="pill">Componentes <b id="r-componentes">0</b></span>
+      <span class="pill">Notaciones <b id="r-notaciones">0</b></span>
+      <span class="empuje">
+        <button id="ver-vista" type="button" aria-pressed="true" aria-controls="salida">Ocultar vista previa</button>
+        <button id="descargar" class="primario" type="button">Descargar prompt-estilo.md</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="bar"><span class="glabel">Útil para</span><div class="goals" id="goals"><button type="button" class="goal" data-goal="manual" aria-pressed="false">Manual de usuario</button><button type="button" class="goal" data-goal="tesis" aria-pressed="false">Tesis</button><button type="button" class="goal" data-goal="especificacion" aria-pressed="false">Especificación</button><button type="button" class="goal" data-goal="informe" aria-pressed="false">Informe</button><button type="button" class="goal" data-goal="arquitectura" aria-pressed="false">Arquitectura</button><button type="button" class="goal" data-goal="diagrama" aria-pressed="false">Diagramas</button></div></div>
+  <div class="bar"><span class="glabel">Ir a</span><div class="chips" id="saltos"></div></div>
+
+  <div class="banner" id="banner" role="status" aria-live="polite"></div>
   </div>
 </header>
 
@@ -277,8 +403,9 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
       <div><button type="button" id="salir-local" class="primario">Volver a todo el documento</button></div>
     </div>
 
-    <details class="grupo sin-local" open>
-      <summary>Documento y metodología</summary>
+    <h2 class="grouphdr" style="--c:#3d4f73">Contenido y estructura</h2>
+    <section style="--c:#3d4f73" class="grupo sin-local" data-sec="Documento">
+      <h2>Documento y metodología<span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
         <label class="campo"><span>Título del documento</span><input type="text" data-k="documento"></label>
         <div class="fila">
@@ -330,19 +457,19 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
             </select></label>
         </div>
       </div>
-    </details>
+    </section>
 
-    <details class="grupo sin-local">
-      <summary>Estructura <small>capítulos en orden</small></summary>
+    <section style="--c:#3b6ea5" class="grupo sin-local" data-sec="Estructura">
+      <h2>Estructura <small>capítulos en orden</small><span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
         <label class="campo"><span>Capítulos (uno por línea, sin número)</span><textarea class="alta" data-k="estructura"></textarea></label>
         <button type="button" id="esqueleto">Cargar esqueleto de la metodología</button>
         <label class="campo"><span>Partes sin numerar (uno por línea)</span><textarea data-k="sin_numerar"></textarea></label>
       </div>
-    </details>
+    </section>
 
-    <details class="grupo sin-local">
-      <summary>Componentes y manuales</summary>
+    <section style="--c:#4658c9" class="grupo sin-local" data-sec="Componentes">
+      <h2>Componentes y manuales<span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
         <p class="subtitulo">Componentes que usa el documento</p>
         <div class="opciones" data-grupo="componentes">
@@ -375,12 +502,11 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
           <label class="item"><input type="checkbox" data-k="capturas_borde"><span><b>Borde de 1 px en capturas</b><small>Separa la captura del fondo blanco de la página.</small></span></label>
           <label class="item"><input type="checkbox" data-k="capturas_marcadores"><span><b>Marcadores numerados en capturas</b><small>Círculos numerados que el texto referencia.</small></span></label>
         </div>
-        <p class="nota-ui">Los tipos de Diátaxis y las opciones de capturas solo se aplican a manuales.</p>
       </div>
-    </details>
+    </section>
 
-    <details class="grupo sin-local">
-      <summary>Diagramas</summary>
+    <section style="--c:#15a3a3" class="grupo sin-local" data-sec="Diagramas">
+      <h2>Diagramas<span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
         <p class="subtitulo">Notaciones permitidas</p>
         <div class="opciones" data-grupo="notaciones">
@@ -393,6 +519,7 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
           <label class="item"><input type="checkbox" value="er"><span><b>Entidad-relación</b><small>Entidades de datos, atributos y cardinalidades.</small></span></label>
           <label class="item"><input type="checkbox" value="c4"><span><b>C4</b><small>Arquitectura por niveles: contexto, contenedores, componentes.</small></span></label>
         </div>
+        <p class="nota-ui" id="nota-sin-notacion" hidden>Elige al menos una notación para configurar los diagramas.</p>
         <div class="fila">
           <label class="campo"><span>Herramienta de origen</span>
             <select data-k="diag_herramienta">
@@ -409,10 +536,11 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
         <label class="campo"><span>Notación de la vista previa</span>
           <select id="diag-vista"></select></label>
       </div>
-    </details>
+    </section>
 
-    <details class="grupo" id="grupo-tipografia">
-      <summary>Tipografía y tamaños</summary>
+    <h2 class="grouphdr" style="--c:#6d5cf0">Presentación</h2>
+    <section style="--c:#6d5cf0" class="grupo" data-sec="Tipografía" id="grupo-tipografia">
+      <h2>Tipografía y tamaños<span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
         <div class="presets">
           <button type="button" data-preset="digital">Digital</button>
@@ -470,20 +598,21 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
           <label class="campo"><span>Sangría 1.ª línea, impreso (cm)</span><input type="number" step="0.05" min="0" data-k="sangria"></label>
         </div>
       </div>
-    </details>
+    </section>
 
-    <details class="grupo">
-      <summary>Color</summary>
+    <section style="--c:#e0529c" class="grupo" data-sec="Color">
+      <h2>Color<span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
         <div class="presets"><button type="button" id="paleta-base">Paleta base (AA verificada)</button></div>
         <div class="colores" id="colores"></div>
         <p class="subtitulo">Contraste WCAG (mínimo 4,5:1)</p>
         <div class="contraste" id="contraste"></div>
       </div>
-    </details>
+    </section>
 
-    <details class="grupo">
-      <summary>Normas de escritura</summary>
+    <h2 class="grouphdr" style="--c:#1f9d6b">Redacción</h2>
+    <section style="--c:#1f9d6b" class="grupo" data-sec="Normas">
+      <h2>Normas de escritura<span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
         <div class="fila">
           <label class="campo"><span>Variante</span>
@@ -514,18 +643,18 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
         <label class="campo"><span>Siglas que no hace falta desarrollar (una por línea)</span><textarea data-k="siglas"></textarea></label>
         <label class="campo"><span>Términos preferidos (uno por línea: preferido = descartado)</span><textarea data-k="terminos" placeholder="inicio de sesión = login"></textarea></label>
       </div>
-    </details>
+    </section>
 
-    <details class="grupo sin-local">
-      <summary>Restricciones y criterios</summary>
+    <section style="--c:#d9882b" class="grupo sin-local" data-sec="Restricciones">
+      <h2>Restricciones y criterios<span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
         <label class="campo"><span>Restricciones del proyecto (una por línea)</span><textarea data-k="restricciones" placeholder="Extensión máxima: 80 páginas"></textarea></label>
         <label class="campo"><span>Criterios de aceptación propios (uno por línea)</span><textarea data-k="criterios" placeholder="Cada tarea del manual tiene una captura"></textarea></label>
       </div>
-    </details>
+    </section>
   </form>
 
-  <section class="salida" aria-label="Resultado">
+  <section class="salida" id="salida" aria-label="Vista previa y resultado">
     <div class="pestanas" role="tablist">
       <button role="tab" aria-selected="true" aria-controls="p-vista" id="t-vista">Vista previa</button>
       <button role="tab" aria-selected="false" aria-controls="p-prompt" id="t-prompt">Prompt generado</button>
@@ -535,6 +664,7 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
         <button type="button" data-modo="digital" aria-pressed="true">Digital</button>
         <button type="button" data-modo="impreso" aria-pressed="false">Impreso</button>
       </span>
+      <button type="button" class="cerrar-vista" id="cerrar-vista" aria-label="Cerrar vista previa" title="Cerrar vista previa">✕</button>
     </div>
     <div class="panel-salida" id="p-vista" role="tabpanel" aria-labelledby="t-vista">
       <div class="barra-vista">
@@ -583,6 +713,7 @@ button[aria-pressed=true].alternar { background: var(--accent); color: var(--acc
     </div>
   </section>
 </main>
+<footer>Documentación · Configurador de estilo</footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -2083,6 +2214,272 @@ document.getElementById("importar").addEventListener("change", async e => {
 pintarBarraDoc();
 pintarFormulario();
 actualizar();
+/* ===== Componentes del selector (tarjetas, filtro «Útil para», saltos y vista previa) =====
+   Los <select> y casillas originales siguen siendo la fuente de verdad: las tarjetas solo los manejan,
+   así el resto del configurador (estado, prompt, memoria, ajustes locales) no cambia. */
+(function () {
+  const TIPOS = { manual: "Manual", tesis: "Tesis", especificacion: "Especificación", informe: "Informe", arquitectura: "Arquitectura", diagrama: "Diagrama" };
+  const DOCS = ["manual", "tesis", "especificacion", "informe", "arquitectura"];
+  /* Para qué tipo de documento sirve cada elemento. Sin entrada: sirve para todos. */
+  const UTIL = {
+    tablas: DOCS, figuras: [...DOCS, "diagrama"], avisos: ["manual", "especificacion", "arquitectura", "informe"], pasos: ["manual"],
+    codigo: ["manual", "arquitectura", "informe"], ecuaciones: ["tesis", "informe"], requisitos: ["especificacion", "arquitectura"],
+    historias: ["especificacion"], glosario: DOCS,
+    nota: ["manual", "especificacion", "arquitectura", "informe"], consejo: ["manual"], advertencia: ["manual", "especificacion"], peligro: ["manual"],
+    tutorial: ["manual"], guia: ["manual"], referencia: ["manual", "arquitectura"], explicacion: ["manual", "arquitectura"],
+    pasos_resultado: ["manual"], capturas_borde: ["manual"], capturas_marcadores: ["manual"],
+    "uml-casos": ["especificacion", "tesis", "diagrama"], "uml-clases": ["arquitectura", "especificacion", "tesis", "diagrama"],
+    "uml-secuencia": ["arquitectura", "especificacion", "tesis", "diagrama"], "uml-actividad": ["especificacion", "manual", "tesis", "diagrama"],
+    "uml-componentes": ["arquitectura", "diagrama"], bpmn: ["especificacion", "informe", "diagrama"],
+    er: ["arquitectura", "especificacion", "tesis", "diagrama"], c4: ["arquitectura", "diagrama"],
+    "tipo:manual": ["manual"], "tipo:tesis": ["tesis"], "tipo:especificacion": ["especificacion"], "tipo:informe": ["informe"],
+    "tipo:arquitectura": ["arquitectura"], "tipo:diagrama": ["diagrama"],
+    "metodologia:diataxis": ["manual"], "metodologia:academica": ["tesis", "informe"], "metodologia:iso29148": ["especificacion"],
+    "metodologia:rup": ["especificacion", "arquitectura"], "metodologia:up": ["especificacion", "arquitectura"], "metodologia:scrum": ["especificacion"],
+    "citas:apa7": ["tesis", "informe"], "citas:ieee": ["tesis", "informe", "arquitectura"], "citas:iso690": ["tesis"],
+    "citas:vancouver": ["tesis"], "citas:institucional": ["tesis"], "citas:ninguna": ["manual", "especificacion", "arquitectura", "diagrama"]
+  };
+  /* Descripción breve de cada opción de los selectores convertidos en tarjetas */
+  const DESC = {
+    "tipo:manual": "Enseña a usar un sistema: tareas, pantallas y problemas frecuentes.",
+    "tipo:tesis": "Trabajo académico con marco teórico, método, resultados y referencias.",
+    "tipo:especificacion": "Requisitos verificables del sistema, con identificador y criterio.",
+    "tipo:informe": "Resultados de un trabajo o análisis, con conclusiones.",
+    "tipo:arquitectura": "Estructura del sistema, decisiones y sus vistas.",
+    "tipo:diagrama": "Una figura o un conjunto de diagramas sueltos.",
+    "tipo:otro": "Un documento que no encaja en los anteriores.",
+    "metodologia:diataxis": "Separa tutoriales, guías, referencia y explicación.",
+    "metodologia:academica": "Introducción, marco, método, resultados y conclusiones.",
+    "metodologia:iso29148": "Norma para especificar requisitos de software.",
+    "metodologia:rup": "Artefactos del Proceso Unificado de Rational.",
+    "metodologia:up": "Proceso Unificado: fases e iteraciones.",
+    "metodologia:scrum": "Producto ágil: épicas, historias y criterios.",
+    "metodologia:ninguna": "Estructura libre, sin una metodología fija.",
+    "audiencia:no técnica": "Usuarios finales, sin vocabulario técnico.",
+    "audiencia:técnica": "Desarrolladores u operadores del sistema.",
+    "audiencia:académica": "Tribunal, docentes o pares investigadores.",
+    "audiencia:mixta": "Lectores técnicos y no técnicos a la vez.",
+    "medio:digital": "Se lee en pantalla.", "medio:impreso": "Se imprime en papel.", "medio:ambos": "Pantalla y papel.",
+    "formato:markdown": "Texto plano versionable.", "formato:docx": "Documento de Word.", "formato:pdf": "Listo para imprimir o enviar.",
+    "ubicacion_prompt:proyecto": "Un solo prompt para todo el repositorio.",
+    "ubicacion_prompt:documento": "Un prompt junto a cada documento.",
+    "diag_herramienta:mermaid": "Diagramas como texto dentro del Markdown.",
+    "diag_herramienta:plantuml": "Texto UML con más notaciones.",
+    "diag_herramienta:imagen": "Dibujados a mano en una herramienta gráfica.",
+    "diag_formato:svg": "Vectorial: nítido a cualquier tamaño.", "diag_formato:png": "Mapa de bits al doble de resolución.",
+    "diag_direccion:LR": "El flujo avanza en horizontal.", "diag_direccion:TB": "El flujo avanza en vertical.",
+    "variante:neutro": "Comprensible en cualquier país.", "variante:rioplatense": "Español de Argentina y Uruguay.",
+    "tratamiento:usted": "Formal.", "tratamiento:tú": "Cercano.", "tratamiento:vos": "Voseo rioplatense.", "tratamiento:impersonal": "Sin dirigirse al lector.",
+    "citas:apa7": "Autor y año entre paréntesis.", "citas:ieee": "Números entre corchetes.", "citas:iso690": "Norma internacional.",
+    "citas:vancouver": "Números en orden de aparición.", "citas:institucional": "Lo que fije el reglamento.", "citas:ninguna": "El documento no cita fuentes."
+  };
+  const ICONOS = {
+    tablas: '<rect x="11" y="12" width="22" height="20" rx="2"/><path d="M11 18.5h22M11 25h22M18.5 12v20"/>',
+    figuras: '<rect x="10" y="12" width="24" height="20" rx="2.5"/><circle cx="17" cy="18.5" r="2.4"/><path d="M11 30l7-7 5 5 4-4 6 6"/>',
+    avisos: '<rect x="10" y="13" width="24" height="18" rx="2.5"/><path d="M14.5 13v18M19 19h10.5M19 25h7"/>',
+    pasos: '<circle cx="14" cy="15" r="2.4"/><circle cx="14" cy="22" r="2.4"/><circle cx="14" cy="29" r="2.4"/><path d="M20 15h11M20 22h11M20 29h8"/>',
+    codigo: '<path d="M17 15l-6 7 6 7M27 15l6 7-6 7M24.5 12.5l-5 19"/>',
+    ecuaciones: '<path d="M29 13H14l8 9-8 9h15"/>',
+    requisitos: '<rect x="11" y="10" width="22" height="24" rx="2.5"/><path d="M15 17l2 2 3.5-3.5M23 17.5h6M15 25l2 2 3.5-3.5M23 25.5h6"/>',
+    historias: '<circle cx="16" cy="17" r="3.4"/><path d="M10 31c0-4 2.7-6.5 6-6.5s6 2.5 6 6.5"/><path d="M24 12h10v7h-5l-3 3v-3h-2z"/>',
+    glosario: '<path d="M13 11h16a2 2 0 0 1 2 2v20H15a2 2 0 0 1-2-2z"/><path d="M13 31a2 2 0 0 1 2-2h16"/><path d="M18 24l3-8 3 8M19 21.5h4"/>',
+    nota: '<circle cx="22" cy="22" r="11"/><path d="M22 20.5v7"/><circle cx="22" cy="16.5" r=".6" fill="currentColor"/>',
+    consejo: '<path d="M18 27c0-3-4-4.5-4-9a8 8 0 0 1 16 0c0 4.5-4 6-4 9z"/><path d="M18.5 31h7M20 34h4"/>',
+    advertencia: '<path d="M22 11l11 20H11z"/><path d="M22 19v5.5"/><circle cx="22" cy="28" r=".6" fill="currentColor"/>',
+    peligro: '<path d="M17.5 11h9l6.5 6.5v9L26.5 33h-9L11 26.5v-9z"/><path d="M18.5 18.5l7 7M25.5 18.5l-7 7"/>',
+    tutorial: '<path d="M22 13l12 6-12 6-12-6z"/><path d="M15 21.5v6c2 2 4.3 3 7 3s5-1 7-3v-6M34 19v7"/>',
+    guia: '<circle cx="22" cy="22" r="11"/><path d="M26.5 17.5l-2.5 6.5-6.5 2.5 2.5-6.5z"/>',
+    referencia: '<rect x="12" y="11" width="6" height="22" rx="1"/><rect x="19.5" y="11" width="6" height="22" rx="1"/><path d="M27.5 13.5l5-1.5 5.5 19-5 1.5z"/>',
+    explicacion: '<path d="M12 14a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-8l-5 5v-5h-1a3 3 0 0 1-3-3z"/><path d="M19.5 16.5a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7"/><circle cx="22" cy="23.5" r=".6" fill="currentColor"/>',
+    pasos_resultado: '<path d="M11 22h18M24 16l6 6-6 6"/><circle cx="33" cy="22" r="1.4" fill="currentColor"/>',
+    capturas_borde: '<rect x="10" y="12" width="24" height="20" rx="2.5" stroke-dasharray="3 2.4"/><rect x="14" y="16" width="16" height="12" rx="1.5"/>',
+    capturas_marcadores: '<rect x="10" y="12" width="24" height="20" rx="2.5"/><circle cx="18" cy="20" r="3.6" fill="currentColor" fill-opacity=".25"/><circle cx="27" cy="26" r="3.6" fill="currentColor" fill-opacity=".25"/>',
+    "uml-casos": '<circle cx="13" cy="15" r="2.6"/><path d="M13 17.6v7M9.5 20.5h7M13 24.6l-3 5M13 24.6l3 5"/><ellipse cx="28.5" cy="22" rx="6.5" ry="4"/>',
+    "uml-clases": '<rect x="13" y="10" width="18" height="24" rx="1.5"/><path d="M13 16h18M13 25h18M16 19.5h9M16 28.5h11"/>',
+    "uml-secuencia": '<rect x="10" y="10" width="8" height="5" rx="1"/><rect x="26" y="10" width="8" height="5" rx="1"/><path d="M14 15v19M30 15v19" stroke-dasharray="2.5 2"/><path d="M14 22h14M25 19l3 3-3 3"/>',
+    "uml-actividad": '<circle cx="22" cy="11.5" r="2" fill="currentColor"/><rect x="15" y="16" width="14" height="6" rx="3"/><path d="M22 13.5V16M22 22v2.5M22 24.5l4 4-4 4-4-4z"/>',
+    "uml-componentes": '<rect x="15" y="12" width="18" height="20" rx="1.5"/><rect x="11" y="16" width="7" height="4" rx="1"/><rect x="11" y="24" width="7" height="4" rx="1"/>',
+    bpmn: '<rect x="9" y="12" width="26" height="20" rx="1.5"/><path d="M9 22h26"/><circle cx="14" cy="17" r="2.4"/><rect x="20" y="14.5" width="9" height="5" rx="1.5"/><path d="M27 27l3-2.5 3 2.5-3 2.5z"/>',
+    er: '<rect x="9" y="17" width="10" height="10" rx="1.5"/><rect x="25" y="17" width="10" height="10" rx="1.5"/><path d="M19 22h6M25 22l-3-3M25 22l-3 3"/>',
+    c4: '<rect x="10" y="10" width="24" height="24" rx="2"/><rect x="14" y="14" width="16" height="16" rx="2"/><rect x="18" y="18" width="8" height="8" rx="1.5"/>',
+    pct_espacio: '<circle cx="15" cy="15" r="3"/><circle cx="29" cy="29" r="3"/><path d="M30 13L14 31"/>'
+  };
+  const svg = interior => `<svg class="ico" viewBox="0 0 44 44" aria-hidden="true"><rect x="1.5" y="1.5" width="41" height="41" rx="12" fill="currentColor" fill-opacity="0.12"/><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${interior}</g></svg>`;
+  const util = clave => UTIL[clave] ? `Útil para: ${UTIL[clave].map(t => TIPOS[t]).join(" · ")}` : "";
+
+  /* 1. Casillas existentes → tarjetas con ícono y «Útil para» */
+  form.querySelectorAll(".opciones label.item").forEach(lab => {
+    const inp = lab.querySelector("input"), clave = inp.dataset.k || inp.value;
+    const texto = lab.querySelector(":scope > span");
+    if (ICONOS[clave]) { const ic = document.createElement("span"); ic.className = "ic2"; ic.innerHTML = svg(ICONOS[clave]); lab.insertBefore(ic, texto); }
+    if (UTIL[clave]) { lab.dataset.good = UTIL[clave].join("|"); texto.insertAdjacentHTML("beforeend", `<span class="gf">${util(clave)}</span>`); }
+  });
+
+  /* 2. Selectores → tarjetas de elección única */
+  const CONVERTIDOS = [];
+  form.querySelectorAll("label.campo > select[data-k]").forEach(sel => {
+    const k = sel.dataset.k, campo = sel.closest("label.campo");
+    const opciones = [...sel.options];
+    const bloque = document.createElement("div"); bloque.className = "eleccion-campo";
+    const titulo = campo.querySelector(":scope > span").textContent;
+    const conDesc = opciones.some(o => DESC[`${k}:${o.value}`]);
+    bloque.innerHTML = `<p class="subtitulo">${esc(titulo)}</p><div class="opciones${conDesc ? "" : " compacta"}" role="radiogroup" aria-label="${esc(titulo)}">` +
+      opciones.map(o => {
+        const c = `${k}:${o.value}`;
+        return `<label class="item"${UTIL[c] ? ` data-good="${UTIL[c].join("|")}"` : ""}><input type="radio" name="r-${k}" value="${esc(o.value)}"><span><b>${esc(o.textContent)}</b>${DESC[c] ? `<small>${esc(DESC[c])}</small>` : ""}${UTIL[c] ? `<span class="gf">${util(c)}</span>` : ""}</span></label>`;
+      }).join("") + "</div>";
+    bloque.addEventListener("change", e => {
+      if (e.target.type !== "radio") return;
+      e.stopPropagation();
+      sel.value = e.target.value;
+      sel.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    bloque.addEventListener("input", e => e.stopPropagation());
+    campo.classList.add("campo-oculto");
+    campo.after(bloque);
+    const fila = bloque.closest(".fila, .fila3"); if (fila) fila.classList.add("apilada");
+    CONVERTIDOS.push({ sel, bloque });
+  });
+  function sincronizar() {
+    CONVERTIDOS.forEach(({ sel, bloque }) => bloque.querySelectorAll("input").forEach(r => { r.checked = r.value === sel.value; }));
+  }
+
+  /* 3. Números sueltos → contador − / + */
+  form.querySelectorAll("label.campo > input[type=number]").forEach(inp => {
+    const paso = document.createElement("span"); paso.className = "step";
+    const boton = (txt, d, et) => {
+      const b = document.createElement("button"); b.type = "button"; b.innerHTML = txt; b.setAttribute("aria-label", et);
+      b.addEventListener("click", e => { e.preventDefault(); d < 0 ? inp.stepDown() : inp.stepUp(); inp.dispatchEvent(new Event("input", { bubbles: true })); });
+      return b;
+    };
+    inp.before(paso);
+    paso.append(boton("&minus;", -1, "Restar"), inp, boton("+", 1, "Sumar"));
+  });
+
+  /* 4. Contadores de sección, filtro y saltos */
+  const secciones = [...form.querySelectorAll("section.grupo")];
+  const metas = [...document.querySelectorAll("#goals .goal")];
+  const activas = () => metas.filter(b => b.classList.contains("on")).map(b => b.dataset.goal);
+  function filtrar() {
+    const act = activas();
+    form.querySelectorAll(".opciones label.item").forEach(lab => {
+      const good = (lab.dataset.good || "").split("|").filter(Boolean);
+      const elegido = lab.querySelector("input").checked;
+      const ver = !act.length || !good.length || elegido || act.some(g => good.includes(g));
+      lab.classList.toggle("hidden", !ver);
+    });
+    secciones.forEach(s => {
+      const n = [...s.querySelectorAll(".opciones label.item:not(.hidden)")].filter(l => !l.closest(".dep-oculta")).length;
+      s.querySelector(":scope > h2 .cnt").textContent = n || "";
+    });
+  }
+  metas.forEach(b => b.addEventListener("click", () => { b.classList.toggle("on"); b.setAttribute("aria-pressed", String(b.classList.contains("on"))); filtrar(); }));
+  const header = document.querySelector("header.top");
+  document.getElementById("saltos").innerHTML = secciones.map((s, i) =>
+    `<button type="button" class="salto" data-i="${i}" style="--cc:${s.style.getPropertyValue("--c")}">${esc(s.dataset.sec)}</button>`).join("");
+  document.querySelectorAll("#saltos .salto").forEach(b => b.addEventListener("click", () => secciones[+b.dataset.i].scrollIntoView({ behavior: "smooth", block: "start" })));
+  const medirHeader = () => document.documentElement.style.setProperty("--alto-header", (getComputedStyle(header).position === "sticky" ? header.offsetHeight : 0) + "px");
+  if (window.ResizeObserver) new ResizeObserver(medirHeader).observe(header);
+  addEventListener("resize", medirHeader); medirHeader();
+
+  /* 5. Resumen del compositor */
+  const nombreOpcion = k => { const s = form.querySelector(`select[data-k="${k}"]`); return s && s.selectedOptions[0] ? s.selectedOptions[0].textContent : ""; };
+  function resumen() {
+    document.getElementById("r-tipo").textContent = nombreOpcion("tipo");
+    document.getElementById("r-metodologia").textContent = nombreOpcion("metodologia");
+    document.getElementById("r-componentes").textContent = (S.componentes || []).length;
+    document.getElementById("r-notaciones").textContent = (S.notaciones || []).length;
+  }
+
+  /* 6. Vista previa que se puede cerrar */
+  const CLAVE_VISTA = "configurador-vista-abierta";
+  const botonVista = document.getElementById("ver-vista");
+  function ponerVista(abierta) {
+    document.body.classList.toggle("sin-vista", !abierta);
+    botonVista.setAttribute("aria-pressed", String(abierta));
+    botonVista.textContent = abierta ? "Ocultar vista previa" : "Mostrar vista previa";
+    try { localStorage.setItem(CLAVE_VISTA, abierta ? "1" : "0"); } catch (e) { /* sin almacenamiento */ }
+    medirHeader();
+    if (abierta) actualizar();
+  }
+  botonVista.addEventListener("click", () => ponerVista(document.body.classList.contains("sin-vista")));
+  document.getElementById("cerrar-vista").addEventListener("click", () => { ponerVista(false); botonVista.focus(); });
+  let abierta = true;
+  try { abierta = localStorage.getItem(CLAVE_VISTA) !== "0"; } catch (e) { /* sin almacenamiento */ }
+  ponerVista(abierta);
+
+  /* 7. Avisos en el banner del encabezado, como la referencia */
+  aviso = function (msg, falla) {
+    const b = document.getElementById("banner");
+    b.textContent = msg; b.classList.toggle("fail", !!falla); b.classList.add("show");
+    clearTimeout(aviso.t); aviso.t = setTimeout(() => b.classList.remove("show"), 3500);
+  };
+  document.getElementById("descargar").addEventListener("click", () => aviso("✓ Descargado. Ahora escribe «listo» en la terminal del agente."));
+
+  /* 8. Secciones desplegables: se recuerda cuáles quedaron plegadas */
+  const CLAVE_PLEGADAS = "configurador-secciones-plegadas";
+  let plegadas = [];
+  try { plegadas = JSON.parse(localStorage.getItem(CLAVE_PLEGADAS) || "[]"); } catch (e) { plegadas = []; }
+  function plegar(s, cerrada) {
+    s.classList.toggle("plegada", cerrada);
+    s.querySelector(":scope > h2 .plegar").setAttribute("aria-expanded", String(!cerrada));
+  }
+  function guardarPlegadas() {
+    try { localStorage.setItem(CLAVE_PLEGADAS, JSON.stringify(secciones.filter(s => s.classList.contains("plegada")).map(s => s.dataset.sec))); } catch (e) { /* sin almacenamiento */ }
+  }
+  secciones.forEach((s, i) => {
+    const h2 = s.querySelector(":scope > h2"), cuerpo = s.querySelector(":scope > .cuerpo-grupo");
+    cuerpo.id = cuerpo.id || "cuerpo-sec-" + i;
+    h2.innerHTML = `<button type="button" class="plegar" aria-controls="${cuerpo.id}">${h2.innerHTML}</button>`;
+    h2.firstChild.addEventListener("click", () => { plegar(s, !s.classList.contains("plegada")); guardarPlegadas(); });
+    plegar(s, plegadas.includes(s.dataset.sec));
+  });
+  /* Saltar a una sección o editar una selección la despliega */
+  document.querySelectorAll("#saltos .salto").forEach(b => b.addEventListener("click", () => { plegar(secciones[+b.dataset.i], false); guardarPlegadas(); }, true));
+  const editarOriginal = editarAjuste;
+  editarAjuste = function (id) { plegar(document.getElementById("grupo-tipografia"), false); guardarPlegadas(); editarOriginal(id); };
+
+  /* 9. Opciones que dependen de otra: solo se muestran cuando tienen efecto en el prompt.
+     Ocultarlas no borra su valor: si se vuelve a activar la opción de la que dependen, reaparecen como estaban. */
+  const tarjetaK = k => form.querySelector(`input[data-k="${k}"]`).closest("label");
+  const conTitulo = g => { const el = form.querySelector(`[data-grupo="${g}"]`); return [el.previousElementSibling, el]; };
+  const notaNotacion = document.getElementById("nota-sin-notacion");
+  const ajustesDiagrama = [];
+  for (let el = notaNotacion.nextElementSibling; el; el = el.nextElementSibling) ajustesDiagrama.push(el);
+  const DEPENDENCIAS = [
+    { els: conTitulo("avisos"), si: () => S.componentes.includes("avisos") },
+    { els: [tarjetaK("pasos_resultado")], si: () => S.componentes.includes("pasos") },
+    { els: [tarjetaK("capturas_borde"), tarjetaK("capturas_marcadores")], si: () => S.componentes.includes("figuras") && S.tipo === "manual" },
+    { els: conTitulo("diataxis"), si: () => S.tipo === "manual" && S.metodologia === "diataxis" },
+    { els: ajustesDiagrama, si: () => S.notaciones.length > 0 }
+  ];
+  function dependencias() {
+    DEPENDENCIAS.forEach(d => { const ver = d.si(); d.els.forEach(el => el.classList.toggle("dep-oculta", !ver)); });
+    notaNotacion.hidden = S.notaciones.length > 0;
+  }
+
+  /* 10. Mantener tarjetas, dependencias, filtro y resumen al día con el estado */
+  const pintarOriginal = pintarFormulario;
+  pintarFormulario = function () { pintarOriginal(); sincronizar(); dependencias(); filtrar(); resumen(); };
+  form.addEventListener("input", () => { sincronizar(); dependencias(); filtrar(); resumen(); });
+  sincronizar(); dependencias(); filtrar(); resumen();
+})();
+/* ===== Tema claro / oscuro ===== */
+(function () {
+  const btn = document.getElementById("tema");
+  const oscuro = () => {
+    const t = document.documentElement.getAttribute("data-theme");
+    return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+  const icono = () => { btn.textContent = oscuro() ? "☀" : "☾"; };
+  btn.addEventListener("click", () => {
+    const sig = oscuro() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", sig);
+    try { localStorage.setItem("configurador-tema", sig); } catch (e) { /* sin almacenamiento */ }
+    icono();
+  });
+  icono();
+})();
 </script>
 </body>
 </html>

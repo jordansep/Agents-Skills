@@ -2,6 +2,24 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.8.0] - 2026-11-02
+
+### Agregado
+
+- Configurador: filtro «Útil para» por tipo de documento, chips «Ir a» por sección e íconos en las tarjetas de opción
+- Configurador: la vista previa se puede cerrar y el formulario pasa a ocupar todo el ancho; se recuerda si quedó abierta
+- Configurador: botón para cambiar entre modo claro y oscuro
+- Configurador: las secciones se pliegan y despliegan desde su título; se recuerda cuáles quedaron plegadas y saltar a una sección la despliega
+
+### Cambiado
+
+- Configurador: nuevo diseño con encabezado fijo y resumen en píldoras, secciones abiertas con contador, listas desplegables convertidas en tarjetas de elección y contadores − / + en los campos numéricos
+
+### Corregido
+
+- Configurador: sin opciones redundantes ni sin efecto. Los tipos de aviso solo aparecen con el componente Avisos; el resultado tras cada paso, con Pasos numerados; borde y marcadores de capturas, con Figuras en un manual; los tipos de Diátaxis, en un manual con Diátaxis; y los ajustes de diagramas, con al menos una notación. Ocultarlas no borra su valor.
+- Configurador: Avisos tiene ícono propio (era igual al de Advertencia) y su «Útil para» coincide con el de sus tipos.
+
 ## [0.7.0] - 2026-11-02
 
 ### Agregado
