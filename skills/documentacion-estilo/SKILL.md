@@ -22,11 +22,13 @@ Carga solo la referencia que necesites:
 
 ## Regla principal: no decidir por cuenta propia
 
+**Aislamiento:** la carpeta instalada de este skill es de solo lectura. Una sesión solo escribe en el repositorio donde trabaja; desde otro repositorio nunca se editan los archivos del skill ni se abren ramas o PRs en el repositorio del agente (`references/memoria.md`, «Aislamiento entre repositorios»).
+
 No elijas, infieras ni apliques por defecto nada que el usuario no haya definido. Si algo no está definido, pregunta, registra las preguntas y las respuestas en la memoria e incorpora la regla. El procedimiento completo está en `references/memoria.md`.
 
 La memoria tiene dos niveles, cada uno en su repositorio:
 
-- **Agente**: `memoria/decisiones.md` de este skill (IDs `DEC-NNN`). Solo reglas para todos los documentos. Se envía al repositorio del agente con un PR.
+- **Agente**: `memoria/decisiones.md` de este skill (IDs `DEC-NNN`). Solo reglas para todos los documentos. Solo se modifica desde una sesión en el repositorio del agente, y se envía con un PR.
 - **Proyecto**: `decisiones-estilo.md` en el repositorio que se documenta, junto a su prompt de estilo (IDs `DP-NNN`). Las decisiones de ese proyecto se commitean ahí y nunca se escriben en la memoria del agente.
 
 ## Paso 1 (siempre primero): abrir el configurador
@@ -75,7 +77,7 @@ Cuando el usuario diga que terminó:
    - DEC-005: `prompt` y `salida`.
    - DEC-006: `comillas`.
 3. El alcance lo indica `alcance_decisiones`:
-   - `agente`: confirma esas DEC en `memoria/decisiones.md` y envíalas con un PR al repositorio del agente.
+   - `agente`: en una sesión del repositorio del agente, confirma esas DEC en `memoria/decisiones.md` y envíalas con un PR. En una sesión de otro repositorio, regístralas en `decisiones-estilo.md` del proyecto con estado `propuesta` (`references/memoria.md` §3.4).
    - `documento`: las DEC del agente siguen pendientes. Registra los parámetros como una entrada `DP-NNN` en `decisiones-estilo.md` del proyecto y commitéala en ese repositorio.
 4. Si una decisión **confirmada** de alguna memoria contradice el prompt, no elijas tú: pregunta al usuario cuál prevalece.
 5. Las **excepciones locales** (sección 8 del prompt) son ajustes que el usuario hizo solo sobre una parte de su documento. Regístralas en la memoria del proyecto y pregunta si alguna debe pasar a ser regla del agente.

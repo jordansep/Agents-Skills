@@ -47,6 +47,7 @@ Verificador independiente:
 python3 skills/documentacion-generar/scripts/verificar_doc.py --prompt docs/prompt-estilo.md docs/manual/
 ```
 
+Para usar los skills en Claude Code, instálalos con el script, en PowerShell:
 Tests del verificador y del configurador (solo biblioteca estándar; el del configurador necesita `node`). Corren en CI en cada PR:
 
 ```bash
@@ -55,6 +56,13 @@ python -m unittest discover -s tests -v
 
 Para usar los skills en Claude Code, enlázalos en `~/.claude/skills/` (o en `.claude/skills/` de un proyecto):
 
-```bash
-ln -s "$PWD/skills/documentacion-estilo" "$PWD/skills/documentacion-generar" ~/.claude/skills/
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\instalar_skills.ps1
 ```
+
+El script crea una copia aparte del repositorio, `../Agents-Skills-instalado`, fija en `origin/main` (es un `git worktree`), y enlaza cada skill de los agentes en `~/.claude/skills/`. Así, las sesiones que trabajan en otros repositorios:
+
+- usan siempre la versión publicada en `main`, no la rama que esté abierta acá;
+- no escriben en esta carpeta de trabajo. La copia instalada es de solo lectura y, si alguien escribe en ella, el script se detiene y lo muestra.
+
+Después de cada merge, vuelve a ejecutar el script para actualizar los skills instalados. Las decisiones de estilo que surgen en otro repositorio quedan como `propuesta` en la memoria de ese proyecto y se incorporan al agente desde una sesión en este repositorio ([procedimiento](skills/documentacion-estilo/references/memoria.md)).
