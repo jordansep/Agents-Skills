@@ -14,6 +14,7 @@ decimal: coma
 max_palabras_oracion: 25
 formato: <markdown | docx | pdf>
 salida: <docs/nombre-del-documento/>
+plantilla: <references/plantillas/<nombre>.md | omitir si no hay>
 estructura:
   - Control de versiones
   - <Capítulo 1>

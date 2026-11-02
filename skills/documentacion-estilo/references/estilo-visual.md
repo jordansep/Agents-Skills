@@ -1,6 +1,6 @@
 # Estilo visual
 
-Define cómo se ve cada elemento. Los valores son los predeterminados del skill; si el reglamento o la marca del cliente fija otros, reemplázalos en todo el documento sin mezclar.
+Define cómo se ve cada elemento. Los valores son los predeterminados del skill; si el reglamento o la marca del cliente fija otros, reemplázalos en todo el documento sin mezclar. Si el prompt declara una `plantilla` (ver `plantillas/README.md`), esa plantilla manda sobre esta referencia.
 
 ## 1. Página y grilla
 
