@@ -167,6 +167,6 @@ Memoria persistente del agente de documentación (skills `documentacion-estilo` 
 6. Arquitectura en láminas: número de página y pie, y si el formato sirve para otros entregables.
 7. Informe de auditoría: PDF solo, o también Markdown.
 
-**Regla resultante**: cuando el prompt declara `plantilla`, su diseño manda sobre `estilo-visual.md`. El configurador tiene un preajuste para cada plantilla y escribe el campo `plantilla` en el prompt.
+**Regla resultante**: cuando el prompt declara `plantilla`, su diseño manda sobre `estilo-visual.md`. El verificador acepta las leyendas APA 7 cuando la plantilla las usa o el prompt dice `leyendas: apa7`. El configurador tiene un preajuste para cada plantilla y escribe el campo `plantilla` en el prompt.
 **Aplicada en**: `references/plantillas/`, `SKILL.md`, `references/estilo-visual.md`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `../documentacion-generar/SKILL.md`.
 **PR**: —

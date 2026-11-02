@@ -15,6 +15,7 @@ max_palabras_oracion: 25
 formato: <markdown | docx | pdf>
 salida: <docs/nombre-del-documento/>
 plantilla: <references/plantillas/<nombre>.md | omitir si no hay>
+leyendas: <clasica | apa7>  # opcional; la plantilla Trabajo de campo UNC ya implica apa7
 estructura:
   - Control de versiones
   - <Capítulo 1>
