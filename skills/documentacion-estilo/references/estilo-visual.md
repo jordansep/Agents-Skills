@@ -110,6 +110,17 @@ Centradas, con número entre paréntesis a la derecha: `(1)`. Cada símbolo se d
 
 Término en negrita, seguido de dos puntos y una definición de una sola oración. Orden alfabético. Las siglas aparecen en el glosario y, además, desarrolladas en la primera aparición del texto.
 
+### Elementos académicos
+
+Se activan desde los componentes del configurador y quedan en `componentes` del prompt. `verificar_doc.py` revisa lo que puede comprobar un script, que aparece entre paréntesis.
+
+- **Resumen y palabras clave** (`palabras_clave`): resumen de un solo párrafo de 150 a 250 palabras; debajo, `**Palabras clave:**` con 3 a 5 términos en minúscula separados por punto y coma. El Abstract lleva `**Keywords:**` con los mismos términos. (Que exista la línea y que tenga de 3 a 5 términos separados por «;».)
+- **Notas al pie** (`notas_pie`): solo para aclaraciones, nunca para citas. Numeración continua; en Markdown, `[^1]` y `[^1]: texto` al final del capítulo. (Que cada llamada tenga su definición, en cualquier documento.)
+- **Citas en bloque** (`cita_bloque`): 40 palabras o más, en párrafo aparte con sangría izquierda de 1,27 cm, sin comillas y con la cita bibliográfica después del punto final. En Markdown, `>` sin rótulo de aviso. (Bloques de menos de 40 palabras y citas de 40 o más entre comillas.)
+- **Hipótesis** (`hipotesis`): `**H1.**`, `**H2.**`… con numeración continua; la nula, `**H0.**`, debajo de su alternativa. (La numeración.)
+- **Índices de tablas y figuras** (`indices`): después del índice general, con número y título exacto de cada leyenda; página en impreso y enlace en digital. (Que existan si el documento tiene tablas o figuras.)
+- **Anexos** (`anexos`): `## Anexo A. Título`, letras en orden y mencionados en el texto antes de aparecer; sus tablas y figuras siguen la numeración continua. (El orden de las letras y la mención.)
+
 ### Control de versiones
 
 Primera página después de la portada. Tabla con columnas: Versión, Fecha, Autor, Descripción del cambio. Las fechas en formato dd/mm/aaaa.

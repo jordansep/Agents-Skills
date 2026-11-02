@@ -260,6 +260,17 @@ pre.texto-salida {
 .doc dl dd { display: inline; margin: 0; }
 .doc dl div { margin-bottom: .4em; }
 .doc .ficticio { color: var(--s); font-size: .85em; }
+.doc .cita-bloque { margin: .7em 0 .7em 1.27cm; padding: 0; border: 0; text-indent: 0; }
+.doc .palabras-clave { margin-top: .6em; }
+.doc sup.llamada { color: var(--p); font-size: .7em; }
+.doc .notas-pie { margin-top: 1.2em; color: var(--s); }
+.doc .notas-pie::before { content: ""; display: block; width: 30%; border-top: 1px solid var(--b); margin-bottom: .4em; }
+.doc .notas-pie p { margin: .2em 0; }
+.doc .indice { list-style: none; padding: 0; margin: .4em 0 1em; }
+.doc .indice li { display: flex; gap: .4em; padding: .15em 0; }
+.doc .indice:not(.impreso) li span:first-child { color: var(--p); text-decoration: underline; text-underline-offset: 2px; }
+.doc .indice.impreso li span:first-child { flex: 1; overflow: hidden; white-space: nowrap; }
+.doc .indice.impreso li span:first-child::after { content: " ........................................................................................................................................"; color: var(--b); }
 .doc .pendiente { background: #FFF8C5; color: #6B4A00; padding: 0 .3em; border-radius: 3px; }
 .doc .sin-contenido { color: var(--s); }
 
@@ -482,6 +493,12 @@ pre.texto-salida {
           <label class="item"><input type="checkbox" value="requisitos"><span><b>Requisitos (RF/RNF)</b><small>Requisitos funcionales y no funcionales con identificador.</small></span></label>
           <label class="item"><input type="checkbox" value="historias"><span><b>Historias de usuario</b><small>«Como… quiero… para…» con criterios de aceptación.</small></span></label>
           <label class="item"><input type="checkbox" value="glosario"><span><b>Glosario</b><small>Definiciones de términos y siglas del dominio.</small></span></label>
+          <label class="item"><input type="checkbox" value="palabras_clave"><span><b>Resumen y palabras clave</b><small>Resumen de un párrafo con 3 a 5 palabras clave (y keywords).</small></span></label>
+          <label class="item"><input type="checkbox" value="notas_pie"><span><b>Notas al pie</b><small>Aclaraciones breves numeradas, fuera del texto principal.</small></span></label>
+          <label class="item"><input type="checkbox" value="cita_bloque"><span><b>Citas en bloque</b><small>Citas textuales de 40 palabras o más, en párrafo aparte con sangría.</small></span></label>
+          <label class="item"><input type="checkbox" value="hipotesis"><span><b>Hipótesis numeradas</b><small>H1, H2… enunciadas en forma afirmativa.</small></span></label>
+          <label class="item"><input type="checkbox" value="indices"><span><b>Índices de tablas y figuras</b><small>Listas de tablas y figuras con su número y título.</small></span></label>
+          <label class="item"><input type="checkbox" value="anexos"><span><b>Anexos</b><small>Material complementario: Anexo A, Anexo B…, citados en el texto.</small></span></label>
         </div>
         <p class="subtitulo">Avisos habilitados</p>
         <div class="opciones" data-grupo="avisos">
@@ -1301,8 +1318,14 @@ function vistaPrevia() {
   let html = `<div class="portada"><h1 style="${hStyle(1)};font-size:calc(${t("h1")} * 1.2)">${esc(S.documento || "Documento sin título")}</h1><p style="${notaStyle}">Versión ${esc(S.version)} · ${hoy()} · ${esc(TIPO_NOMBRE[S.tipo])}</p></div>`;
   let nCap = 0, nTab = 0, nFig = 0, numerados = 0;
   const P = (txt) => `<p style="${pStyle}">${txt}</p>`;
-  const leyendaTabla = (titulo) => `<p class="leyenda" style="${capStyle}"><b>Tabla ${++nTab}.</b> ${titulo}</p>`;
-  const leyendaFigura = (titulo) => `<p class="leyenda" style="${capStyle}"><b>Figura ${++nFig}.</b> ${titulo}</p><p class="fuente" style="${notaStyle}">Fuente: elaboración propia.</p>`;
+  // Las leyendas se registran para armar los índices de tablas y figuras al final del render
+  const idxTab = [], idxFig = [];
+  const leyendaTabla = (titulo) => { idxTab.push([++nTab, titulo]); return `<p class="leyenda" style="${capStyle}"><b>Tabla ${nTab}.</b> ${titulo}</p>`; };
+  const leyendaFigura = (titulo) => { idxFig.push([++nFig, titulo]); return `<p class="leyenda" style="${capStyle}"><b>Figura ${nFig}.</b> ${titulo}</p><p class="fuente" style="${notaStyle}">Fuente: elaboración propia.</p>`; };
+  const listaIndice = (clase, items) => items.length
+    ? `<ol class="indice${impreso ? " impreso" : ""}" style="${capStyle}">${items.map(([n, ti], i) => `<li><span>${clase} ${n}. ${ti}</span>${impreso ? `<span class="pag">${num(4 + i)}</span>` : ""}</li>`).join("")}</ol>`
+    : P(`<span class="ficticio">El documento no tiene ${clase === "Tabla" ? "tablas" : "figuras"}.</span>`);
+  const hayIndiceTablas = caps.some(cp => norm(cp) === "indice de tablas"), hayIndiceFiguras = caps.some(cp => norm(cp) === "indice de figuras");
   const sigla = "Sistema de gestión de aprendizaje (SGA)";
   const ref = cita();
   const avisosTxt = {
@@ -1331,6 +1354,18 @@ function vistaPrevia() {
     historias: () => P(`<b>HU-01.</b> Como docente, quiero exportar las notas, para compartirlas con la secretaría.`) + `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">gherkin</span>Dado que el docente tiene una sesión iniciada\nCuando selecciona "Exportar"\nEntonces se descarga un archivo PDF con las notas</pre>`,
     glosario: () => `<dl><div><dt>Curso:</dt> <dd>conjunto de clases con un docente responsable.</dd></div><div><dt>Inscripción:</dt> <dd>vínculo entre un estudiante y un curso.</dd></div></dl>`,
     referencias: () => `<p style="padding-left:1.25em;text-indent:-1.25em">${referencia()}</p><p class="ficticio">Referencia ficticia, solo para mostrar el formato.</p>`,
+    resumen: () => P(`Este trabajo analiza la relación entre el uso de una plataforma educativa y el rendimiento académico en una muestra de ${num(120)} estudiantes universitarios. Se aplicó un cuestionario de satisfacción y se registraron las horas de uso semanales. El uso se asoció con un mayor puntaje final, sin diferencias entre modalidades.`) +
+      `<p class="palabras-clave" style="${pStyle}"><b>Palabras clave:</b> plataformas educativas; rendimiento académico; satisfacción estudiantil; educación superior</p>`,
+    abstract: () => P(`<span lang="en">This study analyses the relationship between the use of an educational platform and academic performance in a sample of ${num(120)} university students.</span>`) +
+      `<p class="palabras-clave" style="${pStyle}" lang="en"><b>Keywords:</b> educational platforms; academic performance; student satisfaction; higher education</p>`,
+    citaBloque: () => P(`La guía institucional resume así la función de la documentación:`) +
+      `<blockquote class="cita-bloque">La documentación técnica cumple su función cuando quien la lee puede actuar sin pedir ayuda: encuentra el dato que necesita, entiende el contexto en el que se aplica y comprueba por su cuenta que el resultado es el esperado. Por eso cada decisión de estilo debe poder justificarse frente a esa tarea concreta.${ref ? " " + ref : ""}</blockquote>`,
+    notaPie: () => P(`El relevamiento se realizó durante el primer cuatrimestre<sup class="llamada">1</sup>.`),
+    notasPie: () => `<div class="notas-pie" style="${notaStyle}"><p><sup>1</sup> Entre marzo y julio, con la versión vigente de la plataforma.</p></div>`,
+    hipotesis: () => P(`<b>H1.</b> El uso semanal de la plataforma se asocia positivamente con el puntaje final.`) + P(`<b>H2.</b> La satisfacción con la plataforma es mayor en la modalidad virtual que en la presencial.`),
+    anexos: (nivel = 2) => [["A", "Cuestionario de satisfacción", "Ítems del instrumento aplicado a los estudiantes de la muestra."], ["B", "Consentimiento informado", "Modelo de consentimiento firmado por los participantes."]]
+      .map(([l, ti, tx]) => `<h${nivel} style="${hStyle(nivel)}">Anexo ${l}. ${ti}</h${nivel}>` + P(tx)).join(""),
+    indices: (nivel = 2) => `<h${nivel} style="${hStyle(nivel)}">Índice de tablas</h${nivel}><!--IDX-T--><h${nivel} style="${hStyle(nivel)}">Índice de figuras</h${nivel}><!--IDX-F-->`,
     tablaAcad: k => P(`En la Tabla ${nTab + 1} se presenta${/^(las|los)\b/.test(TABLA_ACAD[k].mencion) ? "n" : ""} ${TABLA_ACAD[k].mencion}.`) + TABLA_ACAD[k].ej({ L: leyendaTabla, cap: capStyle, nota: notaStyle })
   };
   // Tipos de tabla marcados: se reparten entre los capítulos numerados desde el tercero
@@ -1351,17 +1386,32 @@ function vistaPrevia() {
       html += `<table style="${capStyle}"><thead><tr><th>Versión</th><th>Fecha</th><th>Autor</th><th>Descripción del cambio</th></tr></thead><tbody><tr><td>0.1</td><td>${hoy()}</td><td><span class="pendiente">[PENDIENTE: autor]</span></td><td>Borrador inicial</td></tr></tbody></table><p class="fuente" style="${notaStyle}">Fuente: elaboración propia.</p>`;
       return;
     }
+    if (k === "resumen" && comp.has("palabras_clave")) { html += ej.resumen(); return; }
+    if (k === "abstract" && comp.has("palabras_clave")) { html += ej.abstract(); return; }
+    if (comp.has("indices") && k === "indice de tablas") { html += "<!--IDX-T-->"; return; }
+    if (comp.has("indices") && k === "indice de figuras") { html += "<!--IDX-F-->"; return; }
+    if (comp.has("indices") && (k === "indice general" || k === "indice") && !(hayIndiceTablas && hayIndiceFiguras)) {
+      html += P(`<span class="proposito">${info ? esc(info[1]) + "." : "Índice generado."}</span>`) +
+        (hayIndiceTablas ? "" : `<h2 style="${hStyle(2)}">Índice de tablas</h2><!--IDX-T-->`) + (hayIndiceFiguras ? "" : `<h2 style="${hStyle(2)}">Índice de figuras</h2><!--IDX-F-->`);
+      return;
+    }
+    if ((k === "anexos" || k === "apendices") && comp.has("anexos")) { html += ej.anexos(); return; }
     if (numerado && numerados === 1) {
       html += P(`${S.tratamiento === "impersonal" ? "En este documento se describe" : "Este documento describe"} el ${sigla}. Está dirigido a una audiencia ${esc(S.audiencia)}. Durante el último trimestre, el sistema atendió a ${num(12500)} usuarios, con una tasa de error del ${pct(3.5, 1)}${ref ? " " + ref : ""}.`);
       html += P(`Según la guía institucional, ${q("la documentación debe poder verificarse")}${ref ? " " + ref : ""}.`);
+      if (comp.has("cita_bloque")) html += ej.citaBloque();
+      if (comp.has("notas_pie")) html += ej.notaPie();
+      if (comp.has("anexos")) html += P(`El cuestionario completo se incluye en el Anexo A.`);
       if (subs[0]) html += `<h2 style="${hStyle(2)}">${nCap}.1 ${esc(subs[0])}</h2>` + P(`<span class="proposito">${esc(info[1])}.</span>`);
       if (subs[1]) html += `<h3 style="${hStyle(3)}">${nCap}.1.1 ${esc(subs[1])}</h3>` + P(`Contenido de ejemplo con una idea por párrafo y oraciones de hasta ${S.max_palabras} palabras.`);
       if (comp.has("avisos")) html += ej.avisos(S.avisos);
       if (comp.has("ecuaciones")) html += ej.ecuaciones();
+      if (comp.has("notas_pie")) html += ej.notasPie();
       return;
     }
     if (numerado && numerados === 2) {
       if (subs[0]) html += `<h2 style="${hStyle(2)}">${nCap}.1 ${esc(subs[0])}</h2>`;
+      if (comp.has("hipotesis")) html += ej.hipotesis();
       if (comp.has("pasos")) html += ej.pasos();
       if (comp.has("figuras")) html += ej.figuras();
       if (!comp.has("pasos") && !comp.has("figuras") && !comp.has("codigo")) html += P(`<span class="proposito">${info ? esc(info[1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
@@ -1393,8 +1443,12 @@ function vistaPrevia() {
       sec("Requisitos", ej.requisitos() + ej.fuente()) + sec("Historias de usuario", ej.historias()) + sec("Glosario", ej.glosario()) +
       (S.citas !== "ninguna" ? sec("Referencias", ej.referencias()) : "") +
       sec("Diagramas", Object.keys(DIAG_TITULO).map(ej.diagrama).join("")) +
-      sec("Tipos de tabla", TABLAS_ACAD.map(x => `<h3 style="${hStyle(3)}">${esc(x.nombre)}</h3>` + ej.tablaAcad(x.k)).join(""));
+      sec("Tipos de tabla", TABLAS_ACAD.map(x => `<h3 style="${hStyle(3)}">${esc(x.nombre)}</h3>` + ej.tablaAcad(x.k)).join("")) +
+      sec("Resumen y palabras clave", ej.resumen() + ej.abstract()) + sec("Citas en bloque", ej.citaBloque()) +
+      sec("Notas al pie", ej.notaPie() + ej.notasPie()) + sec("Hipótesis numeradas", ej.hipotesis()) +
+      sec("Anexos", ej.anexos(3)) + sec("Índices de tablas y figuras", ej.indices(3));
   }
+  html = html.replace(/<!--IDX-T-->/g, () => listaIndice("Tabla", idxTab)).replace(/<!--IDX-F-->/g, () => listaIndice("Figura", idxFig));
   doc.innerHTML = html;
   escalarHoja();
 }
@@ -1482,6 +1536,12 @@ function generarPrompt() {
   if (comp.has("requisitos")) componentes.push("- **Requisitos**: tabla con ID (`RF-001`, `RNF-001`, `RI-001`), enunciado, prioridad, origen y caso de prueba.");
   if (comp.has("historias")) componentes.push("- **Historias de usuario**: \"Como [rol], quiero [acción], para [beneficio].\" con criterios Dado / Cuando / Entonces.");
   if (comp.has("glosario")) componentes.push("- **Glosario**: término en negrita, dos puntos y una definición de una oración; orden alfabético.");
+  if (comp.has("palabras_clave")) componentes.push("- **Resumen y palabras clave**: el capítulo Resumen es un solo párrafo de 150 a 250 palabras (objetivo, método, resultados y conclusión); debajo, `**Palabras clave:**` con 3 a 5 términos en minúscula separados por punto y coma. Si hay Abstract, lleva `**Keywords:**` con los mismos términos en inglés.");
+  if (comp.has("notas_pie")) componentes.push("- **Notas al pie**: solo para aclaraciones que cortarían el texto, nunca para citas; numeración continua en todo el documento; en Markdown, llamada `[^1]` y su definición `[^1]: texto` al final del capítulo; hasta dos líneas cada una.");
+  if (comp.has("cita_bloque")) componentes.push(`- **Citas en bloque**: las citas textuales de 40 palabras o más van en párrafo aparte, con sangría izquierda de 1,27 cm, sin comillas y con la cita bibliográfica después del punto final; en Markdown, con \`>\` y sin rótulo de aviso. Las de menos de 40 palabras van en el texto, entre comillas ${comillas}.`);
+  if (comp.has("hipotesis")) componentes.push("- **Hipótesis**: un párrafo por hipótesis que empieza con `**H1.**`, `**H2.**`…, con numeración continua y enunciado afirmativo y verificable; la hipótesis nula, si se explicita, va debajo de su alternativa como `**H0.**`.");
+  if (comp.has("indices")) componentes.push("- **Índices de tablas y figuras**: después del índice general, una lista por clase con el número y el título exacto de cada leyenda, en el orden en que aparecen; en impreso, con el número de página; en digital, con enlace.");
+  if (comp.has("anexos")) componentes.push("- **Anexos**: cada anexo empieza con `## Anexo A. Título` (letras en orden: A, B, C…) y se menciona en el texto antes de aparecer («ver Anexo A»); sus tablas y figuras siguen la numeración continua del documento.");
   componentes.push("- **Numeración**: figuras y tablas con numeración continua en todo el documento; cada una se menciona en el texto antes de aparecer.");
   if (S.notaciones.length) componentes.push(`- **Diagramas**: notaciones permitidas ${S.notaciones.map(x => NOTACIONES[x]).join(", ")}; fuente en ${{ mermaid: "Mermaid", plantuml: "PlantUML", imagen: "imagen editable" }[S.diag_herramienta]}, exportados a ${S.diag_formato === "svg" ? "SVG" : "PNG a 2×"}; flujo ${S.diag_direccion === "LR" ? "de izquierda a derecha" : "de arriba hacia abajo"}; máximo ${S.diag_max} elementos; título, número, leyenda y fuente.`);
   if (S.tipo === "manual" && S.metodologia === "diataxis") componentes.push(`- **Diátaxis**: el manual incluye ${S.diataxis.map(d => ({ tutorial: "tutoriales", guia: "guías prácticas", referencia: "referencia", explicacion: "explicación" }[d])).join(", ") || "[PENDIENTE: tipos]"}, sin mezclar tipos en una misma página.`);
@@ -2367,6 +2427,8 @@ actualizar();
     tablas: DOCS, figuras: [...DOCS, "diagrama"], avisos: ["manual", "especificacion", "arquitectura", "informe"], pasos: ["manual"],
     codigo: ["manual", "arquitectura", "informe"], ecuaciones: ["tesis", "informe"], requisitos: ["especificacion", "arquitectura"],
     historias: ["especificacion"], glosario: DOCS,
+    palabras_clave: ["tesis", "informe"], notas_pie: ["tesis", "informe"], cita_bloque: ["tesis", "informe"], hipotesis: ["tesis"],
+    indices: ["tesis", "informe", "manual"], anexos: ["tesis", "informe", "especificacion"],
     nota: ["manual", "especificacion", "arquitectura", "informe"], consejo: ["manual"], advertencia: ["manual", "especificacion"], peligro: ["manual"],
     tutorial: ["manual"], guia: ["manual"], referencia: ["manual", "arquitectura"], explicacion: ["manual", "arquitectura"],
     pasos_resultado: ["manual"], capturas_borde: ["manual"], capturas_marcadores: ["manual"],
@@ -2426,6 +2488,12 @@ actualizar();
     requisitos: '<rect x="11" y="10" width="22" height="24" rx="2.5"/><path d="M15 17l2 2 3.5-3.5M23 17.5h6M15 25l2 2 3.5-3.5M23 25.5h6"/>',
     historias: '<circle cx="16" cy="17" r="3.4"/><path d="M10 31c0-4 2.7-6.5 6-6.5s6 2.5 6 6.5"/><path d="M24 12h10v7h-5l-3 3v-3h-2z"/>',
     glosario: '<path d="M13 11h16a2 2 0 0 1 2 2v20H15a2 2 0 0 1-2-2z"/><path d="M13 31a2 2 0 0 1 2-2h16"/><path d="M18 24l3-8 3 8M19 21.5h4"/>',
+    palabras_clave: '<rect x="11" y="10" width="22" height="24" rx="2"/><path d="M15 16h14M15 21h14M15 26h8"/><path d="M26 28l2 2 4-4"/>',
+    notas_pie: '<path d="M11 13h18M11 18h22M11 23h14"/><path d="M11 29h8"/><path d="M11 33h16" stroke-width="1.2"/><path d="M27 21v-4"/>',
+    cita_bloque: '<path d="M11 13h22M17 19h16M17 24h16M17 29h12"/><path d="M12 19v10"/>',
+    hipotesis: '<path d="M12 14v16M20 14v16M12 22h8"/><path d="M26 18l3-3v15"/>',
+    indices: '<path d="M11 14h14M11 20h14M11 26h14M11 32h10"/><path d="M29 14h4M29 20h4M29 26h4M29 32h4"/>',
+    anexos: '<path d="M14 10h11l6 6v18H14z"/><path d="M25 10v6h6"/><path d="M18 30l4-10 4 10M19.5 26.5h5"/>',
     nota: '<circle cx="22" cy="22" r="11"/><path d="M22 20.5v7"/><circle cx="22" cy="16.5" r=".6" fill="currentColor"/>',
     consejo: '<path d="M18 27c0-3-4-4.5-4-9a8 8 0 0 1 16 0c0 4.5-4 6-4 9z"/><path d="M18.5 31h7M20 34h4"/>',
     advertencia: '<path d="M22 11l11 20H11z"/><path d="M22 19v5.5"/><circle cx="22" cy="28" r=".6" fill="currentColor"/>',

@@ -69,6 +69,7 @@ Usa exactamente estos formatos en Markdown:
 - **Avisos**: `> **Nota.**`, `> **Consejo.**`, `> **Advertencia.**` o `> **Peligro.**`, seguidos de hasta tres líneas de texto.
 - **Pasos** (solo en manuales): lista numerada con una acción por paso. El resultado se indica en la línea siguiente con `→`.
 - **Código**: bloque con el lenguaje indicado, de 40 líneas como máximo.
+- **Elementos académicos** (solo los que figuren en `componentes`): resumen y palabras clave, notas al pie, citas en bloque, hipótesis, índices de tablas y figuras y anexos, cada uno con la regla que copia el configurador (ver `references/estilo-visual.md`, «Elementos académicos»).
 - **Numeración**: figuras y tablas se numeran de forma continua en todo el documento, y cada una se menciona en el texto antes de aparecer.
 
 Tipografía y color de la versión final (si se exporta): <familias, tamaños y tokens confirmados por el usuario (ver DEC-003 en memoria/decisiones.md)>.
