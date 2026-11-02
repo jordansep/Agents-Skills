@@ -208,6 +208,94 @@ def verificar_estadistica(lineas, decimal_coma, inf):
         i = j
 
 
+ROTULO_AVISO = re.compile(r"^>\s*\*\*([^*]+?)[.:]\*\*")
+COMILLAS = re.compile(r"“([^”]+)”|«([^»]+)»|\"([^\"\n]+)\"")
+
+
+def bloques_de_cita(lineas):
+    """Bloques de «>» que no son avisos: [(dónde empieza, texto)]."""
+    salida, actual = [], None
+    for donde, linea, tipo, _ in lineas:
+        es_cita = tipo == "texto" and linea.lstrip().startswith(">")
+        if es_cita and actual is None and not ROTULO_AVISO.match(linea.lstrip()):
+            actual = [donde, []]
+            salida.append(actual)
+        if not es_cita:
+            actual = None
+        elif actual is not None:
+            actual[1].append(re.sub(r"^\s*>\s?", "", linea))
+    return [(d, " ".join(t)) for d, t in salida]
+
+
+def verificar_academicos(lineas, componentes, numeros, inf):
+    """Notas al pie siempre; citas en bloque, hipótesis, palabras clave, anexos e índices según `componentes`."""
+    texto = [(d, l) for d, l, t, _ in lineas if t == "texto"]
+
+    # Notas al pie: cada llamada [^n] tiene su definición y cada definición, su llamada.
+    definiciones = {m.group(1): d for d, l in texto for m in [re.match(r"^\[\^([^\]]+)\]:", l)] if m}
+    llamadas = {}
+    for d, l in texto:
+        for m in re.finditer(r"\[\^([^\]]+)\](?!:)", re.sub(r"`[^`]*`", "", l)):
+            llamadas.setdefault(m.group(1), d)
+    for n, d in llamadas.items():
+        if n not in definiciones:
+            inf.error(d, f"la nota al pie [^{n}] no tiene definición")
+    for n, d in definiciones.items():
+        if n not in llamadas:
+            inf.aviso(d, f"la nota al pie [^{n}] está definida pero no se usa en el texto")
+
+    if "cita_bloque" in componentes:
+        for d, cita in bloques_de_cita(lineas):
+            palabras = len(re.findall(r"\w+", re.sub(r"\([^)]*\)\s*$", "", cita)))
+            if palabras < 40:
+                inf.aviso(d, f"cita en bloque de {palabras} palabras: las de menos de 40 van en el texto, entre comillas")
+        for d, l in texto:
+            if l.lstrip().startswith(">"):
+                continue
+            for m in COMILLAS.finditer(l):
+                palabras = len(re.findall(r"\w+", next(g for g in m.groups() if g)))
+                if palabras >= 40:
+                    inf.aviso(d, f"cita de {palabras} palabras entre comillas: las de 40 o más van en bloque")
+
+    if "hipotesis" in componentes:
+        esperado = 1
+        for d, l in texto:
+            m = re.match(r"^\s*\*\*H(\d+)\.\*\*", l)
+            if m and m.group(1) != "0":
+                if int(m.group(1)) != esperado:
+                    inf.error(d, f"hipótesis H{m.group(1)}: la numeración no es continua; se esperaba H{esperado}")
+                esperado = int(m.group(1)) + 1
+
+    if "palabras_clave" in componentes:
+        claves = [(d, l) for d, l in texto if re.match(r"^\s*\*\*Palabras clave:?\*\*:?", l, re.I)]
+        if not claves:
+            inf.aviso("resumen", "falta la línea «**Palabras clave:**» debajo del resumen")
+        for d, l in claves:
+            resto = re.sub(r"^\s*\*\*Palabras clave:?\*\*:?\s*", "", l, flags=re.I).strip().rstrip(".")
+            terminos = [t for t in resto.split(";") if t.strip()]
+            if ";" not in resto and "," in resto:
+                inf.aviso(d, "las palabras clave se separan con punto y coma")
+            elif not 3 <= len(terminos) <= 5:
+                inf.aviso(d, f"{len(terminos)} palabras clave; deben ser de 3 a 5")
+
+    if "anexos" in componentes:
+        anexos = [(d, m.group(1)) for d, l in texto for m in [re.match(r"^#{1,3}\s+Anexo ([A-Z])\b", l)] if m]
+        for k, (d, letra) in enumerate(anexos):
+            esperada = chr(ord("A") + k)
+            if letra != esperada:
+                inf.error(d, f"Anexo {letra}: las letras no siguen el orden; se esperaba Anexo {esperada}")
+        cuerpo = "\n".join(l for _, l in texto if not re.match(r"^#", l))
+        for d, letra in anexos:
+            if not re.search(rf"\bAnexo {letra}\b", cuerpo):
+                inf.aviso(d, f"el Anexo {letra} no se menciona en el texto")
+
+    if "indices" in componentes:
+        titulos = {normalizar(re.sub(r"^#+\s+", "", l)) for _, l in texto if re.match(r"^#{1,3}\s", l)}
+        for clase, nombre in (("Tabla", "indice de tablas"), ("Figura", "indice de figuras")):
+            if numeros[clase] and nombre not in titulos:
+                inf.aviso("estructura", f"el documento tiene {clase.lower()}s pero no «{nombre.replace('indice', 'Índice')}»")
+
+
 ID_MEMORIA = re.compile(r"\b(DEC|DP)-(\d{3})\b")
 
 
@@ -376,6 +464,7 @@ def verificar(prompt, archivos, inf, memorias=None):
     verificar_referencias(lineas, numeros, inf)
     if usa_tablas_estadisticas(prompt):
         verificar_estadistica(lineas, decimal_coma, inf)
+    verificar_academicos(lineas, set(prompt.get("componentes", []) or []), numeros, inf)
     if memorias is not None:
         verificar_memoria(lineas, memorias, inf)
 
@@ -396,9 +485,12 @@ def verificar(prompt, archivos, inf, memorias=None):
                 oraciones_largas.append((inicio, palabras))
         parrafo.clear()
 
-    capitulo_actual = ""
+    capitulo_actual, en_cita = "", False
     for donde, linea, tipo, _ in lineas:
-        es_prosa = tipo == "texto" and linea.strip() and not re.match(r"^\s*(#|\||!\[|<!--)", linea)
+        # Las citas en bloque (> sin rótulo de aviso) son texto ajeno: no cuentan para el largo de oración.
+        es_cita = tipo == "texto" and linea.lstrip().startswith(">")
+        en_cita = es_cita and (en_cita or not ROTULO_AVISO.match(linea.lstrip()))
+        es_prosa = tipo == "texto" and linea.strip() and not en_cita and not re.match(r"^\s*(#|\||!\[|<!--)", linea)
         if not es_prosa:
             cerrar_parrafo()
             inicio = None

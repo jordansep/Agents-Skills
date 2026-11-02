@@ -291,6 +291,83 @@ class TablasEstadisticas(Base):
         self.assertSinProblemas(self.verificar(self.doc(p="0,002"), tablas="\n  - datos\n  - estado-arte"))
 
 
+CITA_LARGA = ("La documentación técnica cumple su función cuando quien la lee puede actuar sin pedir ayuda: "
+              "encuentra el dato que necesita, entiende el contexto en el que se aplica y comprueba por su cuenta "
+              "que el resultado es el esperado. Por eso cada decisión de estilo debe poder justificarse frente a esa tarea concreta.")
+
+
+class ElementosAcademicos(Base):
+    def con(self, *componentes):
+        return {"componentes": "".join(f"\n  - {c}" for c in componentes)}
+
+    def test_nota_al_pie_sin_definicion_es_error(self):
+        inf = self.verificar(DOC_VALIDO + "\nEl estudio fue breve[^1].\n")
+        self.assertMensaje(inf.errores, r"\[\^1\] no tiene definición")
+
+    def test_nota_al_pie_definida_sin_uso_es_advertencia(self):
+        inf = self.verificar(DOC_VALIDO + "\n[^2]: Aclaración suelta.\n")
+        self.assertMensaje(inf.advertencias, r"\[\^2\] está definida pero no se usa")
+
+    def test_nota_al_pie_completa_pasa(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO + "\nEl estudio fue breve[^1].\n\n[^1]: Duró un mes.\n"))
+
+    def test_cita_en_bloque_larga_pasa_y_no_cuenta_como_oracion_larga(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO + f"\nLa guía lo resume así:\n\n> {CITA_LARGA} (García y Pérez, 2021)\n", **self.con("cita_bloque")))
+
+    def test_cita_en_bloque_corta_es_advertencia(self):
+        inf = self.verificar(DOC_VALIDO + "\n> Una cita breve de pocas palabras.\n", **self.con("cita_bloque"))
+        self.assertMensaje(inf.advertencias, r"cita en bloque de 6 palabras")
+
+    def test_cita_larga_entre_comillas_es_advertencia(self):
+        inf = self.verificar(DOC_VALIDO + f"\nLa guía dice «{CITA_LARGA}».\n", **self.con("cita_bloque"))
+        self.assertMensaje(inf.advertencias, r"entre comillas: las de 40 o más van en bloque")
+
+    def test_aviso_no_es_cita_en_bloque(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO + "\n> **Nota.** Guarde antes de salir.\n", **self.con("cita_bloque")))
+
+    def test_hipotesis_salteada_es_error(self):
+        inf = self.verificar(DOC_VALIDO + "\n**H1.** Primera.\n\n**H3.** Tercera.\n", **self.con("hipotesis"))
+        self.assertMensaje(inf.errores, r"H3: la numeración no es continua; se esperaba H2")
+
+    def test_hipotesis_con_nula_pasa(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO + "\n**H1.** Primera.\n\n**H0.** Nula.\n\n**H2.** Segunda.\n", **self.con("hipotesis")))
+
+    def test_faltan_palabras_clave_es_advertencia(self):
+        inf = self.verificar(DOC_VALIDO, **self.con("palabras_clave"))
+        self.assertMensaje(inf.advertencias, r"falta la línea «\*\*Palabras clave:\*\*»")
+
+    def test_palabras_clave_fuera_de_rango_es_advertencia(self):
+        inf = self.verificar(DOC_VALIDO + "\n**Palabras clave:** uno; dos\n", **self.con("palabras_clave"))
+        self.assertMensaje(inf.advertencias, r"2 palabras clave; deben ser de 3 a 5")
+
+    def test_palabras_clave_con_comas_es_advertencia(self):
+        inf = self.verificar(DOC_VALIDO + "\n**Palabras clave:** uno, dos, tres\n", **self.con("palabras_clave"))
+        self.assertMensaje(inf.advertencias, r"se separan con punto y coma")
+
+    def test_palabras_clave_correctas_pasan(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO + "\n**Palabras clave:** uno; dos; tres; cuatro\n", **self.con("palabras_clave")))
+
+    def test_anexos_fuera_de_orden_es_error(self):
+        doc = DOC_VALIDO + "\nVer Anexo A y Anexo C.\n\n# Anexos\n\n## Anexo A. Cuestionario\n\n## Anexo C. Consentimiento\n"
+        self.assertMensaje(self.verificar(doc, **self.con("anexos")).errores, r"Anexo C: las letras no siguen el orden; se esperaba Anexo B")
+
+    def test_anexo_no_mencionado_es_advertencia(self):
+        doc = DOC_VALIDO + "\n# Anexos\n\n## Anexo A. Cuestionario\n"
+        self.assertMensaje(self.verificar(doc, **self.con("anexos")).advertencias, r"Anexo A no se menciona")
+
+    def test_anexos_correctos_pasan(self):
+        doc = DOC_VALIDO + "\nEl cuestionario está en el Anexo A.\n\n# Anexos\n\n## Anexo A. Cuestionario\n"
+        self.assertSinProblemas(self.verificar(doc, **self.con("anexos")))
+
+    def test_sin_indices_con_tablas_y_figuras_es_advertencia(self):
+        inf = self.verificar(DOC_VALIDO, **self.con("indices"))
+        self.assertMensaje(inf.advertencias, r"tiene tablas pero no «Índice de tablas»")
+        self.assertMensaje(inf.advertencias, r"tiene figuras pero no «Índice de figuras»")
+
+    def test_componentes_sin_marcar_no_se_revisan(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO + "\n> Una cita breve.\n\n**H2.** Suelta.\n"))
+
+
 class Pendientes(Base):
     def test_pendientes_se_cuentan(self):
         doc = DOC_VALIDO + "\n[PENDIENTE: dato del cliente]\n\nOtro [PENDIENTE: fecha].\n"

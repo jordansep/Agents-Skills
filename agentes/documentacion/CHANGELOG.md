@@ -2,6 +2,18 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.10.0] - 2026-11-02
+
+### Agregado
+
+- Configurador: elementos académicos (resumen y palabras clave, notas al pie, citas en bloque, hipótesis numeradas, índices de tablas y figuras, y anexos), cada uno con su ejemplo en la vista previa, en «Ver todo» y su regla en el prompt
+- Configurador: los índices de tablas y figuras de la vista previa se arman con las leyendas reales del ejemplo
+- Verificador: notas al pie sin definición o sin uso; y, según los componentes del prompt, citas en bloque de menos de 40 palabras o citas largas entre comillas, numeración de hipótesis, palabras clave, orden y mención de anexos e índices faltantes
+
+### Cambiado
+
+- Verificador: las citas en bloque ya no cuentan para el largo máximo de oración
+
 ## [0.9.0] - 2026-11-02
 
 ### Agregado
