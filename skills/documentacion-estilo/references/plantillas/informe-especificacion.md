@@ -38,7 +38,26 @@ Diseño tomado de *informe_av_v2.docx* («Informe de Relevamiento y Diseño de A
 
 - «Figura N. Título» en una sola línea, debajo de la imagen, centrada y sin negrita.
 
-## 6. Puntos abiertos
+## 6. En el configurador
+
+La plantilla **Informe técnico** es el primer paso del configurador (`assets/configurador.html`). Carga un punto de partida completo, y después se puede cambiar cualquier valor:
+
+- **Ejes**: tipo especificación de requisitos, metodología ISO/IEEE 29148, propósito expositivo, ámbito técnico, lector especialista, medio impreso.
+- **Estructura**: pretextual Control de versiones; textual Introducción, Descripción general, Requisitos específicos, Trazabilidad; postextual Apéndices; numeración hasta el nivel 2.
+- **Presentación**: la de las secciones de arriba (fuentes, tamaños, márgenes y colores).
+
+Componentes propios. Cada uno tiene su ejemplo en la vista previa y su regla en el prompt; la regla de esta tabla es la que copia el prompt, palabra por palabra.
+
+| Componente | Regla del prompt | Qué revisa `verificar_doc.py` |
+|---|---|---|
+| Datos del documento | debajo del título, antes del primer capítulo, tres líneas centradas, una por dato: `**Sistema:** …`, `**Documento:** …` y `**Estado:** …`. | Que estén las tres líneas antes del primer capítulo. |
+| Viñetas con término | las viñetas que definen o caracterizan algo empiezan con el término en negrita y los dos puntos dentro de la negrita: `- **Término:** texto`. | Que los dos puntos queden dentro de la negrita. |
+
+Normas de escritura que suma al prompt (sección 5):
+
+- Las funcionalidades se agrupan por rol de usuario, cada grupo bajo un `###` sin número.
+
+## 7. Puntos abiertos
 
 1. Este informe usa Carta y el Trabajo de campo usa A4. ¿Qué papel se usa para informes técnicos?
 2. Las tablas no tienen número ni título, a diferencia del Trabajo de campo (APA 7). ¿Se unifican con APA 7?

@@ -33,6 +33,11 @@ dedicatoria_alineacion: derecha  # izquierda | centro | derecha
 dedicatoria_estilo: cursiva  # normal | cursiva
 epigrafe_alineacion: derecha
 epigrafe_estilo: cursiva
+numeracion_textual: decimal  # decimal | ninguna (ficha, láminas, auditoría: los capítulos pasan a sin_numerar)
+niveles_numerados: 3  # 1 | 2 | 3; desde el nivel siguiente, los títulos van sin número
+componentes_plantilla:  # opcional: componentes propios de la plantilla (sus reglas en la sección 4)
+  - <documento_fuente | termino_definido | datos_documento | ficha_corrida | estado_completitud | criterio_evidencia | certeza | agenda | preguntas_abiertas | familia | intencion | cuando_usar | antetitulo | una_idea | ...>
+  - omitir si no hay
 # estructura y sin_numerar se derivan de las tres zonas.
 estructura:  # pretextuales, capítulos numerados y postextuales, en orden
   - Control de versiones
@@ -104,6 +109,7 @@ Usa exactamente estos formatos en Markdown:
 - **Pasos** (solo en manuales): lista numerada con una acción por paso. El resultado se indica en la línea siguiente con `→`.
 - **Código**: bloque con el lenguaje indicado, de 40 líneas como máximo.
 - **Elementos académicos** (solo los que figuren en `componentes`): resumen y palabras clave, notas al pie, citas en bloque, hipótesis, índices de tablas y figuras y anexos, cada uno con la regla que copia el configurador (ver `references/estilo-visual.md`, «Elementos académicos»).
+- **Componentes propios de la plantilla** (solo si hay `componentes_plantilla`): una línea por componente con su regla, copiada del configurador (`references/plantillas/<nombre>.md`, «En el configurador»).
 - **Numeración**: figuras y tablas se numeran de forma continua en todo el documento, y cada una se menciona en el texto antes de aparecer.
 
 Tipografía y color de la versión final (si se exporta): <familias, tamaños y tokens confirmados por el usuario (ver DEC-003 en memoria/decisiones.md)>.

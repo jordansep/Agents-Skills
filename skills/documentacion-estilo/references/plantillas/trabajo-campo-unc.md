@@ -4,7 +4,7 @@ Diseño tomado del documento de referencia que entregó el usuario: *Trabajo de 
 
 Esta plantilla funciona como una guía de marca: cuando se usa, manda sobre los valores predeterminados de `estilo-visual.md`. Lo que el documento de referencia no resuelve, o resuelve de forma inconsistente, figura en «Puntos abiertos» y no se aplica hasta que el usuario lo confirme.
 
-En el configurador, el preajuste **Trabajo de campo UNC** (grupo «Tipografía y tamaños») carga estos valores.
+En el configurador, la plantilla **Trabajo de campo UNC** (primer paso, «Plantilla») carga estos valores y sus componentes propios (sección 8).
 
 ## 1. Página
 
@@ -112,7 +112,28 @@ La portada es una composición de bloques de color, no una página de texto:
 - Cierre de sección con la línea «Documento fuente: *nombre del documento*.» en negrita.
 - Las personas de la organización se citan por su rol, nunca por su nombre.
 
-## 8. Puntos abiertos (sin decidir)
+## 8. En el configurador
+
+La plantilla **Trabajo de campo UNC** es el primer paso del configurador (`assets/configurador.html`). Carga un punto de partida completo, y después se puede cambiar cualquier valor:
+
+- **Ejes**: tipo informe técnico, metodología ninguna, propósito mixto, ámbito académico, lector experto, medio impreso.
+- **Estructura**: pretextual Control de versiones, Portada, Índice general; textual Estructura del documento, Planeamiento del proyecto, Acta de acuerdos, Cronograma de aproximación; postextual Referencias, Anexos.
+- **Presentación**: la de las secciones de arriba (fuentes, tamaños, márgenes y colores).
+
+Componentes propios. Cada uno tiene su ejemplo en la vista previa y su regla en el prompt; la regla de esta tabla es la que copia el prompt, palabra por palabra.
+
+| Componente | Regla del prompt | Qué revisa `verificar_doc.py` |
+|---|---|---|
+| Portada institucional | la portada es una composición de bloques: franja con UNC y ESCMB, la carrera, el título en dos líneas (la primera palabra en blanco y la segunda en verde) con el subtítulo en cursiva, una tabla sin bordes con Grupo, Año e Integrantes (uno por línea, precedidos de una raya) y la franja inferior con «Córdoba, Argentina», el año y el grupo; los datos que falten van como `[PENDIENTE: dato]`. | — (no se puede revisar en Markdown) |
+| Documento fuente | cada capítulo de la zona textual cierra con la línea `**Documento fuente: *nombre del documento*.**`; si no se conoce, `**Documento fuente: [PENDIENTE: documento fuente].**`. | Que cada capítulo de la zona textual cierre con esa línea. |
+| Viñetas con término | las viñetas que definen o caracterizan algo empiezan con el término en negrita y los dos puntos dentro de la negrita: `- **Término:** texto`. | Que los dos puntos queden dentro de la negrita. |
+
+Normas de escritura que suma al prompt (sección 5):
+
+- Las personas de la organización se citan por su rol, nunca por su nombre.
+- Cada capítulo lleva el nombre del entregable y, si tiene, su versión («Planeamiento del proyecto v2.0»).
+
+## 9. Puntos abiertos (sin decidir)
 
 El documento de referencia no es uniforme en estos puntos. Se preguntan al usuario (DEC-007) y no se aplican hasta que responda:
 

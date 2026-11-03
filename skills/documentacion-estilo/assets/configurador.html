@@ -164,6 +164,7 @@ label.campo-check { display: flex; align-items: center; gap: 8px; font-size: 13p
 .opciones label > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 .opciones label b { display: block; font-weight: 600; font-size: 14.5px; }
 .opciones label small { display: block; margin-top: 2px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.opciones label small.control { margin-top: 4px; font-size: 12px; color: var(--accent-ink); }
 .opciones label .gf { display: block; margin-top: 5px; font-size: 11px; color: var(--accent-ink); opacity: .85; }
 .opciones label.hidden { display: none; }
 .ic2 { display: flex; gap: 5px; flex: none; }
@@ -284,6 +285,70 @@ pre.texto-salida {
 .doc .indice.impreso li span:first-child { flex: 1; overflow: hidden; white-space: nowrap; }
 .doc .indice.impreso li span:first-child::after { content: " ........................................................................................................................................"; color: var(--b); }
 .doc .pendiente { background: #FFF8C5; color: #6B4A00; padding: 0 .3em; border-radius: 3px; }
+/* ===== Componentes propios de las plantillas (references/plantillas/) ===== */
+.doc .portada.centrada { text-align: center; }
+.doc .portada.sin-linea { border-bottom: 0; }
+.doc.pl-proforma-entrevista .portada h1 { text-transform: uppercase; }
+.doc .leyenda.apa { margin-bottom: .3em; }
+.doc .barra { background: var(--sup); border-bottom: 1px solid var(--b); color: var(--t); text-transform: uppercase; letter-spacing: .03em; padding: .35em .6em; margin: 1.3em 0 .6em; }
+.doc .pregunta { margin: .9em 0 .1em; }
+.doc .linea-respuesta { border-bottom: 1px solid #979898; height: 1.7em; }
+.doc tr.total td { font-weight: 700; text-transform: uppercase; }
+.doc ul.terminos { padding-left: 1.2em; margin: .3em 0 .9em; }
+.doc .doc-fuente { margin-top: 1em; }
+.doc .datos-doc p { margin: .1em 0; }
+.doc .ficha-corrida { color: var(--s); margin-top: .5em; }
+.doc .ficha-corrida p { margin: 0 0 .2em; }
+.doc .archivo { color: var(--s); margin: -.3em 0 .6em; }
+.doc.pl-trabajo-campo-unc h1.cap { text-align: center; }
+.doc.pl-informe-auditoria h1.cap { border-bottom: 2px solid var(--p); padding-bottom: .2em; }
+.doc td.estado.completo, .doc td.estado.si { background: #DAFBE1; color: #1A7F37; font-weight: 600; }
+.doc td.estado.parcial { background: #FFF8C5; color: #9A6700; font-weight: 600; }
+.doc td.estado.no { background: #FFEBE9; color: #CF222E; font-weight: 600; }
+.doc .certeza { font-size: .68em; font-weight: 700; letter-spacing: .05em; padding: .1em .55em; border-radius: 999px; white-space: nowrap; }
+.doc .certeza.confirmado { color: #0550AE; background: #DDF4FF; }
+.doc .certeza.probable { color: #6639BA; background: #F2E9FF; }
+.doc .pastilla { display: inline-block; vertical-align: middle; margin-left: .7em; background: #ECECEA; color: #444441; font-size: .5em; font-weight: 700; padding: .25em .8em; border-radius: 999px; }
+.doc .intencion { background: #F1EFE8; border-left: 3px solid #B4B2A9; padding: .5em .7em; }
+.doc td.uso-si { background: #EAF3DE; }
+.doc td.uso-no { background: #FCEBEB; }
+.doc.dos-columnas .columnas { column-count: 2; column-gap: 1.5em; }
+.doc.dos-columnas .columnas > * { break-inside: avoid; }
+.doc.pl-ficha-1pager h1.cap { border-left: 3px solid var(--p); padding-left: .45em; margin: .9em 0 .35em; }
+.doc.pl-ficha-1pager pre { background: #2C2C2A; color: #F1EFE8; }
+.doc .lamina { border: 1px solid var(--b); border-radius: 10px; padding: 1.3em 1.6em; margin: 0 0 1.4em; aspect-ratio: 297 / 210; display: flex; flex-direction: column; overflow: hidden; }
+.doc .lamina h1.cap { margin: .1em 0 .3em; }
+.doc .portada-lamina { justify-content: center; }
+.doc .antetitulo { color: #1F5FBF; font-size: .7em; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; margin: 0; }
+.doc .titulo-lamina { color: var(--p); margin: .1em 0 .2em; }
+.doc .bajada { color: var(--s); }
+.doc .tarjetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .8em; margin: .5em 0 1em; }
+.doc .tarjeta { border: 1px solid #DFE5EA; border-radius: 8px; padding: .7em .85em; font-size: .88em; background: #fff; }
+.doc .tarjeta b { display: block; margin-bottom: .2em; }
+.doc .tarjeta.futura { border: 1.5px dashed #8C959F; }
+.doc .tarjeta.positiva { background: #E7F5ED; border-left: 4px solid #3D8B5A; }
+.doc .tarjeta.alcance { background: #FFF4D6; border-left: 4px solid #C9A040; }
+.doc .portada-unc { margin-bottom: 1.6em; }
+.doc .portada-unc .franja { display: grid; grid-template-columns: 1fr 1fr; }
+.doc .portada-unc .franja > div { padding: .6em .9em; color: #fff; border-bottom: 3px solid #fff; }
+.doc .portada-unc .franja b { display: block; font-size: 1.25em; }
+.doc .portada-unc .franja span { font-size: .75em; }
+.doc .portada-unc .unc { background: #001F5B; }
+.doc .portada-unc .escmb { background: #1B7A3E; }
+.doc .portada-unc .carrera { background: #F5F7FA; color: #0047A0; font-weight: 700; text-align: center; padding: .55em; margin: 0; }
+.doc .portada-unc .bloque-titulo { background: #001F5B; padding: 1.8em 1.4em; }
+.doc .portada-unc .bloque-titulo p { margin: 0; color: #fff; font-size: 2em; font-weight: 700; line-height: 1.15; }
+.doc .portada-unc .bloque-titulo .t2 { color: #27AE60; }
+.doc .portada-unc .bloque-titulo hr { border: 0; border-top: 2px solid #27AE60; width: 40%; margin: .7em 0; }
+.doc .portada-unc .bloque-titulo .sub { font-size: 1em; font-weight: 400; }
+.doc .portada-unc .datos-portada { width: auto; margin: 1.1em 0; border-collapse: separate; border-spacing: 3px; }
+.doc .portada-unc .datos-portada th { background: #D6EFDF; color: #1B7A3E; border: 0; }
+.doc .portada-unc .datos-portada td { background: #F5F7FA; border: 0; min-width: 200px; }
+.doc .portada-unc .pie-unc { display: grid; grid-template-columns: 1fr 1fr; }
+.doc .portada-unc .pie-unc > span { padding: .5em .9em; color: #fff; font-size: .85em; }
+.doc .portada-unc .pie-unc > span:first-child { background: #0047A0; }
+.doc .portada-unc .pie-unc > span:last-child { background: #27AE60; text-align: right; }
+
 .doc .sin-contenido { color: var(--s); }
 
 /* ===== Documento subido ===== */
@@ -426,6 +491,16 @@ pre.texto-salida {
       <div><button type="button" id="salir-local" class="primario">Volver a todo el documento</button></div>
     </div>
 
+    <h2 class="grouphdr" style="--c:#2f6f8f">Punto de partida</h2>
+    <section style="--c:#2f6f8f" class="grupo sin-local" data-sec="Plantilla" id="grupo-plantilla">
+      <h2>Plantilla <small>primer paso</small><span class="cnt"></span></h2>
+      <div class="cuerpo-grupo">
+        <p class="nota-ui">Una plantilla carga todo de una vez: tipo y ejes, estructura en tres zonas, sus componentes propios y la presentación. Después puedes cambiar cualquier valor.</p>
+        <div class="opciones" id="plantillas" role="radiogroup" aria-label="Plantilla"><!-- se completa desde PLANTILLAS --></div>
+        <p class="nota-ui">Las plantillas salen de tus documentos de referencia. El detalle está en references/plantillas/.</p>
+      </div>
+    </section>
+
     <h2 class="grouphdr" style="--c:#3d4f73">Contenido y estructura</h2>
     <section style="--c:#3d4f73" class="grupo sin-local" data-sec="Documento">
       <h2>Documento y metodología<span class="cnt"></span></h2>
@@ -527,6 +602,10 @@ pre.texto-salida {
           <label class="campo"><span>Paginación textual</span><select data-fz="textual.paginacion"><option value="romana">Romana (i, ii, iii)</option><option value="arabiga">Arábiga (1, 2, 3)</option><option value="ninguna">Ninguna</option></select></label>
           <label class="campo-check"><input type="checkbox" data-fz="textual.pagina_nueva"> Cada capítulo en página nueva</label>
         </div>
+        <div class="fila">
+          <label class="campo"><span>Numeración de los capítulos</span><select data-fz="textual.numeracion"><option value="decimal">Decimal (1, 1.1, 1.1.1)</option><option value="ninguna">Sin número</option></select></label>
+          <label class="campo"><span>Niveles numerados</span><select data-fz="textual.niveles"><option value="3">Tres (hasta 1.1.1)</option><option value="2">Dos (hasta 1.1)</option><option value="1">Uno (solo el capítulo)</option></select></label>
+        </div>
 
         <p class="subtitulo">Postextual</p>
         <div class="zona-lista" id="zona-post" data-zona="post"></div>
@@ -545,6 +624,8 @@ pre.texto-salida {
     <section style="--c:#4658c9" class="grupo sin-local" data-sec="Componentes">
       <h2>Componentes y manuales<span class="cnt"></span></h2>
       <div class="cuerpo-grupo">
+        <p class="subtitulo">Componentes de la plantilla</p>
+        <div class="opciones" data-grupo="componentes_plantilla"><!-- se completa desde COMPONENTES_PLANTILLA --></div>
         <p class="subtitulo">Componentes que usa el documento</p>
         <div class="opciones" data-grupo="componentes">
           <label class="item"><input type="checkbox" value="tablas"><span><b>Tablas</b><small>Datos comparables en filas y columnas, con leyenda «Tabla N».</small></span></label>
@@ -629,16 +710,7 @@ pre.texto-salida {
           <button type="button" data-preset="tesis">Tesis impresa</button>
           <button type="button" data-preset="manual-impreso">Manual impreso</button>
         </div>
-        <p class="subtitulo">Tus plantillas</p>
-        <div class="presets">
-          <button type="button" data-preset="tc-unc" title="Calibri 12, títulos azules sin negrita, tablas APA 7 con encabezado verde claro, A4 con márgenes de 1,27 cm">Trabajo de campo UNC</button>
-          <button type="button" data-preset="informe-tecnico" title="Cambria, títulos azules en negrita y numerados, encabezado de tabla azul claro, Carta">Informe técnico</button>
-          <button type="button" data-preset="auditoria" title="Segoe UI, títulos azules con línea debajo, tablas de criterio y evidencia">Informe de auditoría</button>
-          <button type="button" data-preset="proforma" title="Noto Serif, barras de sección grises, solo grises para imprimir">Proforma de entrevista</button>
-          <button type="button" data-preset="ficha" title="Arial pequeña, A4 en una página y dos columnas, títulos azules">Ficha 1-pager</button>
-          <button type="button" data-preset="laminas" title="Segoe UI, láminas horizontales con antetítulo y título grande">Arquitectura en láminas</button>
-        </div>
-        <p class="nota-ui">Las plantillas salen de tus documentos de referencia. El detalle está en references/plantillas/.</p>
+        <p class="nota-ui">Son preajustes de letra: solo cambian fuentes y tamaños. Las plantillas completas están en el primer paso, «Plantilla».</p>
         <datalist id="fuentes">
           <option>Inter</option><option>Source Sans 3</option><option>Roboto</option><option>Open Sans</option><option>Lato</option>
           <option>IBM Plex Sans</option><option>Noto Sans</option><option>Arial</option><option>Calibri</option>
@@ -906,12 +978,11 @@ const PALETA_BASE = {
   info: "#0969DA", info_fondo: "#DDF4FF", exito: "#1A7F37", exito_fondo: "#DAFBE1",
   advertencia: "#9A6700", advertencia_fondo: "#FFF8C5", peligro: "#CF222E", peligro_fondo: "#FFEBE9"
 };
-const PLANTILLA_DE = { "tc-unc": "trabajo-campo-unc", "informe-tecnico": "informe-especificacion", "auditoria": "informe-auditoria", "proforma": "proforma-entrevista", "ficha": "ficha-1pager", "laminas": "arquitectura-presentacion" };
 const PRESETS = {
   "digital": { f_titulos: "Inter", f_cuerpo: "Inter", f_codigo: "JetBrains Mono", d_cuerpo: 16, d_h1: 30, d_h2: 24, d_h3: 19, d_tabla: 14, d_codigo: 14.5, d_nota: 13, d_interlineado: 1.5, d_ancho: 720, alineacion: "izquierda", sangria: 0, peso_titulos: "600" },
   "tesis": { f_titulos: "Times New Roman", f_cuerpo: "Times New Roman", f_codigo: "Consolas", p_cuerpo: 12, p_h1: 18, p_h2: 15, p_h3: 13, p_tabla: 10, p_codigo: 10, p_nota: 9, p_interlineado: 1.5, p_margen: 2.5, alineacion: "izquierda", sangria: 1.25, peso_titulos: "700" },
   "manual-impreso": { f_titulos: "Source Sans 3", f_cuerpo: "Source Sans 3", f_codigo: "JetBrains Mono", p_cuerpo: 11, p_h1: 18, p_h2: 15, p_h3: 13, p_tabla: 10, p_codigo: 9.5, p_nota: 9, p_interlineado: 1.15, p_margen: 2.5, alineacion: "izquierda", sangria: 0, peso_titulos: "600" },
-  /* Plantillas tomadas de documentos del usuario: references/plantillas/ */
+  /* Presentación de las plantillas (PLANTILLAS): references/plantillas/ */
   "tc-unc": { f_titulos: "Calibri", f_cuerpo: "Calibri", f_codigo: "Consolas", p_cuerpo: 12, p_h1: 16, p_h2: 13, p_h3: 12, p_tabla: 9, p_codigo: 9, p_nota: 9, p_interlineado: 1.15, p_margen: 1.27, p_papel: "A4", alineacion: "justificado", sangria: 0, peso_titulos: "400", citas: "apa7",
     colores: { primario: "#2E74B5", texto: "#000000", secundario: "#666666", superficie: "#D9EAD3", borde: "#000000" } },
   "informe-tecnico": { f_titulos: "Cambria", f_cuerpo: "Cambria", f_codigo: "Consolas", p_cuerpo: 11, p_h1: 14, p_h2: 13, p_h3: 11, p_tabla: 9, p_codigo: 9, p_nota: 9, p_interlineado: 1.15, p_margen: 2.54, p_papel: "Carta", alineacion: "izquierda", sangria: 0, peso_titulos: "700",
@@ -925,6 +996,147 @@ const PRESETS = {
   "laminas": { f_titulos: "Segoe UI", f_cuerpo: "Segoe UI", f_codigo: "Consolas", d_cuerpo: 15, d_h1: 34, d_h2: 26, d_h3: 18, d_tabla: 13, d_codigo: 13, d_nota: 12, d_interlineado: 1.45, d_ancho: 1000, alineacion: "izquierda", sangria: 0, peso_titulos: "700",
     colores: { primario: "#173A6D", texto: "#213455", secundario: "#5B6C85", superficie: "#F7FAFF", borde: "#CAD6E4" } }
 };
+/* ---------- Plantillas: punto de partida completo (references/plantillas/) ----------
+   Una plantilla fija los ejes, la estructura en tres zonas, sus componentes propios y la presentación.
+   Todo queda editable. Cada componente propio tiene ejemplo (vista previa), regla (prompt) y, si se
+   puede revisar en Markdown, control (verificar_doc.py). Mismo texto de regla que la plantilla. */
+const COMPONENTES_PLANTILLA = {
+  portada_institucional: { nombre: "Portada institucional", desc: "Franjas UNC y ESCMB, carrera, título en dos líneas y datos del grupo.",
+    regla: "la portada es una composición de bloques: franja con UNC y ESCMB, la carrera, el título en dos líneas (la primera palabra en blanco y la segunda en verde) con el subtítulo en cursiva, una tabla sin bordes con Grupo, Año e Integrantes (uno por línea, precedidos de una raya) y la franja inferior con «Córdoba, Argentina», el año y el grupo; los datos que falten van como `[PENDIENTE: dato]`.", control: "" },
+  documento_fuente: { nombre: "Documento fuente", desc: "Cada capítulo cierra con el documento del que sale.",
+    regla: "cada capítulo de la zona textual cierra con la línea `**Documento fuente: *nombre del documento*.**`; si no se conoce, `**Documento fuente: [PENDIENTE: documento fuente].**`.",
+    control: "Que cada capítulo de la zona textual cierre con esa línea." },
+  termino_definido: { nombre: "Viñetas con término", desc: "Viñetas que empiezan con el término en negrita y dos puntos.",
+    regla: "las viñetas que definen o caracterizan algo empiezan con el término en negrita y los dos puntos dentro de la negrita: `- **Término:** texto`.",
+    control: "Que los dos puntos queden dentro de la negrita." },
+  datos_documento: { nombre: "Datos del documento", desc: "Sistema, documento y estado, centrados debajo del título.",
+    regla: "debajo del título, antes del primer capítulo, tres líneas centradas, una por dato: `**Sistema:** …`, `**Documento:** …` y `**Estado:** …`.",
+    control: "Que estén las tres líneas antes del primer capítulo." },
+  ficha_corrida: { nombre: "Ficha de corrida", desc: "Commit, fecha, corte, modo, rama y criterio, en gris debajo del título.",
+    regla: "debajo del título, antes del primer capítulo y en gris pequeño: `` **Commit:** `abc1234` · **Fecha:** … · **Corte:** … · **Modo:** … ``; en la línea siguiente, `**Rama:** … · **Estado del repositorio:** …`; después, `**Criterio:** …` y qué significa cada estado.",
+    control: "Que estén el commit (en código), la fecha y el criterio antes del primer capítulo." },
+  estado_completitud: { nombre: "Estado y completitud", desc: "Tabla resumen con Completo, Parcial o No y su porcentaje.",
+    regla: "el resumen es un párrafo con el veredicto general, lo que falta y lo mejor logrado, seguido de la tabla Punto · Estado · Completitud · Lo principal que falta; Estado es Completo, Parcial o No y siempre va escrito (el color verde, amarillo o rosado lo acompaña, no lo reemplaza); Completitud es un porcentaje alineado a la derecha y Completo es siempre 100 %.",
+    control: "Que Estado sea Completo, Parcial o No y que Completo sea 100 %." },
+  criterio_evidencia: { nombre: "Criterio y evidencia", desc: "Detalle de cada punto: criterio, si cumple y la evidencia con su lugar exacto.",
+    regla: "cada punto del detalle es un `### N · Nombre — Estado (NN %)` con la línea `` Archivo: `ruta` `` debajo; luego, la tabla Criterio · ¿Cumple? · Evidencia, donde ¿Cumple? es Sí, Parcial o No y la evidencia cita el lugar exacto entre paréntesis (`(01:124-152)`); cierran el punto dos párrafos: `**Observaciones de *tema*:** …` y `**Para completar:** …`, con una raya «—» si no falta nada o la lista de acciones.",
+    control: "El título de cada punto, la línea Archivo, los valores de ¿Cumple?, el lugar de la evidencia en Sí y Parcial, y el párrafo Para completar." },
+  certeza: { nombre: "Etiquetas de certeza", desc: "CONFIRMADO o PROBABLE al final de la oración.",
+    regla: "lo verificado en la fuente termina con `` `CONFIRMADO` `` y una inferencia sin verificar del todo, con `` `PROBABLE` ``; se exportan como pastillas pequeñas en mayúsculas, azul y violeta.", control: "" },
+  barra_seccion: { nombre: "Barras de sección", desc: "Cada bloque empieza con una franja gris y el título numerado en mayúsculas.",
+    regla: "cada capítulo empieza con una barra de sección: en Markdown, `# 1. Título` con mayúscula inicial; al exportar, una franja de ancho completo con fondo gris claro, borde inferior gris y el título en mayúsculas sostenidas.", control: "" },
+  campos_completar: { nombre: "Campos para completar", desc: "Tabla de datos con espacios para llenar a mano.",
+    regla: "los datos se piden en una tabla de pares campo y espacio para completar: fechas `___ / ___ / ______`, horas `___ : ___` y opciones separadas por barra («Presencial / Virtual»); nunca se completan con datos inventados.", control: "" },
+  agenda: { nombre: "Agenda con tiempos", desc: "Bloque, tema y tiempos estimado, real y total, con su fila de total.",
+    regla: "tabla Bloque · Tema · Tiempo estimado · Tiempo real · Tiempo total, con los tiempos en minutos (`10 min`) y las columnas de tiempo real en blanco; la última fila es `**Tiempo total**` (en mayúsculas al exportar) con la suma de los tiempos estimados.",
+    control: "Que la última fila sea Tiempo total y que sume los tiempos estimados." },
+  preguntas_abiertas: { nombre: "Preguntas con líneas", desc: "Pregunta numerada y, debajo, líneas para responder.",
+    regla: "cada pregunta es un párrafo que empieza con su número en negrita, `**1.2** Texto de la pregunta`, numerado por bloque temático (1.1, 1.2… y 2.1 al cambiar de bloque); debajo, de 3 a 4 líneas para responder, cada una como `___` en su propio párrafo.",
+    control: "Que cada pregunta tenga de 3 a 4 líneas y que la numeración sea continua." },
+  familia: { nombre: "Familia del patrón", desc: "Pastilla gris a la derecha del título.",
+    regla: "debajo del título, antes del primer bloque, la línea `**Familia:** Nombre (Name)`; se exporta como una pastilla gris a la derecha del título.",
+    control: "Que esté la línea antes del primer bloque." },
+  intencion: { nombre: "Intención", desc: "Una o dos oraciones en cursiva sobre fondo beige, con su cita.",
+    regla: "el bloque Intención tiene una o dos oraciones en cursiva con la cita de la obra que define el patrón; se exporta sobre fondo beige con una barra gris a la izquierda.",
+    control: "Que no pase de dos oraciones." },
+  cuando_usar: { nombre: "Cuándo sí y cuándo no", desc: "Tabla de dos columnas, verde y rosada.",
+    regla: "el bloque Cuándo usarlo es una tabla de dos columnas, `Sí usarlo` y `No usarlo` (verde y rosada al exportar), con una situación por fila.",
+    control: "Que la tabla tenga solo esas dos columnas." },
+  dos_columnas: { nombre: "Una página a dos columnas", desc: "Todo en una A4: definición, diagrama, cuándo usar y trampas a la izquierda; el resto, a la derecha.",
+    regla: "la ficha entra en una sola página A4, a dos columnas: a la izquierda Intención, Diagrama canónico, Cuándo usarlo y Trampas; a la derecha Problema, Solución, Caso propio y Referencias; si no entra, se acorta el texto y nunca se pasa a una segunda página.", control: "" },
+  antetitulo: { nombre: "Antetítulo y bajada", desc: "Cada lámina abre con antetítulo, título grande y una bajada corta.",
+    regla: "cada lámina es un `# Título` seguido, en su propia línea, del antetítulo en negrita (`**C4 · Nivel 1**`, con mayúscula inicial) y de la bajada, un párrafo de una a tres oraciones; al exportar, el antetítulo va arriba del título, en mayúsculas con espaciado amplio.",
+    control: "Que cada lámina tenga antetítulo y que la bajada no pase de tres oraciones." },
+  una_idea: { nombre: "Una idea por lámina", desc: "Sin secciones internas: si hay dos ideas, son dos láminas.",
+    regla: "cada lámina desarrolla una sola idea, sin `##` adentro: si hacen falta secciones, se divide en varias láminas.",
+    control: "Que ninguna lámina tenga secciones." },
+  tarjetas: { nombre: "Tarjetas", desc: "Contenido en tarjetas con título en negrita y texto breve.",
+    regla: "el contenido de una lámina va en tarjetas: una viñeta por tarjeta, con el título en negrita y dos puntos (`- **Objetivo:** texto breve`); se exportan como cajas blancas con borde gris claro y esquinas redondeadas.", control: "" },
+  colores_c4: { nombre: "Colores de C4", desc: "Persona, sistema propio, externo y futuro con el mismo color en todo el documento.",
+    regla: "en los diagramas C4 cada color significa lo mismo en todo el documento: persona en amarillo (`#FFF4D6`, borde `#C9A040`), sistema o contenedor propio en azul (`#E8F1FF`, borde `#1F5FBF`), sistema externo o almacenamiento en verde (`#E7F5ED`, borde `#3D8B5A`) y lo futuro o fuera del alcance en blanco con borde gris discontinuo; el límite del sistema es un rectángulo redondeado con su nombre arriba a la izquierda y el flujo va de izquierda a derecha.", control: "" }
+};
+const PLANTILLAS = {
+  "trabajo-campo-unc": { nombre: "Trabajo de campo UNC", preset: "tc-unc", util: ["informe", "tesis"],
+    desc: "Entregable académico largo: portada institucional, tablas y figuras APA 7 y el documento fuente al cierre de cada capítulo.",
+    documento: "Trabajo de campo: práctica profesional",
+    ejes: { tipo: "informe", metodologia: "ninguna", proposito: "mixto", ambito: "academico", lector: "experto", medio: "impreso", formato: "docx", citas: "apa7" },
+    pre: ["Control de versiones", "Portada", "Índice general"], textual: ["Estructura del documento", "Planeamiento del proyecto", "Acta de acuerdos", "Cronograma de aproximación"], post: ["Referencias", "Anexos"],
+    capitulos: { "Estructura del documento": "Qué entregables reúne el documento y en qué orden", "Planeamiento del proyecto": "Metodología, fases, roles y calendario del proyecto",
+      "Acta de acuerdos": "Acuerdos con la organización, con su fecha y los responsables por rol", "Cronograma de aproximación": "Etapas y tareas con el estado de cada una" },
+    formato: {}, componentes: ["tablas", "figuras"], notaciones: ["uml-casos", "uml-secuencia"],
+    propios: ["portada_institucional", "documento_fuente", "termino_definido"],
+    normas: ["Las personas de la organización se citan por su rol, nunca por su nombre.", "Cada capítulo lleva el nombre del entregable y, si tiene, su versión («Planeamiento del proyecto v2.0»)."] },
+  "informe-especificacion": { nombre: "Informe técnico", preset: "informe-tecnico", util: ["especificacion", "informe"],
+    desc: "Requisitos y arquitectura: datos del documento centrados, títulos numerados hasta 1.1 y viñetas con el término en negrita.",
+    documento: "Informe de relevamiento y diseño de arquitectura",
+    ejes: { tipo: "especificacion", metodologia: "iso29148", proposito: "expositivo", ambito: "tecnico", lector: "especialista", medio: "impreso", formato: "docx" },
+    pre: ["Control de versiones"], textual: ["Introducción", "Descripción general", "Requisitos específicos", "Trazabilidad"], post: ["Apéndices"],
+    formato: { textual: { niveles: 2 } }, componentes: ["tablas", "figuras", "requisitos"], tablas_tipos: ["trazabilidad"], notaciones: ["uml-casos", "uml-componentes"],
+    propios: ["datos_documento", "termino_definido"],
+    normas: ["Las funcionalidades se agrupan por rol de usuario, cada grupo bajo un `###` sin número."] },
+  "informe-auditoria": { nombre: "Informe de auditoría", preset: "auditoria", util: ["informe"],
+    desc: "Revisión de un entregable contra criterios: ficha de corrida, estados con su porcentaje y evidencia con el lugar exacto.",
+    documento: "Informe de completitud",
+    ejes: { tipo: "informe", metodologia: "ninguna", proposito: "analitico", ambito: "tecnico", lector: "experto", medio: "impreso", formato: "pdf" },
+    pre: [], textual: ["Resumen de la revisión", "Detalle por punto"], post: [],
+    capitulos: { "Resumen de la revisión": "Veredicto general, lo que falta y lo mejor logrado, con la tabla resumen", "Detalle por punto": "Cada punto con sus criterios, la evidencia y lo que falta para completarlo" },
+    formato: { textual: { numeracion: "ninguna", pagina_nueva: false } }, componentes: ["tablas"], notaciones: [],
+    propios: ["ficha_corrida", "estado_completitud", "criterio_evidencia", "certeza"], normas: [] },
+  "proforma-entrevista": { nombre: "Proforma de entrevista", preset: "proforma",
+    desc: "Formulario para imprimir y completar a mano: barras de sección, campos, agenda con tiempos y preguntas con líneas.",
+    documento: "Proforma de entrevista",
+    ejes: { tipo: "otro", metodologia: "ninguna", proposito: "instructivo", ambito: "academico", lector: "experto", medio: "impreso", formato: "pdf" },
+    pre: [], textual: ["Datos de la entrevista", "Objetivos", "Agenda y control de tiempos", "Notas guía del entrevistador", "Cuerpo de la proforma"], post: [],
+    capitulos: { "Datos de la entrevista": "Datos para completar: fecha, hora, modalidad y participantes por rol", "Objetivos": "Qué se busca relevar en la entrevista",
+      "Agenda y control de tiempos": "Bloques temáticos con su tiempo estimado y el real", "Notas guía del entrevistador": "Recordatorios para conducir la entrevista",
+      "Cuerpo de la proforma": "Preguntas por bloque temático, con líneas para responder" },
+    formato: { textual: { pagina_nueva: false } }, componentes: ["tablas"], notaciones: [],
+    propios: ["barra_seccion", "campos_completar", "agenda", "preguntas_abiertas"], normas: [] },
+  "ficha-1pager": { nombre: "Ficha 1-pager", preset: "ficha",
+    desc: "Ficha de estudio en una sola página A4 a dos columnas, con bloques en orden fijo.",
+    documento: "Patrón State",
+    ejes: { tipo: "otro", metodologia: "ninguna", proposito: "expositivo", ambito: "academico", lector: "experto", medio: "impreso", formato: "pdf", citas: "apa7" },
+    pre: [], textual: ["Intención", "Diagrama canónico", "Cuándo usarlo", "Trampas y anti-patterns", "Problema sin el patrón", "Solución en código", "Caso propio"], post: ["Referencias"],
+    capitulos: { "Intención": "Qué resuelve el patrón, en una o dos oraciones", "Diagrama canónico": "Diagrama de clases del patrón, con su pie", "Cuándo usarlo": "Situaciones en que conviene y en que no",
+      "Trampas y anti-patterns": "Errores frecuentes al aplicarlo", "Problema sin el patrón": "Cómo queda el código sin el patrón y qué falla",
+      "Solución en código": "El patrón aplicado, en código", "Caso propio": "El patrón en el proyecto propio" },
+    formato: { textual: { numeracion: "ninguna", paginacion: "ninguna", pagina_nueva: false }, post: { paginacion: "ninguna", pagina_nueva: false } },
+    componentes: ["tablas", "figuras", "codigo"], notaciones: ["uml-clases"],
+    propios: ["familia", "intencion", "cuando_usar", "dos_columnas"], normas: [] },
+  "arquitectura-presentacion": { nombre: "Arquitectura en láminas", preset: "laminas", util: ["arquitectura"],
+    desc: "Arquitectura para presentar: láminas horizontales con antetítulo, una idea por lámina, tarjetas y C4.",
+    documento: "Arquitectura del sistema de gestión",
+    ejes: { tipo: "arquitectura", metodologia: "ninguna", proposito: "expositivo", ambito: "tecnico", lector: "mixto", medio: "digital", formato: "pdf" },
+    pre: ["Portada"], textual: ["Objetivo y estado", "Contexto del sistema", "Contenedores", "Despliegue", "Decisiones de arquitectura", "Fuera del alcance"], post: [],
+    capitulos: { "Objetivo y estado": "Para qué es el sistema y en qué estado está", "Contexto del sistema": "Actores y sistemas externos (C4, nivel 1)",
+      "Contenedores": "Aplicaciones y almacenamientos del sistema (C4, nivel 2)", "Despliegue": "Dónde se ejecuta cada contenedor",
+      "Decisiones de arquitectura": "Cada decisión con su motivo y la alternativa descartada", "Fuera del alcance": "Lo que no se hace en esta etapa" },
+    formato: { pre: { paginacion: "ninguna" }, textual: { numeracion: "ninguna", paginacion: "ninguna" } },
+    componentes: ["figuras"], notaciones: ["c4"],
+    propios: ["antetitulo", "una_idea", "tarjetas", "colores_c4"], normas: [] }
+};
+/* Títulos de ejemplo de las plantillas: al cambiar de plantilla se reemplazan, pero nunca uno escrito por el usuario. */
+const TITULOS_EJEMPLO = new Set(Object.values(PLANTILLAS).map(p => p.documento));
+/* Aplica una plantilla como punto de partida. "" vuelve a no tener plantilla sin tocar nada más. */
+function aplicarPlantilla(id, st) {
+  st = st || S;
+  const p = PLANTILLAS[id];
+  if (!p) { st.plantilla = ""; st.componentes_plantilla = []; return; }
+  const c = x => JSON.parse(JSON.stringify(x));
+  if (!st.documento || st.documento === DEF.documento || TITULOS_EJEMPLO.has(st.documento)) st.documento = p.documento;
+  Object.assign(st, c(p.ejes));
+  const pre = PRESETS[p.preset];
+  Object.assign(st, c(pre));
+  st.colores = Object.assign({}, PALETA_BASE, pre.colores || {});
+  st.componentes = [...p.componentes]; st.tablas_tipos = [...(p.tablas_tipos || [])]; st.notaciones = [...p.notaciones]; st.diag_vista = "";
+  st.pretextuales = [...p.pre]; st.textual = p.textual.join("\n"); st.postextuales = [...p.post];
+  st.propios = st.propios.filter(x => [...p.pre, ...p.post].some(n => norm(n) === norm(x.nombre)));
+  st.formato_zonas = c(FORMATO_ZONAS_BASE);
+  Object.entries(p.formato).forEach(([z, f]) => Object.assign(st.formato_zonas[z], f));
+  st.componentes_plantilla = [...p.propios]; st.plantilla = id; st.estructura_editada = false;
+  st.modo = st.medio === "digital" ? "digital" : "impreso";
+  derivarEstructura(st);
+}
 const REGLAS_TIPO = {
   manual: [
     "Imperativo con el tratamiento elegido; los títulos de tareas en infinitivo (\"Exportar un informe\").",
@@ -1012,10 +1224,12 @@ const GOOGLE = ["Inter","Source Sans 3","Roboto","Open Sans","Lato","IBM Plex Sa
 const SISTEMA = ["Arial","Calibri","Georgia","Times New Roman","Cambria","Consolas","Courier New","Segoe UI","Helvetica"];
 
 function esqueleto(m) { return ESQUELETOS[m] || ESQUELETOS.ninguna; }
-/* Propósito y subsecciones por capítulo: la metodología actual tiene prioridad sobre las demás. */
+/* Propósito y subsecciones por capítulo: la plantilla elegida tiene prioridad, después la metodología actual y
+   después las demás. */
 function datosCapitulos() {
   const otras = Object.entries(ESQUELETOS).filter(([m]) => m !== S.metodologia).flatMap(([, e]) => e);
-  return Object.fromEntries([...otras, ...esqueleto(S.metodologia)].map(e => [norm(e[0]), e]));
+  const pl = PLANTILLAS[S.plantilla] ? Object.entries(PLANTILLAS[S.plantilla].capitulos || {}).map(([n, prop]) => [n, prop, []]) : [];
+  return Object.fromEntries([...otras, ...esqueleto(S.metodologia), ...pl].map(e => [norm(e[0]), e]));
 }
 
 /* ---------- Zonas de la estructura (references/escritura.md, «Partes pretextuales y postextuales») ---------- */
@@ -1047,10 +1261,10 @@ const CATALOGO_POST = [
 const CATALOGO = { pre: CATALOGO_PRE, post: CATALOGO_POST };
 const CLAVE_ZONA = { pre: "pretextuales", post: "postextuales" };
 const FORMATO_ZONAS_BASE = {
-  pre: { paginacion: "romana", pagina_nueva: true }, textual: { paginacion: "arabiga", pagina_nueva: true }, post: { paginacion: "arabiga", pagina_nueva: true },
+  pre: { paginacion: "romana", pagina_nueva: true }, textual: { paginacion: "arabiga", pagina_nueva: true, numeracion: "decimal", niveles: 3 }, post: { paginacion: "arabiga", pagina_nueva: true },
   dedicatoria: { alineacion: "derecha", estilo: "cursiva" }, epigrafe: { alineacion: "derecha", estilo: "cursiva" }
 };
-const VALORES_FORMATO = { paginacion: ["romana", "arabiga", "ninguna"], alineacion: ["izquierda", "centro", "derecha"], estilo: ["normal", "cursiva"] };
+const VALORES_FORMATO = { paginacion: ["romana", "arabiga", "ninguna"], alineacion: ["izquierda", "centro", "derecha"], estilo: ["normal", "cursiva"], numeracion: ["decimal", "ninguna"], niveles: [1, 2, 3] };
 function delCatalogo(nombre) { return [...CATALOGO_PRE, ...CATALOGO_POST].find(c => norm(c.nombre) === norm(nombre)); }
 /* Partes que van sin número cuando se reparten capítulos sueltos (esqueleto o .docx). */
 function esParteSinNumero(c) { return SIN_NUMERAR_BASE.includes(norm(c)) || !!delCatalogo(c); }
@@ -1116,12 +1330,14 @@ function textualDe(st) {
   return unicos(lineas(st.textual)).filter(n => !enZonas.has(norm(n)));
 }
 /* `estructura` y `sin_numerar` se derivan de las zonas: los leen el verificador y los prompts existentes.
-   `estructura` deja fuera las partes sin título; la zona textual nunca entra en `sin_numerar`. */
+   `estructura` deja fuera las partes sin título; la zona textual solo entra en `sin_numerar` cuando
+   su numeración es «ninguna» (ficha, láminas, auditoría). */
+function sinNumeroTextual(st) { return !!(st.formato_zonas && st.formato_zonas.textual && st.formato_zonas.textual.numeracion === "ninguna"); }
 function derivarEstructura(st) {
   st = st || S;
   const conTitulo = l => l.filter(n => !SIN_TITULO.includes(norm(n)));
   st.estructura = unicos([...conTitulo(st.pretextuales), ...textualDe(st), ...conTitulo(st.postextuales)]).join("\n");
-  st.sin_numerar = unicos([...st.pretextuales, ...st.postextuales]).join("\n");
+  st.sin_numerar = unicos([...st.pretextuales, ...(sinNumeroTextual(st) ? textualDe(st) : []), ...st.postextuales]).join("\n");
 }
 /* Elementos que se muestran en una zona: los elegidos en su orden y después los demás del catálogo y propios. */
 function elementosZona(z, st) {
@@ -1187,7 +1403,7 @@ const DEF = {
   f_titulos: "Inter", f_cuerpo: "Inter", f_codigo: "JetBrains Mono",
   d_cuerpo: 16, d_h1: 30, d_h2: 24, d_h3: 19, d_tabla: 14, d_codigo: 14.5, d_nota: 13, d_interlineado: 1.5, d_ancho: 720,
   p_cuerpo: 11, p_h1: 18, p_h2: 15, p_h3: 13, p_tabla: 10, p_codigo: 9.5, p_nota: 9, p_interlineado: 1.15, p_margen: 2.5, p_papel: "A4",
-  peso_titulos: "600", alineacion: "izquierda", sangria: 0, plantilla: "",
+  peso_titulos: "600", alineacion: "izquierda", sangria: 0, plantilla: "", componentes_plantilla: [],
   colores: Object.assign({}, PALETA_BASE),
   variante: "neutro", tratamiento: "usted", citas: "apa7", comillas: "dobles", reglamento: "",
   decimal: "coma", miles: "espacio", fecha: "dd/mm/aaaa", pct_espacio: true, max_palabras: 25,
@@ -1256,6 +1472,9 @@ function combinar(o) {
         r.formato_zonas[zn][c] = c === "pagina_nueva" ? (typeof x === "boolean" ? x : v) : (VALORES_FORMATO[c].includes(x) ? x : v);
       });
     });
+    // Plantilla y componentes propios: solo valores conocidos (una configuración sin ellos queda sin plantilla).
+    if (typeof r.plantilla !== "string" || !tiene(PLANTILLAS, r.plantilla)) r.plantilla = "";
+    r.componentes_plantilla = (Array.isArray(r.componentes_plantilla) ? r.componentes_plantilla : []).filter((k, i, l) => tiene(COMPONENTES_PLANTILLA, k) && l.indexOf(k) === i);
     derivarEstructura(r);
   }
   return r;
@@ -1391,6 +1610,11 @@ const TABLA_ACAD = Object.fromEntries(TABLAS_ACAD.map(t => [t.k, t]));
 const ESTADISTICAS = new Set(["frecuencia", "contingencia", "correlacion", "regresion", "anova", "demografica", "descriptivos", "fiabilidad", "pruebas"]);
 document.querySelector('[data-grupo="tablas_tipos"]').innerHTML = TABLAS_ACAD.map(t =>
   `<label class="item"><input type="checkbox" value="${t.k}"><span><b>${t.nombre}</b><small>${t.desc}</small></span></label>`).join("");
+document.getElementById("plantillas").innerHTML =
+  `<label class="item"><input type="radio" name="plantilla" value=""><span><b>Sin plantilla</b><small>Partes de los valores actuales y eliges cada parámetro.</small></span></label>` +
+  Object.entries(PLANTILLAS).map(([id, p]) => `<label class="item"><input type="radio" name="plantilla" value="${id}"><span><b>${esc(p.nombre)}</b><small>${esc(p.desc)}</small></span></label>`).join("");
+document.querySelector('[data-grupo="componentes_plantilla"]').innerHTML = Object.entries(COMPONENTES_PLANTILLA).map(([k, c]) =>
+  `<label class="item"><input type="checkbox" value="${k}"><span><b>${esc(c.nombre)}</b><small>${esc(c.desc)}</small>${c.control ? `<small class="control">Lo revisa el verificador: ${esc(c.control.replace(/^./, m => m.toLowerCase()))}</small>` : ""}</span></label>`).join("");
 function hoy() {
   const d = new Date(); const dd = String(d.getDate()).padStart(2, "0"), mm = String(d.getMonth() + 1).padStart(2, "0"), y = d.getFullYear();
   return S.fecha === "aaaa-mm-dd" ? `${y}-${mm}-${dd}` : `${dd}/${mm}/${y}`;
@@ -1445,6 +1669,16 @@ function pintarFormulario() {
   cont.innerHTML = COLORES.map(([k, n]) => `<label class="color"><input type="color" data-color="${k}" value="${EF.colores[k]}"><span>${n}<br><code>${EF.colores[k].toUpperCase()}</code></span></label>`).join("");
   pintarSelectorDiagrama();
   pintarZonas();
+  pintarPlantilla();
+}
+/* Plantilla elegida y sus componentes propios: se ven los de la plantilla y los que estén marcados. */
+function pintarPlantilla() {
+  document.querySelectorAll("#plantillas input").forEach(r => { r.checked = r.value === S.plantilla; });
+  const propios = (PLANTILLAS[S.plantilla] || { propios: [] }).propios;
+  form.querySelectorAll('[data-grupo="componentes_plantilla"] label.item').forEach(l => {
+    const k = l.querySelector("input").value;
+    l.classList.toggle("dep-oculta", !propios.includes(k) && !S.componentes_plantilla.includes(k));
+  });
 }
 /* ---------- Zonas: catálogo, orden, propios y formato ---------- */
 function pintarZonas() {
@@ -1467,7 +1701,8 @@ function pintarZonas() {
     const el = e.target;
     if (el.dataset && el.dataset.fz) {
       const [z, c] = el.dataset.fz.split(".");
-      S.formato_zonas[z][c] = el.type === "checkbox" ? el.checked : el.value;
+      S.formato_zonas[z][c] = el.type === "checkbox" ? el.checked : c === "niveles" ? Number(el.value) : el.value;
+      if (c === "numeracion") derivarEstructura();
     } else if (el.classList && el.classList.contains("zona-check")) {
       const item = el.closest(".zona-item"), z = el.closest("[data-zona]").dataset.zona;
       alternarElemento(z, item.dataset.nombre, el.checked); pintarZonas();
@@ -1546,6 +1781,17 @@ function cambiarMetodologia() {
     cargarEsqueleto(); pintarFormulario();
   }
 }
+(function () {
+  const caja = document.getElementById("plantillas"); if (!caja || !caja.addEventListener) return;
+  caja.addEventListener("input", e => e.stopPropagation());
+  caja.addEventListener("change", e => {
+    e.stopPropagation();
+    const id = e.target.value;
+    if (id && S.estructura_editada && !confirm("¿Aplicar la plantilla? Se reemplazarán la estructura, los componentes y la presentación, y se perderán tus cambios en la estructura.")) { pintarPlantilla(); return; }
+    aplicarPlantilla(id); pintarFormulario(); actualizar();
+    aviso(id ? `Plantilla ${PLANTILLAS[id].nombre} aplicada: puedes cambiar cualquier valor` : "Sin plantilla: los valores actuales se mantienen");
+  });
+})();
 document.getElementById("esqueleto").addEventListener("click", () => { cargarEsqueleto(); pintarFormulario(); actualizar(); aviso("Esqueleto cargado"); });
 document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => {
   iniciarAjusteDeSeleccion();
@@ -1555,12 +1801,9 @@ document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("clic
     guardarSubido(); pintarFormulario(); actualizar(); aviso("Preajuste aplicado solo a la selección"); return;
   }
   const pre = PRESETS[b.dataset.preset];
-  S.plantilla = PLANTILLA_DE[b.dataset.preset] || "";
   Object.assign(S, pre);
   if (pre.colores) S.colores = Object.assign({}, PALETA_BASE, pre.colores);
-  if (b.dataset.preset === "laminas") S.modo = "digital";
-  else if (b.dataset.preset !== "digital" && S.medio === "digital") { S.modo = "impreso"; }
-  if (b.dataset.preset === "digital") S.modo = "digital";
+  S.modo = b.dataset.preset === "digital" ? "digital" : S.medio === "digital" ? "impreso" : S.modo;
   pintarFormulario(); actualizar(); aviso("Preajuste aplicado: puedes ajustar cada valor");
 }));
 document.getElementById("paleta-base").addEventListener("click", () => {
@@ -1672,7 +1915,8 @@ function vistaPrevia() {
   const t = k => (impreso ? S["p_" + k] : S["d_" + k]) + u;
   const fT = pila(S.f_titulos, esSerif(S.f_titulos) ? "serif" : "sans"), fC = pila(S.f_cuerpo, esSerif(S.f_cuerpo) ? "serif" : "sans"), fM = pila(S.f_codigo, "mono");
   const vars = { "--p": c.primario, "--t": c.texto, "--s": c.secundario, "--sup": c.superficie, "--b": c.borde, "--info": c.info, "--info-f": c.info_fondo, "--exito": c.exito, "--exito-f": c.exito_fondo, "--adv": c.advertencia, "--adv-f": c.advertencia_fondo, "--pel": c.peligro, "--pel-f": c.peligro_fondo };
-  doc.className = "doc " + (impreso ? "impreso" : "digital");
+  const PL = S.fuente_vista === "documento" && SUBIDO ? "" : S.plantilla, cp = new Set(PL ? S.componentes_plantilla : []);
+  doc.className = "doc " + (impreso ? "impreso" : "digital") + (PL ? " pl-" + PL : "") + (cp.has("dos_columnas") ? " dos-columnas" : "");
   Object.entries(vars).forEach(([k, val]) => doc.style.setProperty(k, val));
   doc.style.fontFamily = fC; doc.style.fontSize = t("cuerpo"); doc.style.lineHeight = impreso ? S.p_interlineado : S.d_interlineado;
   doc.style.textAlign = "left";
@@ -1692,13 +1936,23 @@ function vistaPrevia() {
   const sinNum = new Set(lineas(S.sin_numerar).map(norm));
   const caps = lineas(S.estructura);
   const datos = datosCapitulos();
-  let html = `<div class="portada"><h1 style="${hStyle(1)};font-size:calc(${t("h1")} * 1.2)">${esc(S.documento || "Documento sin título")}</h1><p style="${notaStyle}">Versión ${esc(S.version)} · ${hoy()} · ${esc(TIPO_NOMBRE[S.tipo])}</p></div>`;
+  // Plantilla: leyendas APA 7 (Trabajo de campo UNC), capítulos sin número y niveles numerados
+  const apa = PL === "trabajo-campo-unc";
+  const sinNumTxt = sinNumeroTextual(S), niveles = Number(S.formato_zonas.textual.niveles) || 3;
+  const textuales = textualDe(S).map(norm);
+  const numSub = (nivel, n) => !sinNumTxt && nivel <= niveles ? n + " " : "";
+  const titDoc = esc(S.documento || "Documento sin título");
+  let html = "";
   let nCap = 0, nTab = 0, nFig = 0, numerados = 0;
   const P = (txt) => `<p style="${pStyle}">${txt}</p>`;
   // Las leyendas se registran para armar los índices de tablas y figuras al final del render
   const idxTab = [], idxFig = [];
-  const leyendaTabla = (titulo) => { idxTab.push([++nTab, titulo]); return `<p class="leyenda" style="${capStyle}"><b>Tabla ${nTab}.</b> ${titulo}</p>`; };
-  const leyendaFigura = (titulo) => { idxFig.push([++nFig, titulo]); return `<p class="leyenda" style="${capStyle}"><b>Figura ${nFig}.</b> ${titulo}</p><p class="fuente" style="${notaStyle}">Fuente: elaboración propia.</p>`; };
+  const leyendaTabla = (titulo) => { idxTab.push([++nTab, titulo]); return apa ? `<p class="leyenda apa" style="${capStyle}"><b>Tabla ${nTab}</b><br><i>${titulo}</i></p>` : `<p class="leyenda" style="${capStyle}"><b>Tabla ${nTab}.</b> ${titulo}</p>`; };
+  const leyendaFigura = (titulo) => { idxFig.push([++nFig, titulo]); return apa ? `<p class="leyenda apa" style="${capStyle}"><b>Figura ${nFig}</b><br><i>${titulo}</i></p>` : `<p class="leyenda" style="${capStyle}"><b>Figura ${nFig}.</b> ${titulo}</p><p class="fuente" style="${notaStyle}">Fuente: elaboración propia.</p>`; };
+  // APA 7: la leyenda va arriba de la figura y la nota, debajo
+  const figuraCon = (contenido, titulo) => apa ? leyendaFigura(titulo) + contenido + `<p class="fuente" style="${notaStyle}"><i>Nota.</i> Elaboración propia.</p>` : contenido + leyendaFigura(titulo);
+  const hCap = cp.has("dos_columnas") ? 2 : 1; // en la ficha, los capítulos son títulos de bloque
+  const tituloCap = (cap, numerado) => `<h1 class="cap${cp.has("barra_seccion") ? " barra" : ""}" style="${hStyle(hCap)}">${numerado ? nCap + (cp.has("barra_seccion") ? ". " : " ") : ""}${esc(cap)}</h1>`;
   const listaIndice = (clase, items) => items.length
     ? `<ol class="indice${impreso ? " impreso" : ""}" style="${capStyle}">${items.map(([n, ti], i) => `<li><span>${clase} ${n}. ${ti}</span>${impreso ? `<span class="pag">${num(4 + i)}</span>` : ""}</li>`).join("")}</ol>`
     : P(`<span class="ficticio">El documento no tiene ${clase === "Tabla" ? "tablas" : "figuras"}.</span>`);
@@ -1720,12 +1974,12 @@ function vistaPrevia() {
     figuras: () => {
       const mk = S.capturas_marcadores ? ` <span class="marcador">1</span>` : "";
       return P(`En la Figura ${nFig + 1} se muestra el asistente de creación.`) +
-        `<div class="figura"><div class="captura" style="${S.capturas_borde ? "" : "border-color:transparent"};${capStyle}"><div class="barra">Nuevo proyecto</div><div class="contenido"><span class="campo-falso">Nombre del proyecto</span><span class="btn">Guardar</span>${mk}</div></div></div>` +
-        leyendaFigura("Asistente de creación de proyectos");
+        figuraCon(`<div class="figura"><div class="captura" style="${S.capturas_borde ? "" : "border-color:transparent"};${capStyle}"><div class="barra">Nuevo proyecto</div><div class="contenido"><span class="campo-falso">Nombre del proyecto</span><span class="btn">Guardar</span>${mk}</div></div></div>`,
+          "Asistente de creación de proyectos");
     },
     codigo: () => `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">bash</span>sga exportar --formato pdf --salida informes/</pre>`,
-    diagrama: n => { const dt = DIAG_TITULO[n]; return P(`En la Figura ${nFig + 1} se muestra el ${dt} del módulo de cursos.`) + `<div class="figura">${diagramaSVG(n, c, S.f_cuerpo)}</div>` + leyendaFigura(`${dt[0].toUpperCase() + dt.slice(1)} del módulo de cursos`); },
-    fuente: () => `<p class="fuente" style="${notaStyle}">Fuente: elaboración propia (datos de ejemplo).</p>`,
+    diagrama: n => { const dt = DIAG_TITULO[n]; return P(`En la Figura ${nFig + 1} se muestra el ${dt} del módulo de cursos.`) + figuraCon(`<div class="figura">${diagramaSVG(n, c, S.f_cuerpo)}</div>`, `${dt[0].toUpperCase() + dt.slice(1)} del módulo de cursos`); },
+    fuente: () => apa ? `<p class="fuente" style="${notaStyle}"><i>Nota.</i> Datos de ejemplo.</p>` : `<p class="fuente" style="${notaStyle}">Fuente: elaboración propia (datos de ejemplo).</p>`,
     requisitos: () => P(`En la Tabla ${nTab + 1} se listan los requisitos funcionales.`) + leyendaTabla("Requisitos funcionales del módulo de cursos") + `<table style="${capStyle}"><thead><tr><th>ID</th><th>Requisito</th><th>Prioridad</th></tr></thead><tbody><tr><td>RF-001</td><td>El sistema deberá exportar las notas en PDF.</td><td>Alta</td></tr><tr><td>RF-002</td><td>El docente deberá poder anular una inscripción.</td><td>Media</td></tr></tbody></table>`,
     tablas: () => P(`En la Tabla ${nTab + 1} se comparan los tiempos de respuesta.`) + leyendaTabla("Tiempo de respuesta por operación") + `<table style="${capStyle}"><thead><tr><th>Operación</th><th class="num">Solicitudes</th><th class="num">Tiempo medio (ms)</th></tr></thead><tbody><tr><td>Crear curso</td><td class="num">${num(12500)}</td><td class="num">${num(182.4, 1)}</td></tr><tr><td>Exportar notas</td><td class="num">${num(3210)}</td><td class="num">${num(1045.7, 1)}</td></tr></tbody></table>`,
     historias: () => P(`<b>HU-01.</b> Como docente, quiero exportar las notas, para compartirlas con la secretaría.`) + `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">gherkin</span>Dado que el docente tiene una sesión iniciada\nCuando selecciona "Exportar"\nEntonces se descarga un archivo PDF con las notas</pre>`,
@@ -1751,16 +2005,15 @@ function vistaPrevia() {
   const porCap = Math.ceil(colaTablas.length / Math.max(1, totalNumerados - 2));
   const tomarTablas = () => colaTablas.splice(0, porCap).map(ej.tablaAcad).join("");
 
-  caps.forEach(cap => {
+  const capituloGenerico = cap => {
     const k = norm(cap), numerado = !sinNum.has(k);
     const info = datos[k];
     if (numerado) { nCap++; numerados++; }
-    const titulo = (numerado ? nCap + " " : "") + esc(cap);
-    html += `<h1 style="${hStyle(1)}">${titulo}</h1>`;
+    html += tituloCap(cap, numerado);
     const subs = (info && info[2]) || [];
     if (k === "control de versiones") {
       html += leyendaTabla("Historial de cambios");
-      html += `<table style="${capStyle}"><thead><tr><th>Versión</th><th>Fecha</th><th>Autor</th><th>Descripción del cambio</th></tr></thead><tbody><tr><td>0.1</td><td>${hoy()}</td><td><span class="pendiente">[PENDIENTE: autor]</span></td><td>Borrador inicial</td></tr></tbody></table><p class="fuente" style="${notaStyle}">Fuente: elaboración propia.</p>`;
+      html += `<table style="${capStyle}"><thead><tr><th>Versión</th><th>Fecha</th><th>Autor</th><th>Descripción del cambio</th></tr></thead><tbody><tr><td>0.1</td><td>${hoy()}</td><td><span class="pendiente">[PENDIENTE: autor]</span></td><td>Borrador inicial</td></tr></tbody></table><p class="fuente" style="${notaStyle}">${apa ? "<i>Nota.</i> Elaboración propia." : "Fuente: elaboración propia."}</p>`;
       return;
     }
     if (k === "resumen" && comp.has("palabras_clave")) { html += ej.resumen(); return; }
@@ -1779,15 +2032,15 @@ function vistaPrevia() {
       if (comp.has("cita_bloque")) html += ej.citaBloque();
       if (comp.has("notas_pie")) html += ej.notaPie();
       if (comp.has("anexos")) html += P(`El cuestionario completo se incluye en el Anexo A.`);
-      if (subs[0]) html += `<h2 style="${hStyle(2)}">${nCap}.1 ${esc(subs[0])}</h2>` + P(`<span class="proposito">${esc(info[1])}.</span>`);
-      if (subs[1]) html += `<h3 style="${hStyle(3)}">${nCap}.1.1 ${esc(subs[1])}</h3>` + P(`Contenido de ejemplo con una idea por párrafo y oraciones de hasta ${S.max_palabras} palabras.`);
+      if (subs[0]) html += `<h2 style="${hStyle(2)}">${numSub(2, nCap + ".1")}${esc(subs[0])}</h2>` + P(`<span class="proposito">${esc(info[1])}.</span>`);
+      if (subs[1]) html += `<h3 style="${hStyle(3)}">${numSub(3, nCap + ".1.1")}${esc(subs[1])}</h3>` + P(`Contenido de ejemplo con una idea por párrafo y oraciones de hasta ${S.max_palabras} palabras.`);
       if (comp.has("avisos")) html += ej.avisos(S.avisos);
       if (comp.has("ecuaciones")) html += ej.ecuaciones();
       if (comp.has("notas_pie")) html += ej.notasPie();
       return;
     }
     if (numerado && numerados === 2) {
-      if (subs[0]) html += `<h2 style="${hStyle(2)}">${nCap}.1 ${esc(subs[0])}</h2>`;
+      if (subs[0]) html += `<h2 style="${hStyle(2)}">${numSub(2, nCap + ".1")}${esc(subs[0])}</h2>`;
       if (comp.has("hipotesis")) html += ej.hipotesis();
       if (comp.has("pasos")) html += ej.pasos();
       if (comp.has("figuras")) html += ej.figuras();
@@ -1809,7 +2062,136 @@ function vistaPrevia() {
     if ((k === "referencias" || k === "bibliografia") && S.citas !== "ninguna") { html += ej.referencias(); return; }
     html += P(`<span class="proposito">${info ? esc(info[1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
     if (numerado) html += tomarTablas();
+  };
+  /* ---- Componentes propios de las plantillas: un ejemplo por componente (references/plantillas/) ---- */
+  const celdaTd = v => String(v).startsWith("<td") ? v : `<td>${v}</td>`;
+  const tablaP = (titulo, cab, filas, claseUltima) => leyendaTabla(titulo) + `<table style="${capStyle}"><thead><tr>${cab.map(h => `<th${/^(Completitud|Tiempo)/.test(h) ? ' class="num"' : ""}>${h}</th>`).join("")}</tr></thead><tbody>` +
+    filas.map((f, i) => `<tr${claseUltima && i === filas.length - 1 ? ` class="${claseUltima}"` : ""}>${f.map(celdaTd).join("")}</tr>`).join("") + `</tbody></table>`;
+  const estado = e => `<td class="estado ${norm(e)}">${e}</td>`;
+  const certeza = e => `<span class="certeza ${norm(e)}">${e}</span>`;
+  const listaB = items => `<ul class="terminos">${items.map(([t, x]) => `<li style="${pStyle}">${t ? `<b>${t}:</b> ` : ""}${x}</li>`).join("")}</ul>`;
+  const pregunta = (n, txt, lineasR) => `<p class="pregunta" style="${pStyle}"><b>${n}</b> ${txt}</p>` + `<div class="linea-respuesta"></div>`.repeat(lineasR);
+  const ante = txt => `<p class="antetitulo">${txt}</p>`;
+  const bajada = txt => `<p class="bajada" style="${pStyle}">${txt}</p>`;
+  const tarjetas = items => cp.has("tarjetas")
+    ? `<div class="tarjetas">${items.map(([ti, x, clase]) => `<div class="tarjeta${clase ? " " + clase : ""}"><b>${ti}</b><span>${x}</span></div>`).join("")}</div>`
+    : listaB(items.map(([ti, x]) => [ti, x]));
+  const c4SVG = () => {
+    const caja = (x, y, w, h, fondo, borde, titulo, sub, discontinua) => `<rect x='${x}' y='${y}' width='${w}' height='${h}' rx='8' fill='${fondo}' stroke='${borde}' stroke-width='1.6'${discontinua ? " stroke-dasharray='6 4'" : ""}/>` +
+      `<text x='${x + w / 2}' y='${y + h / 2 - 3}' text-anchor='middle' font-weight='700' font-size='12' fill='#213455'>${titulo}</text><text x='${x + w / 2}' y='${y + h / 2 + 13}' text-anchor='middle' font-size='10' fill='#5B6C85'>${sub}</text>`;
+    const flecha = (x1, x2, y, et) => `<line x1='${x1}' y1='${y}' x2='${x2}' y2='${y}' stroke='#8C959F' stroke-width='1.2' marker-end='url(#fc4)'/><text x='${(x1 + x2) / 2}' y='${y - 6}' text-anchor='middle' font-size='9.5' fill='#5B6C85'>${et}</text>`;
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 620 210' width='620' role='img' aria-label='Diagrama de contexto C4 con los colores de la plantilla' font-family='${esc(S.f_cuerpo).replace(/'/g, "")}, Arial, sans-serif'>` +
+      `<defs><marker id='fc4' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='7' markerHeight='7' orient='auto'><path d='M0,0 L10,5 L0,10 z' fill='#8C959F'/></marker></defs>` +
+      caja(10, 70, 120, 62, "#FFF4D6", "#C9A040", "Docente", "Persona") +
+      `<rect x='170' y='12' width='270' height='186' rx='12' fill='#F7FAFF' stroke='#6C84A5' stroke-width='1.4'/><text x='182' y='32' font-weight='700' font-size='11' fill='#173A6D'>Sistema de gestión</text>` +
+      caja(205, 70, 200, 62, "#E8F1FF", "#1F5FBF", "API del sistema", "Backend modular") +
+      caja(480, 30, 130, 58, "#E7F5ED", "#3D8B5A", "Servicio de correo", "Sistema externo") +
+      caja(480, 122, 130, 58, "#FFFFFF", "#8C959F", "Aula virtual", "Fuera del alcance", true) +
+      flecha(130, 203, 96, "Usa (HTTPS)") + flecha(405, 478, 70, "SMTP") + `<line x1='405' y1='118' x2='478' y2='150' stroke='#8C959F' stroke-width='1.2' stroke-dasharray='4 3' marker-end='url(#fc4)'/></svg>`;
+  };
+  const ejp = {
+    portada_institucional: () => {
+      const [w1, ...resto] = String(S.documento || "Documento sin título").split(" "), anio = new Date().getFullYear();
+      return `<div class="portada-unc"><div class="franja"><div class="unc"><b>UNC</b><span>Universidad Nacional de Córdoba</span></div><div class="escmb"><b>ESCMB</b><span>Esc. Superior de Comercio Manuel Belgrano</span></div></div>` +
+        `<p class="carrera">Analista Universitario de Sistemas de Información</p><div class="bloque-titulo"><p class="t1">${esc(w1)}</p><p class="t2">${esc(resto.join(" "))}</p><hr><p class="sub"><i>Versión ${esc(S.version)}</i></p></div>` +
+        `<table class="datos-portada"><tr><th>Grupo</th><td><span class="pendiente">[PENDIENTE: número]</span></td></tr><tr><th>Año</th><td>${anio}</td></tr><tr><th>Integrantes</th><td>— <span class="pendiente">[PENDIENTE: nombres]</span></td></tr></table>` +
+        `<div class="pie-unc"><span>Córdoba, Argentina</span><span>${anio} · Grupo <span class="pendiente">[PENDIENTE]</span></span></div></div>`;
+    },
+    documento_fuente: cap => `<p class="doc-fuente" style="${pStyle}"><b>Documento fuente: <i>${esc(cap)} v1.0</i>.</b></p>`,
+    termino_definido: () => listaB([["Calidad de proceso", "que la forma de trabajo se pueda repetir y medir."], ["Calidad de producto", "que el sistema cumpla los requisitos acordados."]]),
+    datos_documento: () => `<div class="datos-doc"><p><b>Sistema:</b> Sistema de Gestión Académica</p><p><b>Documento:</b> ${esc(TIPO_NOMBRE[S.tipo][0].toUpperCase() + TIPO_NOMBRE[S.tipo].slice(1))}</p><p><b>Estado:</b> Borrador</p></div>`,
+    ficha_corrida: () => `<div class="ficha-corrida" style="${notaStyle}"><p><b>Commit:</b> <code>79bbf4b</code> · <b>Fecha:</b> ${hoy()} · <b>Corte:</b> primera entrega · <b>Modo:</b> completo</p><p><b>Rama:</b> main · <b>Estado del repositorio:</b> sin cambios pendientes</p><p><b>Criterio:</b> consigna de la primera entrega. Completo: cumple todos los criterios; Parcial: cumple una parte; No: no cumple ninguno.</p></div>`,
+    estado_completitud: () => P(`El entregable cumple la mayor parte de la consigna. Falta el documento de arquitectura y quedan historias sin criterios de aceptación; lo mejor logrado es el backlog, completo y priorizado. La Tabla ${nTab + 1} resume cada punto.`) +
+      tablaP("Completitud por punto", ["Punto", "Estado", "Completitud", "Lo principal que falta"],
+        [["1 · Visión y backlog", estado("Completo"), `<td class="num">${pct(100)}</td>`, "—"], ["2 · Requisitos", estado("Parcial"), `<td class="num">${pct(60)}</td>`, "Criterios de aceptación de 4 historias"], ["3 · Arquitectura", estado("No"), `<td class="num">${pct(0)}</td>`, "El documento no está en el repositorio"]]),
+    criterio_evidencia: () => `<h3 style="${hStyle(3)}">2 · Requisitos — Parcial (${pct(60)})</h3><p class="archivo" style="${notaStyle}">Archivo: <code>docs/02-requisitos.md</code></p>` +
+      P(`La Tabla ${nTab + 1} muestra cada criterio del punto con su evidencia.`) +
+      tablaP("Criterios del punto Requisitos", ["Criterio", "¿Cumple?", "Evidencia"],
+        [["Cada historia tiene criterios de aceptación", estado("Parcial"), "8 de 12 historias (02:40-118)"], ["Cada requisito tiene un ID único", estado("Sí"), "RF-001 a RF-024 (02:12-38)"], ["Hay requisitos no funcionales medibles", estado("No"), "—"]]) +
+      P(`<b>Observaciones de <i>requisitos</i>:</b> el formato de las historias es uniforme${cp.has("certeza") ? " " + certeza("CONFIRMADO") : ""}. Las estimaciones parecen hechas en una sola sesión${cp.has("certeza") ? " " + certeza("PROBABLE") : ""}.`) +
+      P(`<b>Para completar:</b>`) + listaB([["", "Agregar criterios de aceptación a cuatro historias."], ["", "Cuantificar al menos dos requisitos no funcionales."]]),
+    certeza: () => P(`El backlog está priorizado ${certeza("CONFIRMADO")}. Las estimaciones parecen hechas en una sola sesión ${certeza("PROBABLE")}.`),
+    barra_seccion: () => `<p class="barra barra-demo" style="${hStyle(hCap)}">1. Datos de la entrevista</p>`,
+    campos_completar: () => tablaP("Datos de la entrevista", ["Campo", "Dato", "Campo", "Dato"],
+      [["Fecha", "___ / ___ / ______", "Hora de inicio", "___ : ___"], ["Modalidad", "Presencial / Virtual", "Hora de cierre", "___ : ___"], ["Entrevistado (rol)", "______________", "Entrevistador (rol)", "______________"]]),
+    agenda: () => tablaP("Agenda de la entrevista", ["Bloque", "Tema", "Tiempo estimado", "Tiempo real", "Tiempo total"],
+      [["1", "Apertura y encuadre", "5 min", "", ""], ["2", "Misión y estructura", "15 min", "", ""], ["3", "Diagnóstico de dolores", "20 min", "", ""], ["4", "Cierre y próximos pasos", "5 min", "", ""], ["Tiempo total", "", "45 min", "", ""]], "total"),
+    preguntas_abiertas: () => pregunta("1.1", "Cuéntenos cuál es la misión del área y a quién atiende.", 4) + pregunta("1.2", "¿Qué tareas ocupan la mayor parte de la semana?", 3),
+    familia: () => `<span class="pastilla">Familia: Comportamiento (Behavioral)</span>`,
+    intencion: () => `<p class="intencion" style="${pStyle}"><i>Permite que un objeto cambie su comportamiento cuando cambia su estado interno: parece que cambiara de clase.</i> ${S.citas === "apa7" ? "(Gamma et al., 1994)" : cita()}</p>`,
+    cuando_usar: () => tablaP("Cuándo usar el patrón State", ["Sí usarlo", "No usarlo"],
+      [['<td class="uso-si">El comportamiento depende del estado y cambia en ejecución</td>', '<td class="uso-no">Hay dos estados que casi no cambian</td>'], ['<td class="uso-si">Hay condicionales repetidos sobre el estado</td>', '<td class="uso-no">Las transiciones son triviales</td>']]),
+    dos_columnas: () => P(`<span class="ficticio">Con la plantilla Ficha 1-pager, la vista previa compone los bloques en una A4 a dos columnas.</span>`),
+    antetitulo: () => ante("C4 · Nivel 1") + `<p class="titulo-lamina" style="${hStyle(2)}">Contexto del sistema</p>` + bajada("Quién usa el sistema y con qué sistemas externos se comunica."),
+    una_idea: () => P(`<span class="ficticio">Cada lámina desarrolla una sola idea: no tiene secciones internas.</span>`),
+    tarjetas: () => tarjetas([["Objetivo", "Centralizar inscripciones y notas."], ["Estado", "Primera demo en marzo."]]),
+    colores_c4: () => figuraCon(`<div class="figura">${c4SVG()}</div>`, "Contexto del sistema con los colores de C4")
+  };
+  // «Ver todo» muestra cada componente completo, aunque no esté marcado
+  const conTodo = f => { const antes = [...cp]; Object.keys(COMPONENTES_PLANTILLA).forEach(k => cp.add(k)); const r = f(); cp.clear(); antes.forEach(k => cp.add(k)); return r; };
+  const prop = k => P(`<span class="proposito">${datos[k] ? esc(datos[k][1]) + "." : "Propósito del capítulo: [PENDIENTE]."}</span>`);
+  const si = (k, f, otro) => cp.has(k) ? f() : (otro ? otro() : "");
+  /* Contenido de los capítulos propios de cada plantilla (por nombre normalizado). Los demás usan el ejemplo general. */
+  const EJP = {
+    "informe-auditoria": {
+      "resumen de la revision": () => si("estado_completitud", ejp.estado_completitud, () => prop("resumen de la revision")) + si("certeza", ejp.certeza),
+      "detalle por punto": () => si("criterio_evidencia", ejp.criterio_evidencia, () => prop("detalle por punto"))
+    },
+    "proforma-entrevista": {
+      "datos de la entrevista": () => si("campos_completar", ejp.campos_completar, () => prop("datos de la entrevista")),
+      "objetivos": () => listaB([["", "Conocer la misión y la estructura del área."], ["", "Identificar los dolores del proceso actual."], ["", "Acordar los próximos pasos del relevamiento."]]),
+      "agenda y control de tiempos": () => si("agenda", ejp.agenda, () => prop("agenda y control de tiempos")),
+      "notas guia del entrevistador": () => listaB([["", "Presentarse y explicar el objetivo en un minuto."], ["", "Pedir ejemplos concretos, no opiniones generales."], ["", "Anotar el tiempo real de cada bloque."]]),
+      "cuerpo de la proforma": () => `<h2 style="${hStyle(2)}">${numSub(2, nCap + ".1")}Misión</h2>` +
+        si("preguntas_abiertas", ejp.preguntas_abiertas, () => P("¿Cuál es la misión del área y a quién atiende?")) +
+        `<h2 style="${hStyle(2)}">${numSub(2, nCap + ".2")}Diagnóstico de dolores</h2>` +
+        (cp.has("preguntas_abiertas") ? pregunta("2.1", "¿Qué parte del proceso genera más demoras o retrabajo?", 4) : P("¿Qué parte del proceso genera más demoras o retrabajo?"))
+    },
+    "ficha-1pager": {
+      "intencion": () => si("intencion", ejp.intencion, () => prop("intencion")),
+      "diagrama canonico": () => comp.has("figuras") ? figuraCon(`<div class="figura">${diagramaSVG("uml-clases", c, S.f_cuerpo)}</div>`, "Estructura del patrón State") : prop("diagrama canonico"),
+      "cuando usarlo": () => si("cuando_usar", ejp.cuando_usar, () => prop("cuando usarlo")),
+      "trampas y anti-patterns": () => listaB([["Explosión de clases", "un estado por cada combinación de banderas."], ["Estado con datos", "los estados guardan datos del contexto y dejan de ser intercambiables."]]),
+      "problema sin el patron": () => P(`Sin el patrón, cada método de <code>Inscripcion</code> repite un <code>switch</code> sobre <code>estado</code> y cada estado nuevo obliga a tocarlos todos.`),
+      "solucion en codigo": () => comp.has("codigo") ? `<pre style="font-family:${esc(fM)};font-size:${t("codigo")}"><span class="lang">typescript</span>interface Estado { confirmar(i: Inscripcion): void }\nclass Pendiente implements Estado {\n  confirmar(i: Inscripcion) { i.cambiar(new Confirmada()); }\n}</pre>` : prop("solucion en codigo"),
+      "caso propio": () => P(`Una inscripción pasa de <b>Pendiente</b> → <b>Confirmada</b> → <b>Cursando</b>; cada estado decide qué acciones permite.`)
+    },
+    "arquitectura-presentacion": {
+      "objetivo y estado": () => bajada("Un sistema para centralizar inscripciones, cursos y notas.") + tarjetas([["Objetivo", "Reemplazar planillas y correos por un solo sistema."], ["Estado", "Diseño aprobado; desarrollo en curso."], ["Primera demo", "Inscripción y consulta de notas.", "positiva"]]),
+      "contexto del sistema": () => bajada("Quién usa el sistema y con qué sistemas externos se comunica.") +
+        (cp.has("colores_c4") ? figuraCon(`<div class="figura">${c4SVG()}</div>`, "Contexto del sistema (C4, nivel 1)") : comp.has("figuras") ? ej.diagrama("c4") : ""),
+      "contenedores": () => bajada("Las aplicaciones y los almacenamientos que forman el sistema.") + tarjetas([["Aplicación web", "Interfaz para docentes y estudiantes."], ["API del sistema", "Backend modular con REST / OpenAPI."], ["Base de datos", "PostgreSQL con las inscripciones y notas."]]),
+      "despliegue": () => bajada("Dónde se ejecuta cada contenedor.") + tarjetas([["Servidor de aplicaciones", "API y aplicación web en contenedores."], ["Almacenamiento", "Archivos con URL firmadas."]]),
+      "decisiones de arquitectura": () => bajada("Cada decisión con su motivo y la alternativa descartada.") + tarjetas([["Monolito modular", "Un solo despliegue para un equipo chico; se descartaron los microservicios."], ["PostgreSQL", "Transacciones en inscripciones; se descartó una base documental."]]),
+      "fuera del alcance": () => bajada("Lo que no entra en esta etapa.") + tarjetas([["Aula virtual", "Se integra en una etapa posterior.", "futura"], ["Fuera del alcance", "Pagos en línea.", "alcance"]])
+    }
+  };
+  const ANTETITULOS = { "objetivo y estado": "Visión general", "contexto del sistema": "C4 · Nivel 1", "contenedores": "C4 · Nivel 2", "despliegue": "Infraestructura", "decisiones de arquitectura": "Decisiones", "fuera del alcance": "Alcance" };
+  const propios = EJP[PL] || {};
+  const laminas = PL === "arquitectura-presentacion";
+  caps.forEach(cap => {
+    const k = norm(cap), inicio = html.length;
+    if (propios[k]) {
+      const numerado = !sinNum.has(k);
+      if (numerado) { nCap++; numerados++; }
+      html += tituloCap(cap, numerado) + propios[k]();
+    } else capituloGenerico(cap);
+    if (textuales.includes(k)) {
+      if (cp.has("termino_definido") && k === textuales[0]) html += ejp.termino_definido();
+      if (cp.has("documento_fuente")) html += ejp.documento_fuente(cap);
+    }
+    if (laminas) html = html.slice(0, inicio) + `<section class="lamina">${cp.has("antetitulo") ? ante(ANTETITULOS[k] || "Lámina") : ""}` + html.slice(inicio) + `</section>`;
   });
+  if (cp.has("dos_columnas")) html = `<div class="columnas">${html}</div>`;
+  const info = `<p style="${notaStyle}">Versión ${esc(S.version)} · ${hoy()} · ${esc(TIPO_NOMBRE[S.tipo])}</p>`;
+  const portada = cp.has("portada_institucional") ? ejp.portada_institucional()
+    : laminas ? `<section class="lamina portada-lamina">${cp.has("antetitulo") ? ante("Documento de arquitectura") : ""}<h1 style="${hStyle(1)};font-size:calc(${t("h1")} * 1.2)">${titDoc}</h1>${info}</section>`
+    : PL === "informe-especificacion" ? `<div class="portada centrada"><h1 style="${hStyle(1)};font-size:calc(${t("h1")} * 1.4);font-weight:400">${titDoc}</h1>${cp.has("datos_documento") ? ejp.datos_documento() : info}</div>`
+    : PL === "proforma-entrevista" ? `<div class="portada centrada sin-linea"><h1 style="${hStyle(1)}">${titDoc}</h1></div>`
+    : PL === "ficha-1pager" ? `<div class="portada sin-linea"><h1 style="${hStyle(1)}">${titDoc}${cp.has("familia") ? ejp.familia() : ""}</h1></div>`
+    : PL === "informe-auditoria" ? `<div class="portada sin-linea"><h1 style="${hStyle(1)}">${titDoc}</h1>${cp.has("ficha_corrida") ? ejp.ficha_corrida() : info}</div>`
+    : `<div class="portada"><h1 style="${hStyle(1)};font-size:calc(${t("h1")} * 1.2)">${titDoc}</h1>${info}</div>`;
+  html = portada + html;
   if (colaTablas.length) html += colaTablas.splice(0).map(ej.tablaAcad).join("");
   if (!caps.length) html += P(`<span class="sin-contenido">Agrega capítulos en "Estructura" para ver la vista previa.</span>`);
   if (S.ver_todo) {
@@ -1823,7 +2205,9 @@ function vistaPrevia() {
       sec("Tipos de tabla", TABLAS_ACAD.map(x => `<h3 style="${hStyle(3)}">${esc(x.nombre)}</h3>` + ej.tablaAcad(x.k)).join("")) +
       sec("Resumen y palabras clave", ej.resumen() + ej.abstract()) + sec("Citas en bloque", ej.citaBloque()) +
       sec("Notas al pie", ej.notaPie() + ej.notasPie()) + sec("Hipótesis numeradas", ej.hipotesis()) +
-      sec("Anexos", ej.anexos(3)) + sec("Índices de tablas y figuras", ej.indices(3));
+      sec("Anexos", ej.anexos(3)) + sec("Índices de tablas y figuras", ej.indices(3)) +
+      sec("Componentes de las plantillas", Object.entries(COMPONENTES_PLANTILLA).map(([k, x]) => `<h3 style="${hStyle(3)}">${esc(x.nombre)}</h3>` +
+        conTodo(() => k === "documento_fuente" ? ejp.documento_fuente("Planeamiento del proyecto") : ejp[k]())).join(""));
   }
   html = html.replace(/<!--IDX-T-->/g, () => listaIndice("Tabla", idxTab)).replace(/<!--IDX-F-->/g, () => listaIndice("Figura", idxFig));
   doc.innerHTML = html;
@@ -1859,6 +2243,8 @@ function y(v) { return JSON.stringify(String(v)); }
 function lista(clave, items) { return items.length ? `${clave}:\n` + items.map(i => `  - ${/^[\wÀ-ÿ][\wÀ-ÿ .()/,-]*$/.test(i) ? i : y(i)}`).join("\n") : `${clave}: []`; }
 function generarPrompt() {
   const caps = lineas(S.estructura), sinNum = lineas(S.sin_numerar), siglas = lineas(S.siglas), comp = new Set(S.componentes);
+  const sinNumero = sinNumeroTextual(S), niveles = Number(S.formato_zonas.textual.niveles) || 3;
+  const plantilla = PLANTILLAS[S.plantilla];
   const tiposTabla = comp.has("tablas") ? TABLAS_ACAD.filter(x => S.tablas_tipos.includes(x.k)) : [];
   const datos = datosCapitulos();
   const medios = S.medio === "ambos" ? ["digital", "impreso"] : [S.medio];
@@ -1879,12 +2265,14 @@ function generarPrompt() {
     `diagramas_herramienta: ${S.diag_herramienta}`, `diagramas_formato: ${S.diag_formato}`, `diagramas_direccion: ${S.diag_direccion}`, `diagramas_max_elementos: ${S.diag_max}`,
     lista("notaciones", S.notaciones.map(n => NOTACIONES[n])),
     lista("componentes", S.componentes),
+    ...(S.componentes_plantilla.length ? [lista("componentes_plantilla", S.componentes_plantilla)] : []),
     ...(tiposTabla.length ? [lista("tablas", tiposTabla.map(x => x.k))] : []),
     lista("pretextuales", S.pretextuales), lista("postextuales", S.postextuales),
     ...[["pretextual", "pre"], ["textual", "textual"], ["postextual", "post"]].flatMap(([nombre, z]) =>
       [`paginacion_${nombre}: ${S.formato_zonas[z].paginacion}`, `pagina_nueva_${nombre}: ${S.formato_zonas[z].pagina_nueva ? "si" : "no"}`]),
     `dedicatoria_alineacion: ${S.formato_zonas.dedicatoria.alineacion}`, `dedicatoria_estilo: ${S.formato_zonas.dedicatoria.estilo}`,
     `epigrafe_alineacion: ${S.formato_zonas.epigrafe.alineacion}`, `epigrafe_estilo: ${S.formato_zonas.epigrafe.estilo}`,
+    `numeracion_textual: ${S.formato_zonas.textual.numeracion}`, ...(sinNumero ? [] : [`niveles_numerados: ${niveles}`]),
     "# estructura y sin_numerar se derivan de las tres zonas.",
     lista("estructura", caps), lista("sin_numerar", sinNum), lista("siglas_conocidas", siglas),
     "---"
@@ -1894,7 +2282,7 @@ function generarPrompt() {
   const filas = textualDe(S).map((cp, i) => {
     const info = datos[norm(cp)];
     const min = info && info[2].length ? info[2].join("; ") : "[PENDIENTE: contenido mínimo]";
-    return `| ${i + 1} ${celda(cp)} | ${info ? info[1] : "[PENDIENTE: propósito]"} | ${min} |`;
+    return `| ${sinNumero ? "" : i + 1 + " "}${celda(cp)} | ${info ? info[1] : "[PENDIENTE: propósito]"} | ${min} |`;
   });
   const PAGINACION = { romana: "paginación romana", arabiga: "paginación arábiga", ninguna: "sin paginación" };
   const ALINEACION = { izquierda: "a la izquierda", centro: "centrada", derecha: "a la derecha" };
@@ -1916,7 +2304,9 @@ function generarPrompt() {
   const decimal = S.decimal === "coma" ? "coma (`3,5`)" : "punto (`3.5`)";
   const terminos = lineas(S.terminos).map(l => { const [a, b] = l.split("=").map(s => s.trim()); return b ? `${a} (no ${b})` : a; });
   const componentes = [];
-  componentes.push("- **Títulos**: `# 1 Capítulo`, `## 1.1 Sección`, `### 1.1.1 Subsección`. Máximo cuatro niveles, sin punto final, mayúscula solo inicial.");
+  const ejTitulos = sinNumero ? "`# Capítulo`, `## Sección`, `### Subsección`, todos sin número"
+    : ["`# 1 Capítulo`", "`## 1.1 Sección`", "`### 1.1.1 Subsección`"].map((t, i) => i < niveles ? t : t.replace(/ [\d.]+ /, " ")).join(", ") + (niveles < 3 ? ` (desde el nivel ${niveles + 1}, sin número)` : "");
+  componentes.push(`- **Títulos**: ${ejTitulos}. Máximo cuatro niveles, sin punto final, mayúscula solo inicial.`);
   if (comp.has("tablas") || comp.has("requisitos")) componentes.push("- **Tablas**: `**Tabla N.** Título` antes de la tabla y `Fuente: ...` después. Unidades en el encabezado; números alineados a la derecha.");
   if (tiposTabla.some(x => ESTADISTICAS.has(x.k))) {
     const sd = S.decimal === "coma" ? "," : ".";
@@ -1942,6 +2332,8 @@ function generarPrompt() {
   if (S.notaciones.length) componentes.push(`- **Diagramas**: notaciones permitidas ${S.notaciones.map(x => NOTACIONES[x]).join(", ")}; fuente en ${{ mermaid: "Mermaid", plantuml: "PlantUML", imagen: "imagen editable" }[S.diag_herramienta]}, exportados a ${S.diag_formato === "svg" ? "SVG" : "PNG a 2×"}; flujo ${S.diag_direccion === "LR" ? "de izquierda a derecha" : "de arriba hacia abajo"}; máximo ${S.diag_max} elementos; título, número, leyenda y fuente.`);
   if (S.tipo === "manual" && S.metodologia === "diataxis") componentes.push(`- **Diátaxis**: el manual incluye ${S.diataxis.map(d => ({ tutorial: "tutoriales", guia: "guías prácticas", referencia: "referencia", explicacion: "explicación" }[d])).join(", ") || "[PENDIENTE: tipos]"}, sin mezclar tipos en una misma página.`);
 
+  const propiosPlantilla = Object.keys(COMPONENTES_PLANTILLA).filter(k => S.componentes_plantilla.includes(k))
+    .map(k => `- **${COMPONENTES_PLANTILLA[k].nombre}**: ${COMPONENTES_PLANTILLA[k].regla}`);
   const tip = [];
   if (medios.includes("digital")) tip.push(`- **Digital**: títulos en ${S.f_titulos} (peso ${S.peso_titulos}), cuerpo en ${S.f_cuerpo} ${S.d_cuerpo} px con interlineado ${S.d_interlineado}, código en ${S.f_codigo} ${S.d_codigo} px. H1 ${S.d_h1} px, H2 ${S.d_h2} px, H3 ${S.d_h3} px; tablas y figuras ${S.d_tabla} px; notas ${S.d_nota} px. Ancho de lectura ${S.d_ancho} px.`);
   if (medios.includes("impreso")) tip.push(`- **Impreso**: papel ${S.p_papel}, márgenes de ${S.p_margen} cm. Títulos en ${S.f_titulos}, cuerpo en ${S.f_cuerpo} ${S.p_cuerpo} pt con interlineado ${S.p_interlineado}, código en ${S.f_codigo} ${S.p_codigo} pt. H1 ${S.p_h1} pt, H2 ${S.p_h2} pt, H3 ${S.p_h3} pt; tablas ${S.p_tabla} pt; notas ${S.p_nota} pt.${Number(S.sangria) > 0 ? ` Sangría de primera línea de ${S.sangria} cm.` : ""}`);
@@ -1970,13 +2362,13 @@ Actúas como ${ROL[S.tipo]} y vas a escribir «${S.documento}», ${TIPO_CON_ARTI
 
 ## 3. Estructura
 
-El documento tiene tres zonas, en este orden: pretextual, textual y postextual. Solo los capítulos de la zona textual llevan numeración decimal (1, 1.1, 1.1.1). Las partes pretextuales y postextuales (las de \`sin_numerar\`) llevan título sin número, salvo Portada, Dedicatoria y Epígrafe, que no llevan título. Cada parte sigue su regla de contenido.
+El documento tiene tres zonas, en este orden: pretextual, textual y postextual. ${sinNumero ? "Ningún capítulo lleva número: los de la zona textual, como las partes pretextuales y postextuales (las de \`sin_numerar\`), llevan título sin número" : `Solo los capítulos de la zona textual llevan numeración decimal (${niveles === 1 ? "1" : niveles === 2 ? "1, 1.1" : "1, 1.1, 1.1.1"}${niveles < 3 ? `; desde el nivel ${niveles + 1}, los títulos van sin número` : ""}). Las partes pretextuales y postextuales (las de \`sin_numerar\`) llevan título sin número`}, salvo Portada, Dedicatoria y Epígrafe, que no llevan título. Cada parte sigue su regla de contenido.
 
 ### Pretextuales (sin número, ${formatoZona("pre", "elemento")})
 
 ${tablaZona("pre")}
 ${notasPre.length ? "\n" + notasPre.join("\n") + "\n" : ""}
-### Textuales (numerados, ${formatoZona("textual", "capítulo")})
+### Textuales (${sinNumero ? "sin número" : "numerados"}, ${formatoZona("textual", "capítulo")})
 
 ${filas.length ? "| Capítulo | Propósito | Contenido mínimo |\n|---|---|---|\n" + filas.join("\n") : "[PENDIENTE: capítulos de la zona textual]"}
 
@@ -1987,6 +2379,7 @@ ${tablaZona("post")}
 ## 4. Componentes visuales
 
 ${componentes.join("\n")}
+${propiosPlantilla.length ? `\nComponentes propios de ${plantilla ? "la plantilla " + plantilla.nombre : "plantilla"}:\n\n${propiosPlantilla.join("\n")}\n` : ""}
 
 Tipografía y color de la versión final:
 
@@ -2002,7 +2395,7 @@ ${tip.join("\n")}
 ${(REGLAS_TIPO[S.tipo] || []).map(r => "- " + r).join("\n")}
 - Propósito ${PROPOSITO_NOMBRE[S.proposito]}: ${REGLAS_PROPOSITO[S.proposito]}
 - Ámbito ${AMBITO_NOMBRE[S.ambito]}: ${REGLAS_AMBITO[S.ambito]}
-- Lector ${LECTOR_NOMBRE[S.lector]}: ${REGLAS_LECTOR[S.lector]}
+- Lector ${LECTOR_NOMBRE[S.lector]}: ${REGLAS_LECTOR[S.lector]}${(plantilla ? plantilla.normas : []).map(r => "\n- " + r).join("")}
 ${terminos.length ? "- Términos preferidos: " + terminos.join("; ") + "." : "- Términos preferidos: [PENDIENTE: definir con el usuario a medida que aparezcan]."}
 ${esDivulgacion(S) ? "\n**Divulgación** (ámbito " + AMBITO_NOMBRE[S.ambito] + ", lector público general y propósito " + PROPOSITO_NOMBRE[S.proposito] + "):\n\n" + REGLAS_DIVULGACION.map(r => "- " + r).join("\n") + "\n" : ""}
 ## 6. Restricciones
@@ -2856,6 +3249,7 @@ if (AVISO_INICIAL) aviso(AVISO_INICIAL);
     "citas:vancouver": ["tesis"], "citas:institucional": ["tesis"], "citas:ninguna": ["manual", "especificacion", "arquitectura", "diagrama"]
   };
   TABLAS_ACAD.forEach(x => { UTIL[x.k] = x.util; });
+  Object.entries(PLANTILLAS).forEach(([id, p]) => { if (p.util) UTIL[id] = p.util; });
   /* Descripción breve de cada opción de los selectores convertidos en tarjetas */
   const DESC = {
     "tipo:manual": "Enseña a usar un sistema: tareas, pantallas y problemas frecuentes.",
@@ -3083,6 +3477,7 @@ if (AVISO_INICIAL) aviso(AVISO_INICIAL);
   for (let el = notaNotacion.nextElementSibling; el; el = el.nextElementSibling) ajustesDiagrama.push(el);
   const DEPENDENCIAS = [
     { els: conTitulo("avisos"), si: () => S.componentes.includes("avisos") },
+    { els: conTitulo("componentes_plantilla"), si: () => !!S.plantilla || S.componentes_plantilla.length > 0 },
     { els: conTitulo("tablas_tipos"), si: () => S.componentes.includes("tablas") },
     { els: [tarjetaK("pasos_resultado")], si: () => S.componentes.includes("pasos") },
     { els: [tarjetaK("capturas_borde"), tarjetaK("capturas_marcadores")], si: () => S.componentes.includes("figuras") && S.tipo === "manual" },

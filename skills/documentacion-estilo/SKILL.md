@@ -42,6 +42,7 @@ Antes de preguntar nada en la terminal, abre el configurador visual en el navega
    - **Linux**: `xdg-open "<ruta completa>"`
 3. Si el comando falla o no hay entorno gráfico (SSH, contenedor), dale al usuario la ruta completa para que lo abra con doble clic.
 4. Dile al usuario, en pocas líneas, qué hacer:
+   - Si su documento se parece a uno de sus modelos (Trabajo de campo UNC, informe técnico, informe de auditoría, proforma de entrevista, ficha 1-pager o arquitectura en láminas), empezar por el primer paso, **Plantilla**: carga los ejes, la estructura, los componentes propios y la presentación de ese modelo, y después se puede cambiar cualquier valor.
    - Elegir los parámetros. Si ya tiene un documento en curso, puede subirlo con **Subir documento…** y verlo con el estilo.
    - Pulsar **Descargar prompt-estilo.md**.
    - Volver a la terminal y escribir «listo».

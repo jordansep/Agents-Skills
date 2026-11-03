@@ -52,7 +52,7 @@ Si el prompt pegado no tiene encabezado YAML, conviértelo al formato de `../doc
 Sigue el prompt al pie de la letra: estructura, componentes, tratamiento y normas de escritura. Además, usa estas convenciones de Markdown, que son las que revisa el verificador:
 
 - **Título del documento**: un H1 inicial con el texto exacto de `documento`, o ningún título.
-- **Capítulos**: `# 1 Introducción`, `## 1.1 Alcance`, `### 1.1.1 Limitaciones`. Las partes de `sin_numerar` van sin número: `# Glosario`. Los nombres de capítulo coinciden exactamente con `estructura`. Las partes pretextuales y postextuales (`pretextuales` y `postextuales`, si el prompt las trae) siguen la regla de su fila en la sección 3.
+- **Capítulos**: `# 1 Introducción`, `## 1.1 Alcance`, `### 1.1.1 Limitaciones`. Las partes de `sin_numerar` van sin número: `# Glosario`. Con `numeracion_textual: ninguna`, los capítulos de la zona textual también van sin número (están en `sin_numerar`); con `niveles_numerados: 2`, los `###` van sin número. Los nombres de capítulo coinciden exactamente con `estructura`. Las partes pretextuales y postextuales (`pretextuales` y `postextuales`, si el prompt las trae) siguen la regla de su fila en la sección 3.
 - **Prólogo**: lo escribe otra persona. No lo redactes: `# Prólogo` lleva solo `[PENDIENTE: texto del prologuista]`. El verificador da una advertencia si tiene otro texto.
 - **Control de versiones**: va primero por defecto, salvo que el prompt lo ubique en otro lugar de `pretextuales`. Tabla con columnas Versión, Fecha, Autor y Descripción del cambio. La primera versión es la 0.1 (borrador), con la fecha de hoy. Como autor, usa el que indicó el usuario o el de `git config user.name`.
 - **Tablas**: `**Tabla N.** Título` antes de la tabla y `Fuente: ...` después.
@@ -76,6 +76,20 @@ Si el prompt tiene `plantilla`, lee ese archivo (la ruta es relativa al director
   ```
 
   En las figuras, la leyenda va antes de la imagen o del bloque `mermaid`, y la nota después. Los «Puntos abiertos» de la plantilla no se aplican: si el documento los necesita, pregúntalos.
+
+Si el prompt trae `componentes_plantilla`, sus reglas están en la sección 4 («Componentes propios de la plantilla») y en la sección «En el configurador» de la plantilla. El verificador revisa los que se pueden ver en Markdown:
+
+| Componente | Qué revisa |
+|---|---|
+| Documento fuente | Que cada capítulo de la zona textual cierre con `**Documento fuente: *nombre*.**` |
+| Viñetas con término | Que los dos puntos queden dentro de la negrita: `- **Término:** texto` |
+| Datos del documento, ficha de corrida y familia | Que sus líneas (`**Sistema:**`, `**Commit:**`, `**Familia:**`…) estén antes del primer capítulo; el commit, en código |
+| Estado y completitud | Estado Completo, Parcial o No; Completo con 100 % |
+| Criterio y evidencia | Título `### N · Nombre — Estado (NN %)`, línea `Archivo:`, ¿Cumple? Sí, Parcial o No, evidencia con su lugar entre paréntesis y el párrafo `**Para completar:**` |
+| Agenda con tiempos | Última fila `**Tiempo total**` con la suma de los tiempos estimados |
+| Preguntas con líneas | Numeración `**1.1**`, `**1.2**`… continua por bloque y de 3 a 4 líneas `___` por pregunta |
+| Intención y Cuándo sí y cuándo no | Intención de una o dos oraciones; tabla de solo dos columnas, `Sí usarlo` y `No usarlo` |
+| Antetítulo y bajada, una idea por lámina | Cada lámina empieza con el antetítulo en negrita, la bajada no pasa de tres oraciones y no hay `##` adentro |
 
 Si una sección necesita un componente, formato o término que el prompt no define, no lo improvises. Escribe `[PENDIENTE: estilo no definido, ver DEC-NNN]` (o `DP-NNN` si es una decisión del proyecto), haz las preguntas del procedimiento de memoria y sigue con las secciones que no dependen de esa decisión. Cuando llegue la respuesta, vuelve a esa sección.
 

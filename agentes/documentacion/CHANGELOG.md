@@ -2,6 +2,25 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.14.0] - 2026-11-03
+
+### Agregado
+
+- Configurador: plantilla como primer paso; cada plantilla carga un punto de partida completo (ejes, estructura en tres zonas, componentes, presentación y sus componentes propios), todo editable
+- Componentes propios de las seis plantillas, con ejemplo en la vista previa y en «Ver todo» y su regla en el prompt (componentes_plantilla): portada institucional, documento fuente y viñetas con término (Trabajo de campo UNC); datos del documento (Informe técnico); ficha de corrida, estado y completitud, criterio y evidencia y etiquetas de certeza (auditoría); barras de sección, campos para completar, agenda y preguntas con líneas (proforma); familia, intención, cuándo sí y cuándo no y dos columnas (ficha); antetítulo y bajada, una idea por lámina, tarjetas y colores de C4 (láminas)
+- Estructura: numeración de los capítulos (decimal o sin número) y niveles numerados (numeracion_textual y niveles_numerados en el prompt)
+- Verificador: revisa los componentes propios que se ven en Markdown (documento fuente, dos puntos del término, datos y ficha antes del primer capítulo, estados y completitud, criterio y evidencia, agenda, preguntas, intención, cuándo usar, antetítulo, bajada y una idea por lámina) y respeta niveles_numerados
+
+### Cambiado
+
+- Tipografía conserva solo los preajustes de letra (Digital, Tesis impresa, Manual impreso), que ya no quitan la plantilla elegida
+- La vista previa usa las leyendas APA 7 con la plantilla Trabajo de campo UNC y la composición de cada plantilla (barras, dos columnas, láminas)
+- references/plantillas: cada plantilla tiene la sección «En el configurador» con sus componentes, la regla que copia el prompt y lo que revisa el verificador
+
+### Corregido
+
+- Verificador: un título «N · Nombre» (punto de una auditoría) ya no se toma como numeración decimal, y el número de pregunta en negrita («**1.2**») no se marca como punto decimal
+
 ## [0.13.0] - 2026-11-02
 
 ### Agregado

@@ -761,6 +761,8 @@ class ZonasDelConfigurador(unittest.TestCase):
         cls.salida = json.loads(r.stdout)
         cls.catalogo = cls.salida.pop("__catalogo")
         cls.sin_numerar_base = cls.catalogo.pop("sin_numerar_base")
+        cls.catalogo.pop("plantillas")
+        cls.catalogo.pop("componentes_plantilla")
 
     def z(self, nombre):
         return self.salida[nombre]["zonas"]
@@ -976,3 +978,482 @@ class ZonasDelConfigurador(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(shutil.which("node"), "node no está instalado")
+class PlantillasDelConfigurador(Base):
+    """Plantillas como punto de partida (0.14.0): cada una fija ejes, zonas, componentes propios y presentación,
+    y cada componente propio llega a la vista previa, al prompt y, si se puede revisar, al verificador."""
+
+    PLANTILLAS = ["trabajo-campo-unc", "informe-especificacion", "informe-auditoria", "proforma-entrevista", "ficha-1pager", "arquitectura-presentacion"]
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        estados = {p: {"__acciones": [["plantilla", p]]} for p in cls.PLANTILLAS}
+        estados.update({
+            "sin_plantilla": {"__acciones": [["plantilla", "proforma-entrevista"], ["plantilla", ""]]},
+            "titulo_propio": {"documento": "Mi informe", "__acciones": [["plantilla", "informe-auditoria"]]},
+            "cambio": {"__acciones": [["plantilla", "proforma-entrevista"], ["plantilla", "ficha-1pager"]]},
+            "vieja": {"plantilla": "proforma-entrevista", "componentes_plantilla": ["agenda", "inventado", "agenda"]},
+            "desconocida": {"plantilla": "otra", "componentes_plantilla": ["agenda"]},
+            "ver_todo": {"ver_todo": True},
+            "niveles": {"__acciones": [["formato", "textual", "niveles", 2]]},
+            "sin_numero": {"__acciones": [["formato", "textual", "numeracion", "ninguna"]]},
+            "preajuste": {"__acciones": [["plantilla", "ficha-1pager"]]},
+        })
+        r = subprocess.run(
+            ["node", str(Path(__file__).with_name("configurador_node.js")), str(CONFIGURADOR), json.dumps(estados)],
+            capture_output=True, text=True, encoding="utf-8")
+        if r.returncode:
+            raise AssertionError(r.stderr)
+        cls.salida = json.loads(r.stdout)
+        cls.catalogo = cls.salida.pop("__catalogo")
+
+    def prompt(self, nombre):
+        datos, _, _ = vd.leer_frontmatter(self.salida[nombre]["prompt"])
+        return datos
+
+    def revisar(self, plantilla, doc):
+        inf = vd.Informe()
+        vd.verificar(self.prompt(plantilla), [self.escribir("doc.md", doc)], inf)
+        return inf
+
+    # --- Configurador ---
+
+    def test_cada_plantilla_fija_ejes_zonas_componentes_y_presentacion(self):
+        for p in self.PLANTILLAS:
+            with self.subTest(p):
+                d = self.prompt(p)
+                def_ = self.catalogo["plantillas"][p]
+                self.assertEqual(d["plantilla"], f"references/plantillas/{p}.md")
+                self.assertEqual(d["tipo"], def_["ejes"]["tipo"])
+                self.assertEqual(d["proposito"], def_["ejes"]["proposito"])
+                self.assertEqual(d["componentes_plantilla"], def_["propios"])
+                self.assertEqual(self.salida[p]["zonas"]["textual"].split("\n"), def_["textual"])
+                self.assertIn("Componentes propios de la plantilla " + def_["nombre"], self.salida[p]["prompt"])
+                self.assertNotIn("[PENDIENTE: propósito]", self.salida[p]["prompt"])
+
+    def test_cada_componente_tiene_ejemplo_regla_y_esta_en_su_plantilla(self):
+        comps = self.catalogo["componentes_plantilla"]
+        usados = {c for p in self.catalogo["plantillas"].values() for c in p["propios"]}
+        self.assertEqual(usados, set(comps))
+        for p in self.PLANTILLAS:
+            prompt = self.salida[p]["prompt"]
+            for k in self.catalogo["plantillas"][p]["propios"]:
+                self.assertIn(f"- **{comps[k]['nombre']}**: {comps[k]['regla']}", prompt)
+        vista = self.salida["ver_todo"]["vista"]
+        for c in comps.values():
+            self.assertIn(f">{c['nombre']}</h3>", vista)
+
+    def test_las_reglas_estan_en_la_referencia_de_cada_plantilla(self):
+        for p, def_ in self.catalogo["plantillas"].items():
+            ref = (RAIZ / "skills" / "documentacion-estilo" / "references" / "plantillas" / f"{p}.md").read_text(encoding="utf-8")
+            for k in def_["propios"]:
+                with self.subTest(p=p, componente=k):
+                    self.assertIn(self.catalogo["componentes_plantilla"][k]["regla"], ref)
+
+    def test_la_vista_previa_muestra_los_componentes_de_su_plantilla(self):
+        marcas = {"trabajo-campo-unc": ["portada-unc", "Documento fuente:", "<b>Tabla 1</b><br>"],
+                  "informe-especificacion": ["datos-doc", "<b>Sistema:</b>"],
+                  "informe-auditoria": ["ficha-corrida", "estado parcial", "Para completar:", "certeza confirmado"],
+                  "proforma-entrevista": ["cap barra", "linea-respuesta", "Tiempo total"],
+                  "ficha-1pager": ["pastilla", "intencion", "uso-si", "columnas"],
+                  "arquitectura-presentacion": ["lamina", "antetitulo", "tarjeta", "#FFF4D6"]}
+        for p, ms in marcas.items():
+            for m in ms:
+                with self.subTest(p=p, marca=m):
+                    self.assertIn(m, self.salida[p]["vista"])
+        self.assertNotIn("linea-respuesta", self.salida["trabajo-campo-unc"]["vista"])
+
+    def test_sin_plantilla_no_deja_componentes_ni_normas(self):
+        s = self.salida["sin_plantilla"]
+        self.assertEqual((s["plantilla"], s["componentes_plantilla"]), ("", []))
+        self.assertNotIn("componentes_plantilla", self.prompt("sin_plantilla"))
+        self.assertNotIn("plantilla", self.prompt("sin_plantilla"))
+        self.assertNotIn("Componentes propios", s["prompt"])
+
+    def test_el_titulo_del_usuario_no_se_reemplaza(self):
+        self.assertEqual(self.prompt("titulo_propio")["documento"], "Mi informe")
+        self.assertEqual(self.prompt("cambio")["documento"], "Patrón State")
+
+    def test_cambiar_de_plantilla_reemplaza_sus_componentes(self):
+        self.assertEqual(self.prompt("cambio")["componentes_plantilla"], self.catalogo["plantillas"]["ficha-1pager"]["propios"])
+
+    def test_configuracion_vieja_o_desconocida_se_depura(self):
+        self.assertEqual(self.salida["vieja"]["componentes_plantilla"], ["agenda"])
+        self.assertEqual((self.salida["desconocida"]["plantilla"], self.salida["desconocida"]["componentes_plantilla"]), ("", ["agenda"]))
+
+    def test_se_recupera_al_reimportar(self):
+        for p in self.PLANTILLAS:
+            self.assertEqual(self.salida[p]["reimportado"]["zonas"], self.salida[p]["zonas"])
+
+    def test_numeracion_ninguna_pasa_la_zona_textual_a_sin_numerar(self):
+        d = self.prompt("sin_numero")
+        self.assertEqual(d["numeracion_textual"], "ninguna")
+        self.assertIn("Introducción", d["sin_numerar"])
+        self.assertNotIn("niveles_numerados", d)
+        self.assertIn("Ningún capítulo lleva número", self.salida["sin_numero"]["prompt"])
+        self.assertIn("| Introducción |", self.salida["sin_numero"]["prompt"])
+
+    def test_niveles_numerados(self):
+        d = self.prompt("niveles")
+        self.assertEqual(d["niveles_numerados"], "2")
+        self.assertIn("`### Subsección` (desde el nivel 3, sin número)", self.salida["niveles"]["prompt"])
+        self.assertEqual(self.prompt("nuevo" if "nuevo" in self.salida else "niveles")["numeracion_textual"], "decimal")
+
+    # --- Verificador: un documento correcto por plantilla y errores sembrados ---
+
+    TDC = textwrap.dedent("""\
+        # Trabajo de campo: práctica profesional
+
+        # Control de versiones
+
+        Sin cambios.
+
+        # Índice general
+
+        Índice generado.
+
+        # 1 Estructura del documento
+
+        - **Calidad de proceso:** que la forma de trabajo se pueda repetir.
+
+        **Documento fuente: *Plan de trabajo v1.0*.**
+
+        # 2 Planeamiento del proyecto
+
+        Texto.
+
+        **Documento fuente: [PENDIENTE: documento fuente].**
+
+        # 3 Acta de acuerdos
+
+        Texto.
+
+        **Documento fuente: *Acta 1*.**
+
+        # 4 Cronograma de aproximación
+
+        Texto.
+
+        **Documento fuente: *Cronograma*.**
+
+        # Referencias
+
+        Ninguna.
+
+        # Anexos
+
+        Ninguno.
+        """)
+
+    def test_trabajo_de_campo_valido_pasa(self):
+        self.assertSinProblemas(self.revisar("trabajo-campo-unc", self.TDC))
+
+    def test_trabajo_de_campo_sin_documento_fuente_y_dos_puntos_afuera(self):
+        doc = self.TDC.replace("**Documento fuente: *Acta 1*.**", "Documento fuente: Acta 1.").replace("**Calidad de proceso:**", "**Calidad de proceso**:")
+        inf = self.revisar("trabajo-campo-unc", doc)
+        self.assertMensaje(inf.advertencias, "«acta de acuerdos» no cierra con «\\*\\*Documento fuente")
+        self.assertMensaje(inf.advertencias, "dos puntos del término van dentro de la negrita")
+
+    INFORME = textwrap.dedent("""\
+        # Informe de relevamiento y diseño de arquitectura
+
+        **Sistema:** Sistema de Gestión Académica
+
+        **Documento:** Especificación de requisitos
+
+        **Estado:** Borrador
+
+        # Control de versiones
+
+        Sin cambios.
+
+        # 1 Introducción
+
+        ## 1.1 Propósito
+
+        ### Estudiante (Alumno)
+
+        - **Cohesión transaccional:** las operaciones se confirman juntas.
+
+        # 2 Descripción general
+
+        Texto.
+
+        # 3 Requisitos específicos
+
+        Texto.
+
+        # 4 Trazabilidad
+
+        Texto.
+
+        # Apéndices
+
+        Ninguno.
+        """)
+
+    def test_informe_tecnico_valido_pasa_con_h3_sin_numero(self):
+        self.assertSinProblemas(self.revisar("informe-especificacion", self.INFORME))
+
+    def test_informe_tecnico_sin_datos_del_documento(self):
+        inf = self.revisar("informe-especificacion", self.INFORME.replace("**Estado:** Borrador", ""))
+        self.assertMensaje(inf.advertencias, "falta «\\*\\*Estado:\\*\\*»")
+
+    def test_h3_sin_numero_es_error_con_tres_niveles(self):
+        inf = self.verificar("# 1 Introducción\n\n## 1.1 Propósito\n\n### Estudiante\n", estructura="\n  - Introducción", niveles_numerados=3)
+        self.assertMensaje(inf.errores, "título sin numeración decimal: «Estudiante»")
+
+    AUDITORIA = textwrap.dedent("""\
+        # Informe de completitud
+
+        **Commit:** `79bbf4b` · **Fecha:** 31/10/2026 · **Corte:** primera entrega · **Modo:** completo
+
+        **Rama:** main · **Estado del repositorio:** limpio
+
+        **Criterio:** consigna de la primera entrega.
+
+        # Resumen de la revisión
+
+        El entregable cumple casi toda la consigna. La Tabla 1 resume cada punto.
+
+        **Tabla 1.** Completitud por punto
+
+        | Punto | Estado | Completitud | Lo principal que falta |
+        |---|---|---|---|
+        | 1 · Visión | Completo | 100 % | — |
+        | 2 · Requisitos | Parcial | 60 % | Criterios de aceptación |
+
+        # Detalle por punto
+
+        ### 2 · Requisitos — Parcial (60 %)
+
+        Archivo: `docs/02-requisitos.md`
+
+        La Tabla 2 muestra los criterios.
+
+        **Tabla 2.** Criterios del punto
+
+        | Criterio | ¿Cumple? | Evidencia |
+        |---|---|---|
+        | Historias con criterios | Parcial | 8 de 12 historias (02:40-118) |
+        | Requisitos medibles | No | — |
+
+        **Observaciones de *requisitos*:** el formato es uniforme `CONFIRMADO`.
+
+        **Para completar:** agregar los criterios que faltan.
+        """)
+
+    def test_auditoria_valida_pasa(self):
+        self.assertSinProblemas(self.revisar("informe-auditoria", self.AUDITORIA))
+
+    def test_auditoria_con_errores_sembrados(self):
+        doc = (self.AUDITORIA.replace("| Completo | 100 % |", "| Completo | 90 % |").replace("| Parcial | 60 % | Criterios", "| A medias | 60 % | Criterios")
+               .replace("| Parcial | 8 de 12 historias (02:40-118) |", "| Parcial | 8 de 12 historias |").replace("| No | — |", "| Tal vez | — |")
+               .replace("**Para completar:** agregar los criterios que faltan.", "").replace("Archivo: `docs/02-requisitos.md`", "")
+               .replace("— Parcial (60 %)", "(60 %)").replace("`79bbf4b`", "79bbf4b"))
+        inf = self.revisar("informe-auditoria", doc)
+        for patron in ("Completo es siempre 100 %", "estado «A medias»", "no cita el lugar exacto", "«¿Cumple\\?» es «Tal vez»",
+                       "no tiene el párrafo «\\*\\*Para completar", "falta la línea «Archivo", "título del punto debe ser", "commit de la ficha de corrida va en código"):
+            self.assertMensaje(inf.advertencias, patron)
+
+    PROFORMA = textwrap.dedent("""\
+        # Proforma de entrevista
+
+        # 1. Datos de la entrevista
+
+        La Tabla 1 tiene los datos.
+
+        **Tabla 1.** Datos de la entrevista
+
+        | Campo | Dato |
+        |---|---|
+        | Fecha | ___ / ___ / ______ |
+
+        # 2. Objetivos
+
+        - Conocer la misión del área.
+
+        # 3. Agenda y control de tiempos
+
+        La Tabla 2 es la agenda.
+
+        **Tabla 2.** Agenda
+
+        | Bloque | Tema | Tiempo estimado | Tiempo real | Tiempo total |
+        |---|---|---|---|---|
+        | 1 | Apertura | 5 min | | |
+        | 2 | Misión | 15 min | | |
+        | **Tiempo total** | | **20 min** | | |
+
+        # 4. Notas guía del entrevistador
+
+        - Pedir ejemplos concretos.
+
+        # 5. Cuerpo de la proforma
+
+        ## 5.1 Misión
+
+        **1.1** Cuéntenos cuál es la misión del área.
+
+        ___
+
+        ___
+
+        ___
+
+        **1.2** ¿Qué tareas ocupan la semana?
+
+        ___
+
+        ___
+
+        ___
+
+        ___
+
+        ## 5.2 Diagnóstico
+
+        **2.1** ¿Qué parte del proceso demora más?
+
+        ___
+
+        ___
+
+        ___
+        """)
+
+    def test_proforma_valida_pasa(self):
+        self.assertSinProblemas(self.revisar("proforma-entrevista", self.PROFORMA))
+
+    def test_proforma_con_errores_sembrados(self):
+        doc = self.PROFORMA.replace("**20 min**", "**25 min**").replace("**1.2**", "**1.3**")
+        doc = doc.replace("**2.1** ¿Qué parte del proceso demora más?\n\n___\n\n___\n\n", "**2.1** ¿Qué parte del proceso demora más?\n\n")
+        inf = self.revisar("proforma-entrevista", doc)
+        self.assertMensaje(inf.advertencias, "tiempo total es 25 min, pero los tiempos estimados suman 20 min")
+        self.assertMensaje(inf.advertencias, "pregunta 1.3: la numeración no es continua; se esperaba 1.2")
+        self.assertMensaje(inf.advertencias, "la pregunta 2.1 tiene 1 líneas")
+        sin_total = self.PROFORMA.replace("| **Tiempo total** | | **20 min** | | |\n", "")
+        self.assertMensaje(self.revisar("proforma-entrevista", sin_total).advertencias, "no termina con la fila «\\*\\*Tiempo total")
+
+    FICHA = textwrap.dedent("""\
+        # Patrón State
+
+        **Familia:** Comportamiento (Behavioral)
+
+        # Intención
+
+        *Permite que un objeto cambie su comportamiento cuando cambia su estado.* (Gamma et al., 1994)
+
+        # Diagrama canónico
+
+        La Figura 1 muestra la estructura.
+
+        ![Diagrama de clases del patrón State](state.png)
+
+        **Figura 1.** Estructura del patrón
+
+        # Cuándo usarlo
+
+        La Tabla 1 resume cuándo usarlo.
+
+        **Tabla 1.** Cuándo usar el patrón
+
+        | Sí usarlo | No usarlo |
+        |---|---|
+        | El comportamiento depende del estado | Hay dos estados fijos |
+
+        # Trampas y anti-patterns
+
+        - **Explosión de clases:** un estado por combinación.
+
+        # Problema sin el patrón
+
+        Texto.
+
+        # Solución en código
+
+        Texto.
+
+        # Caso propio
+
+        Texto.
+
+        # Referencias
+
+        Gamma, E. et al. (1994). *Design Patterns*. Addison-Wesley.
+        """)
+
+    def test_ficha_valida_pasa(self):
+        self.assertSinProblemas(self.revisar("ficha-1pager", self.FICHA))
+
+    def test_ficha_con_errores_sembrados(self):
+        doc = (self.FICHA.replace("**Familia:** Comportamiento (Behavioral)", "")
+               .replace("cuando cambia su estado.*", "cuando cambia su estado. Parece otra clase. Se usa mucho.*")
+               .replace("| Sí usarlo | No usarlo |\n|---|---|", "| Sí | No | Nota |\n|---|---|---|"))
+        inf = self.revisar("ficha-1pager", doc)
+        self.assertMensaje(inf.advertencias, "falta «\\*\\*Familia:\\*\\*»")
+        self.assertMensaje(inf.advertencias, "la intención tiene 3 oraciones")
+        self.assertMensaje(inf.advertencias, "solo dos columnas")
+
+    LAMINAS = textwrap.dedent("""\
+        # Arquitectura del sistema de gestión
+
+        # Objetivo y estado
+
+        **Visión general**
+
+        Un sistema para centralizar inscripciones.
+
+        - **Objetivo:** reemplazar planillas.
+
+        # Contexto del sistema
+
+        **C4 · Nivel 1**
+
+        Quién usa el sistema.
+
+        # Contenedores
+
+        **C4 · Nivel 2**
+
+        Las aplicaciones del sistema.
+
+        # Despliegue
+
+        **Infraestructura**
+
+        Dónde se ejecuta.
+
+        # Decisiones de arquitectura
+
+        **Decisiones**
+
+        Cada decisión con su motivo.
+
+        # Fuera del alcance
+
+        **Alcance**
+
+        Lo que no entra.
+        """)
+
+    def test_laminas_validas_pasan(self):
+        self.assertSinProblemas(self.revisar("arquitectura-presentacion", self.LAMINAS))
+
+    def test_laminas_con_errores_sembrados(self):
+        doc = (self.LAMINAS.replace("**C4 · Nivel 2**\n\n", "").replace("Dónde se ejecuta.", "Uno. Dos. Tres. Cuatro.")
+               .replace("Lo que no entra.", "Lo que no entra.\n\n## Detalle\n\nTexto."))
+        inf = self.revisar("arquitectura-presentacion", doc)
+        self.assertMensaje(inf.advertencias, "«contenedores» no empieza con el antetítulo")
+        self.assertMensaje(inf.advertencias, "la bajada de «despliegue» tiene 4 oraciones")
+        self.assertMensaje(inf.advertencias, "«fuera del alcance» tiene secciones")
+
+    def test_sin_componentes_de_plantilla_no_se_revisa(self):
+        prompt = self.prompt("arquitectura-presentacion")
+        prompt.pop("componentes_plantilla")
+        inf = vd.Informe()
+        vd.verificar(prompt, [self.escribir("doc.md", self.LAMINAS.replace("**C4 · Nivel 2**\n\n", ""))], inf)
+        self.assertSinProblemas(inf)

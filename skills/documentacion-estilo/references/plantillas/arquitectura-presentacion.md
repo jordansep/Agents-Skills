@@ -44,7 +44,24 @@ El significado de cada color es el mismo en todos los diagramas del documento.
 - El límite del sistema es un rectángulo redondeado con su nombre en negrita arriba a la izquierda.
 - Flujo de izquierda a derecha: actores a la izquierda, sistema al centro y externos a la derecha.
 
-## 5. Puntos abiertos
+## 5. En el configurador
+
+La plantilla **Arquitectura en láminas** es el primer paso del configurador (`assets/configurador.html`). Carga un punto de partida completo, y después se puede cambiar cualquier valor:
+
+- **Ejes**: tipo documento de arquitectura, metodología ninguna, propósito expositivo, ámbito técnico, lector mixto, medio digital.
+- **Estructura**: pretextual Portada; textual Objetivo y estado, Contexto del sistema, Contenedores, Despliegue, Decisiones de arquitectura, Fuera del alcance; postextual ninguna; capítulos sin número, sin paginación.
+- **Presentación**: la de las secciones de arriba (fuentes, tamaños, márgenes y colores).
+
+Componentes propios. Cada uno tiene su ejemplo en la vista previa y su regla en el prompt; la regla de esta tabla es la que copia el prompt, palabra por palabra.
+
+| Componente | Regla del prompt | Qué revisa `verificar_doc.py` |
+|---|---|---|
+| Antetítulo y bajada | cada lámina es un `# Título` seguido, en su propia línea, del antetítulo en negrita (`**C4 · Nivel 1**`, con mayúscula inicial) y de la bajada, un párrafo de una a tres oraciones; al exportar, el antetítulo va arriba del título, en mayúsculas con espaciado amplio. | Que cada lámina tenga antetítulo y que la bajada no pase de tres oraciones. |
+| Una idea por lámina | cada lámina desarrolla una sola idea, sin `##` adentro: si hacen falta secciones, se divide en varias láminas. | Que ninguna lámina tenga secciones. |
+| Tarjetas | el contenido de una lámina va en tarjetas: una viñeta por tarjeta, con el título en negrita y dos puntos (`- **Objetivo:** texto breve`); se exportan como cajas blancas con borde gris claro y esquinas redondeadas. | — (no se puede revisar en Markdown) |
+| Colores de C4 | en los diagramas C4 cada color significa lo mismo en todo el documento: persona en amarillo (`#FFF4D6`, borde `#C9A040`), sistema o contenedor propio en azul (`#E8F1FF`, borde `#1F5FBF`), sistema externo o almacenamiento en verde (`#E7F5ED`, borde `#3D8B5A`) y lo futuro o fuera del alcance en blanco con borde gris discontinuo; el límite del sistema es un rectángulo redondeado con su nombre arriba a la izquierda y el flujo va de izquierda a derecha. | — (no se puede revisar en Markdown) |
+
+## 6. Puntos abiertos
 
 1. ¿Las láminas llevan número de página y pie con el nombre del documento? El modelo no los tiene.
 2. ¿Se usa este formato solo para arquitectura o también para presentar otros entregables?
