@@ -11,7 +11,7 @@ Carga solo la referencia que necesites:
 
 - `references/metodologias.md`: estructura de capítulos para RUP, UP, Scrum, ISO/IEEE 29148, Diátaxis, tesis, y notaciones de diagramas.
 - `references/estilo-visual.md`: grilla, títulos, componentes, tipografía, paleta de color y diagramas.
-- `references/escritura.md`: normas de redacción, ortotipografía, reglas por tipo de documento y ejemplos.
+- `references/escritura.md`: normas de redacción, ortotipografía, reglas por tipo de documento, catálogo de partes pretextuales y postextuales (§4 ter) y ejemplos.
 - `assets/plantilla-prompt-estilo.md`: plantilla del archivo de salida.
 - `assets/configurador.html`: configurador visual para que el usuario elija los parámetros, con vista previa en vivo. Genera el prompt de estilo y las respuestas para la memoria.
 - `references/plantillas/`: diseños tomados de documentos que el usuario entregó como modelo (Trabajo de campo UNC, informe técnico, informe de auditoría, proforma de entrevista, ficha 1-pager, arquitectura en láminas y diagramas). Mandan sobre `estilo-visual.md` cuando el prompt los declara en `plantilla`. El `README.md` de la carpeta dice cuál usar.
@@ -144,7 +144,13 @@ Pregunta siempre si hay un reglamento institucional o una guía de marca. Si exi
 
 1. Toma el esqueleto de capítulos de `references/metodologias.md` para la metodología elegida y adáptalo al proyecto.
 2. No mezcles metodologías. Si hace falta combinarlas, declara qué parte sigue cuál.
-3. Incluye siempre "Control de versiones" como primera parte.
+3. Reparte la estructura en tres zonas (`references/escritura.md`, §4 ter):
+   - **Pretextual**: elementos del catálogo, en orden, sin número. Incluye siempre "Control de versiones" como primer elemento, salvo que el usuario lo descarte.
+   - **Textual**: los capítulos numerados.
+   - **Postextual**: elementos del catálogo, en orden, sin número.
+4. Copia en la sección 3 la regla de cada elemento pretextual y postextual tal como está en el catálogo. Si el usuario agrega un elemento propio, pregúntale su regla. El prólogo lo escribe otra persona: deja `[PENDIENTE: texto del prologuista]`.
+5. Pregunta el formato de cada zona (paginación y página nueva) y, si hay dedicatoria o epígrafe, su alineación y su estilo. Los valores por defecto están en el catálogo.
+6. Escribe en el encabezado `pretextuales`, `postextuales` y el formato de las zonas. Escribe también `estructura` (las tres zonas en orden, sin Portada, Dedicatoria ni Epígrafe, que no llevan título) y `sin_numerar` (pretextuales y postextuales, nunca un capítulo textual), que se derivan de las zonas. Si una configuración vieja tiene una parte sin número entre capítulos, va a su zona (pre o post según el catálogo; si no está en ninguno, a post) y se avisa al usuario.
 
 ### Componentes y estilo visual
 

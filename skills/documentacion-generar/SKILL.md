@@ -52,8 +52,9 @@ Si el prompt pegado no tiene encabezado YAML, conviértelo al formato de `../doc
 Sigue el prompt al pie de la letra: estructura, componentes, tratamiento y normas de escritura. Además, usa estas convenciones de Markdown, que son las que revisa el verificador:
 
 - **Título del documento**: un H1 inicial con el texto exacto de `documento`, o ningún título.
-- **Capítulos**: `# 1 Introducción`, `## 1.1 Alcance`, `### 1.1.1 Limitaciones`. Las partes de `sin_numerar` van sin número: `# Glosario`. Los nombres de capítulo coinciden exactamente con `estructura`.
-- **Control de versiones**: es la primera parte. Tabla con columnas Versión, Fecha, Autor y Descripción del cambio. La primera versión es la 0.1 (borrador), con la fecha de hoy. Como autor, usa el que indicó el usuario o el de `git config user.name`.
+- **Capítulos**: `# 1 Introducción`, `## 1.1 Alcance`, `### 1.1.1 Limitaciones`. Las partes de `sin_numerar` van sin número: `# Glosario`. Los nombres de capítulo coinciden exactamente con `estructura`. Las partes pretextuales y postextuales (`pretextuales` y `postextuales`, si el prompt las trae) siguen la regla de su fila en la sección 3.
+- **Prólogo**: lo escribe otra persona. No lo redactes: `# Prólogo` lleva solo `[PENDIENTE: texto del prologuista]`. El verificador da una advertencia si tiene otro texto.
+- **Control de versiones**: va primero por defecto, salvo que el prompt lo ubique en otro lugar de `pretextuales`. Tabla con columnas Versión, Fecha, Autor y Descripción del cambio. La primera versión es la 0.1 (borrador), con la fecha de hoy. Como autor, usa el que indicó el usuario o el de `git config user.name`.
 - **Tablas**: `**Tabla N.** Título` antes de la tabla y `Fuente: ...` después.
 - **Figuras**: después de la imagen o del bloque `mermaid`, va `**Figura N.** Título` y luego `Fuente: ...`. Las imágenes llevan texto alternativo: `![Pantalla de inicio de sesión](figuras/login.png)`.
 - **Numeración continua** de tablas y figuras en todo el documento, también entre archivos. Cada una se menciona en el texto antes de aparecer ("En la Figura 2 se muestra...").

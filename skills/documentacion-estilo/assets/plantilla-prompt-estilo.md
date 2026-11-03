@@ -18,15 +18,30 @@ formato: <markdown | docx | pdf>
 salida: <docs/nombre-del-documento/>
 plantilla: <references/plantillas/<nombre>.md | omitir si no hay>
 leyendas: <clasica | apa7>  # opcional; la plantilla Trabajo de campo UNC ya implica apa7
-estructura:
+pretextuales:  # en orden; catálogo y reglas en references/escritura.md, §4 ter
+  - Control de versiones
+  - <Resumen | Índice general | ...>
+postextuales:
+  - <Glosario | Referencias | Anexos | ...>
+paginacion_pretextual: romana  # romana | arabiga | ninguna
+pagina_nueva_pretextual: si
+paginacion_textual: arabiga
+pagina_nueva_textual: si
+paginacion_postextual: arabiga
+pagina_nueva_postextual: si
+dedicatoria_alineacion: derecha  # izquierda | centro | derecha
+dedicatoria_estilo: cursiva  # normal | cursiva
+epigrafe_alineacion: derecha
+epigrafe_estilo: cursiva
+# estructura y sin_numerar se derivan de las tres zonas.
+estructura:  # pretextuales, capítulos numerados y postextuales, en orden
   - Control de versiones
   - <Capítulo 1>
   - <Capítulo 2>
-sin_numerar:
+  - <Glosario>
+sin_numerar:  # pretextuales y postextuales
   - Control de versiones
-  - Glosario
-  - Referencias
-  - Anexos
+  - <Glosario>
 siglas_conocidas:
   - URL
   - PDF
@@ -53,13 +68,29 @@ Actúas como <redactor técnico | asesor de tesis | analista de requisitos> y va
 
 ## 3. Estructura
 
-Escribe los capítulos en este orden, con numeración decimal (1, 1.1, 1.1.1). Las partes de `sin_numerar` llevan título sin número.
+El documento tiene tres zonas, en este orden: pretextual, textual y postextual. Solo los capítulos de la zona textual llevan numeración decimal (1, 1.1, 1.1.1). Las partes pretextuales y postextuales (las de `sin_numerar`) llevan título sin número, salvo Portada, Dedicatoria y Epígrafe, que no llevan título. Cada parte sigue su regla de contenido.
+
+### Pretextuales (sin número, <paginación romana | arábiga | sin paginación>, <cada elemento en página nueva | sin salto de página entre uno y otro>)
+
+| Elemento | Regla |
+|---|---|
+| Control de versiones | Tabla con las columnas Versión, Fecha, Autor y Descripción del cambio. Va primero por defecto. |
+| <Elemento> | <Regla del catálogo (references/escritura.md, §4 ter) o la del usuario> |
+
+<Si hay dedicatoria o epígrafe: «La dedicatoria va a la derecha y en cursiva.»> <Si hay prólogo: «El prólogo lo escribe otra persona, no el autor: no lo redactes; su sección lleva solo `[PENDIENTE: texto del prologuista]`.»> <Si además hay prefacio: «El prefacio, en cambio, lo escribe el autor.»>
+
+### Textuales (numerados, <paginación arábiga>, <cada capítulo en página nueva>)
 
 | Capítulo | Propósito | Contenido mínimo |
 |---|---|---|
-| Control de versiones | Registrar cambios | Tabla: Versión, Fecha, Autor, Descripción del cambio |
 | 1 <Capítulo> | <Qué responde al lector> | <Secciones o elementos obligatorios> |
 | 2 <Capítulo> | <...> | <...> |
+
+### Postextuales (sin número, <paginación arábiga>, <cada elemento en página nueva>)
+
+| Elemento | Regla |
+|---|---|
+| <Glosario> | <Términos con su definición, en orden alfabético.> |
 
 ## 4. Componentes visuales
 
@@ -105,4 +136,5 @@ Tipografía y color de la versión final (si se exporta): <familias, tamaños y 
 
 - El script `verificar_doc.py` de documentacion-generar termina sin errores.
 - Todos los capítulos de `estructura` están presentes y en orden.
+- <Si hay prólogo: La sección «Prólogo» solo tiene `[PENDIENTE: texto del prologuista]`.>
 - <Criterios propios: por ejemplo, "cada requisito tiene un caso de prueba", "cada tarea del manual tiene una captura".>

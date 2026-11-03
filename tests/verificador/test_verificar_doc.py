@@ -577,6 +577,7 @@ class EjesDelConfigurador(unittest.TestCase):
         if r.returncode:
             raise AssertionError(r.stderr)
         cls.salida = json.loads(r.stdout)
+        cls.salida.pop("__catalogo")
 
     def test_estado_por_defecto_escribe_los_tres_ejes_y_sus_reglas(self):
         p = self.salida["nuevo"]["prompt"]
@@ -661,7 +662,316 @@ class EjesDelConfigurador(unittest.TestCase):
 
     def test_los_ejes_se_recuperan_al_reimportar(self):
         for nombre, s in self.salida.items():
-            self.assertEqual(s["reimportado"], {k: s[k] for k in ("proposito", "ambito", "lector")}, nombre)
+            self.assertEqual({k: s["reimportado"][k] for k in ("proposito", "ambito", "lector")},
+                             {k: s[k] for k in ("proposito", "ambito", "lector")}, nombre)
+
+
+PROLOGO = "\n  - Prólogo\n  - Control de versiones"
+
+
+class Prologo(Base):
+    def doc(self, texto):
+        return DOC_VALIDO.replace("# 1 Introducción", f"# Prólogo\n\n{texto}\n\n# 1 Introducción")
+
+    def test_prologo_con_marcador_pasa(self):
+        self.assertSinProblemas(self.verificar(self.doc("[PENDIENTE: texto del prologuista]"), sin_numerar=PROLOGO))
+
+    def test_prologo_redactado_es_advertencia_y_no_error(self):
+        inf = self.verificar(self.doc("Conocí al autor hace años y su obra me sorprendió."), sin_numerar=PROLOGO)
+        self.assertEqual(inf.errores, [])
+        self.assertMensaje(inf.advertencias, r"«Prólogo» tiene texto: el prólogo lo escribe otra persona")
+
+    def test_prologo_al_final_del_documento_tambien_se_revisa(self):
+        inf = self.verificar(DOC_VALIDO + "\n# Prólogo\n\nTexto escrito por el agente.\n", sin_numerar=PROLOGO)
+        self.assertMensaje(inf.advertencias, r"«Prólogo» tiene texto")
+
+    def test_prologo_con_marcador_en_cursiva_o_negrita_pasa(self):
+        for texto in ("*[PENDIENTE: texto del prologuista]*", "**[PENDIENTE: texto del prologuista]**",
+                      "_[PENDIENTE: texto del prologuista]_"):
+            self.assertSinProblemas(self.verificar(self.doc(texto), sin_numerar=PROLOGO))
+
+    def test_prologo_vacio_da_aviso(self):
+        inf = self.verificar(self.doc(""), sin_numerar=PROLOGO)
+        self.assertEqual(inf.errores, [])
+        self.assertMensaje(inf.advertencias, r"«Prólogo» está vacía")
+
+    def test_prologo_con_otro_pendiente_da_aviso(self):
+        inf = self.verificar(self.doc("[PENDIENTE: completar]"), sin_numerar=PROLOGO)
+        self.assertMensaje(inf.advertencias, r"«Prólogo» tiene texto")
+
+    def test_prologo_sin_numerar_por_defecto(self):
+        # «Prólogo» está en SIN_NUMERAR_BASE: no hace falta declararlo en sin_numerar.
+        self.assertSinProblemas(self.verificar(self.doc("[PENDIENTE: texto del prologuista]")))
+
+    def test_partes_nuevas_sin_numerar_por_defecto(self):
+        for nombre in ("Prefacio", "Prólogo", "Epígrafe", "Índice alfabético", "Colofón"):
+            self.assertIn(vd.normalizar(nombre), vd.SIN_NUMERAR_BASE, nombre)
+
+    def test_prefacio_redactado_no_da_aviso(self):
+        doc = DOC_VALIDO.replace("# 1 Introducción", "# Prefacio\n\nEscribí este manual para el equipo.\n\n# 1 Introducción")
+        self.assertSinProblemas(self.verificar(doc, sin_numerar="\n  - Prefacio"))
+
+
+@unittest.skipUnless(shutil.which("node"), "node no está instalado")
+class ZonasDelConfigurador(unittest.TestCase):
+    """Estructura en tres zonas (references/escritura.md, §4 ter): una prueba por fila de la matriz del spec."""
+
+    VIEJO = {"estructura": "Control de versiones\nResumen\nIntroducción\nGlosario\nDesarrollo\nReferencias\nAnexos",
+             "sin_numerar": "Control de versiones\nResumen\nGlosario\nReferencias\nAnexos"}
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        estados = {
+            "nuevo": None,
+            "academica": {"metodologia": "academica", "__acciones": [["esqueleto"]]},
+            "orden": {"metodologia": "academica", "__acciones": [["esqueleto"], ["mover", "pre", "Abstract", -1]]},
+            "propio": {"__acciones": [["propio", "pre", "Lista de símbolos", "Cada símbolo con su significado y unidad."], ["propio", "pre", "  ", "Sin nombre"]]},
+            "prologo": {"__acciones": [["alternar", "pre", "Prólogo", True], ["alternar", "pre", "Prefacio", True], ["alternar", "pre", "Portada", True]]},
+            "viejo": cls.VIEJO,
+            "en_medio": {"estructura": "Introducción\nGlosario\nDesarrollo", "sin_numerar": "Glosario"},
+            "en_medio_pre": {"estructura": "Introducción\nResumen\nApéndice de datos\nDesarrollo",
+                             "sin_numerar": "Resumen\nApéndice de datos"},
+            "sin_titulo": {"__acciones": [["alternar", "pre", "Dedicatoria", True], ["alternar", "pre", "Epígrafe", True],
+                                          ["alternar", "pre", "Portada", True], ["alternar", "pre", "Índice general", True]]},
+            "control_primero": {"__acciones": [["alternar", "pre", "Portada", True], ["alternar", "pre", "Control de versiones", False],
+                                               ["alternar", "pre", "Control de versiones", True]]},
+            "quitar": {"__acciones": [["propio", "post", "Fe de erratas", "Correcciones."], ["quitar", "post", "Fe de erratas"]]},
+            "invalido": {"pretextuales": ["Control de versiones"], "textual": "Introducción", "postextuales": [],
+                         "formato_zonas": {"pre": {"paginacion": "griega", "pagina_nueva": "si"}, "textual": "x", "epigrafe": {"estilo": 3}},
+                         "propios": [None, "texto", {"zona": "medio", "nombre": "X"}, {"zona": "pre", "nombre": "  "},
+                                     {"zona": "post", "nombre": " Fe de erratas ", "regla": 5}]},
+            "epigrafe": {"formato_zonas": {"epigrafe": {"alineacion": "izquierda", "estilo": "normal"}},
+                         "__acciones": [["alternar", "pre", "Epígrafe", True]]},
+            "dos_zonas": {"__acciones": [["propio", "pre", "Notas", "Aclaraciones."], ["propio", "post", "notas", "Otra."],
+                                         ["propio", "pre", "Glosario", "Repetido."], ["alternar", "post", "Glosario", False],
+                                         ["propio", "pre", "Glosario", "Glosario al comienzo."], ["alternar", "post", "Glosario", True]]},
+            "tuberia": {"__acciones": [["propio", "pre", "Uso A|B", "Columna a|b."]], "textual": "Introducción\nEntrada|salida"},
+            "duplicado": {"pretextuales": ["Control de versiones"], "textual": "Introducción\nGlosario\nUso\nUso",
+                          "postextuales": ["Glosario"]},
+            "capitulos": {"__acciones": [["capitulos", ["Portada", "Control de versiones", "Introducción", "Glosario", "Uso", "Bibliografía", "Colofón"]]]},
+            "formato": {"formato_zonas": {"pre": {"paginacion": "arabiga", "pagina_nueva": False}, "dedicatoria": {"alineacion": "centro", "estilo": "normal"}},
+                        "__acciones": [["alternar", "pre", "Dedicatoria", True]]},
+        }
+        r = subprocess.run(
+            ["node", str(Path(__file__).with_name("configurador_node.js")), str(CONFIGURADOR), json.dumps(estados)],
+            capture_output=True, text=True, encoding="utf-8")
+        if r.returncode:
+            raise AssertionError(r.stderr)
+        cls.salida = json.loads(r.stdout)
+        cls.catalogo = cls.salida.pop("__catalogo")
+        cls.sin_numerar_base = cls.catalogo.pop("sin_numerar_base")
+
+    def z(self, nombre):
+        return self.salida[nombre]["zonas"]
+
+    def seccion(self, nombre, titulo):
+        p = self.salida[nombre]["prompt"]
+        return p.split(f"### {titulo}", 1)[1].split("\n### ", 1)[0].split("\n## ", 1)[0]
+
+    def fm(self, nombre, clave):
+        datos, _, _ = vd.leer_frontmatter(self.salida[nombre]["prompt"])
+        return datos.get(clave)
+
+    def test_nuevo_reparte_el_esqueleto_y_deriva_lo_mismo_que_0_12(self):
+        z = self.z("nuevo")
+        self.assertEqual(z["pretextuales"], ["Control de versiones"])
+        self.assertEqual(z["postextuales"], ["Glosario"])
+        self.assertEqual(z["textual"].split("\n")[0], "Introducción")
+        self.assertEqual(self.fm("nuevo", "estructura"), [
+            "Control de versiones", "Introducción", "Primeros pasos", "Tareas frecuentes", "Referencia de la interfaz",
+            "Conceptos", "Solución de problemas", "Preguntas frecuentes", "Glosario"])
+        self.assertEqual(self.fm("nuevo", "sin_numerar"), ["Control de versiones", "Glosario"])
+        self.assertEqual(self.fm("nuevo", "pretextuales"), ["Control de versiones"])
+        self.assertEqual(self.fm("nuevo", "postextuales"), ["Glosario"])
+
+    def test_formato_por_defecto(self):
+        esperado = {"paginacion_pretextual": "romana", "paginacion_textual": "arabiga", "paginacion_postextual": "arabiga",
+                    "pagina_nueva_pretextual": "si", "pagina_nueva_textual": "si", "pagina_nueva_postextual": "si",
+                    "dedicatoria_alineacion": "derecha", "dedicatoria_estilo": "cursiva",
+                    "epigrafe_alineacion": "derecha", "epigrafe_estilo": "cursiva"}
+        for clave, valor in esperado.items():
+            self.assertEqual(self.fm("nuevo", clave), valor, clave)
+        self.assertIn("### Pretextuales (sin número, paginación romana, cada elemento en página nueva)", self.salida["nuevo"]["prompt"])
+
+    def test_esqueleto_academico(self):
+        z = self.z("academica")
+        self.assertEqual(z["pretextuales"], ["Control de versiones", "Resumen", "Abstract", "Índice general"])
+        self.assertEqual(z["postextuales"], ["Referencias", "Anexos"])
+        self.assertNotIn("Resumen", z["textual"])
+
+    def test_orden_cambia_pretextuales_y_estructura(self):
+        self.assertEqual(self.z("orden")["pretextuales"], ["Control de versiones", "Abstract", "Resumen", "Índice general"])
+        self.assertEqual(self.fm("orden", "estructura")[:4], ["Control de versiones", "Abstract", "Resumen", "Índice general"])
+        pre = self.seccion("orden", "Pretextuales")
+        self.assertLess(pre.index("| Abstract |"), pre.index("| Resumen |"))
+
+    def test_elemento_propio_con_su_regla(self):
+        s = self.salida["propio"]
+        self.assertEqual(s["resultados"], [True, False])  # sin nombre no se agrega
+        self.assertEqual(s["zonas"]["pretextuales"], ["Control de versiones", "Lista de símbolos"])
+        self.assertIn("| Lista de símbolos | Cada símbolo con su significado y unidad. |", self.seccion("propio", "Pretextuales"))
+        self.assertIn("Lista de símbolos", self.fm("propio", "sin_numerar"))
+        self.assertNotIn("Sin nombre", s["prompt"])
+
+    def test_prologo_lo_escribe_otra_persona(self):
+        pre = self.seccion("prologo", "Pretextuales")
+        self.assertIn("| Prólogo | Lo escribe otra persona: deja `[PENDIENTE: texto del prologuista]` y nunca lo redactes. |", pre)
+        self.assertIn("| Prefacio | Lo escribe el autor", pre)
+        self.assertLess(pre.index("| Prefacio |"), pre.index("| Prólogo |"))
+        self.assertIn("La sección «Prólogo» solo tiene `[PENDIENTE: texto del prologuista]`.", self.salida["prologo"]["prompt"])
+        self.assertNotIn("Prólogo", self.salida["nuevo"]["prompt"].split("<!--")[0])
+
+    def test_control_de_versiones_sigue_primero_al_marcar_portada(self):
+        self.assertEqual(self.z("prologo")["pretextuales"], ["Control de versiones", "Portada", "Prefacio", "Prólogo"])
+
+    def test_configuracion_vieja_se_reparte_en_zonas(self):
+        z = self.z("viejo")
+        self.assertEqual(z["pretextuales"], ["Control de versiones", "Resumen"])
+        self.assertEqual(z["textual"], "Introducción\nDesarrollo")
+        self.assertEqual(z["postextuales"], ["Glosario", "Referencias", "Anexos"])
+        self.assertEqual(self.fm("viejo", "estructura"), [
+            "Control de versiones", "Resumen", "Introducción", "Desarrollo", "Glosario", "Referencias", "Anexos"])
+        self.assertIn("Glosario", self.salida["viejo"]["aviso_importar"])
+
+    def test_sin_numero_en_medio_va_a_postextual_con_aviso(self):
+        s = self.salida["en_medio"]
+        self.assertEqual(s["zonas"]["pretextuales"], [])
+        self.assertEqual(s["zonas"]["textual"], "Introducción\nDesarrollo")
+        self.assertEqual(s["zonas"]["postextuales"], ["Glosario"])
+        self.assertEqual(self.fm("en_medio", "sin_numerar"), ["Glosario"])
+        self.assertRegex(s["aviso_importar"], r"Se movieron a su zona .*: Glosario$")
+        self.assertIn("| 1 Introducción |", self.seccion("en_medio", "Textuales"))
+        self.assertIn("| 2 Desarrollo |", self.seccion("en_medio", "Textuales"))
+        self.assertEqual(self.salida["nuevo"]["aviso_importar"], "")
+
+    def test_sin_numero_en_medio_va_a_su_zona_o_a_post_como_propio(self):
+        z = self.z("en_medio_pre")
+        self.assertEqual(z["pretextuales"], ["Resumen"])
+        self.assertEqual(z["postextuales"], ["Apéndice de datos"])
+        self.assertEqual(z["textual"], "Introducción\nDesarrollo")
+        self.assertIn({"zona": "post", "nombre": "Apéndice de datos", "regla": ""}, z["propios"])
+        self.assertTrue(self.salida["en_medio_pre"]["aviso_importar"].endswith("; sin regla: Apéndice de datos"))
+
+    def test_textual_nunca_figura_en_sin_numerar(self):
+        for nombre, s in self.salida.items():
+            sin_numerar = {vd.normalizar(x) for x in s["zonas"]["sin_numerar"].split("\n") if x}
+            zonas = {vd.normalizar(x) for x in s["zonas"]["pretextuales"] + s["zonas"]["postextuales"]}
+            self.assertEqual(sin_numerar, zonas, nombre)
+
+    def test_usar_capitulos_reparte_con_la_misma_regla(self):
+        s = self.salida["capitulos"]
+        z = s["zonas"]
+        self.assertEqual(z["pretextuales"], ["Control de versiones", "Portada"])
+        self.assertEqual(z["textual"], "Introducción\nUso")
+        self.assertEqual(z["postextuales"], ["Glosario", "Bibliografía", "Colofón"])
+        self.assertRegex(s["resultados"][0], r"Se movieron a su zona .*: Glosario$")
+        self.assertNotIn("Portada", self.fm("capitulos", "estructura"))
+
+    def test_sin_titulo_no_entra_en_estructura(self):
+        z = self.z("sin_titulo")
+        self.assertEqual(z["pretextuales"], ["Control de versiones", "Portada", "Dedicatoria", "Epígrafe", "Índice general"])
+        estructura = self.fm("sin_titulo", "estructura")
+        for nombre in ("Portada", "Dedicatoria", "Epígrafe"):
+            self.assertNotIn(nombre, estructura)
+        self.assertIn("Índice general", estructura)
+        self.assertEqual(self.fm("sin_titulo", "pretextuales"), z["pretextuales"])
+        pre = self.seccion("sin_titulo", "Pretextuales")
+        self.assertIn("| Dedicatoria | Una o dos líneas del autor, sin título. |", pre)
+        self.assertIn("| Epígrafe | Cita breve con su autor, sin título. |", pre)
+
+    def test_sin_titulo_el_verificador_no_exige_su_h1(self):
+        datos, _, _ = vd.leer_frontmatter(self.salida["sin_titulo"]["prompt"])
+        caps = [c for c in datos["estructura"]]
+        sin_num = {vd.normalizar(x) for x in datos["sin_numerar"]}
+        cuerpo, n = [], 0
+        for c in caps:
+            if vd.normalizar(c) in sin_num:
+                cuerpo.append(f"# {c}\n\nTexto de la parte.\n")
+            else:
+                n += 1
+                cuerpo.append(f"# {n} {c}\n\nTexto del capítulo.\n")
+        doc = f"# {datos['documento']}\n\n*Para mi familia.*\n\n" + "\n".join(cuerpo)
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta = Path(tmp) / "doc.md"
+            ruta.write_text(doc, encoding="utf-8")
+            inf = vd.Informe()
+            vd.verificar(datos, [ruta], inf)
+        self.assertEqual(inf.errores, [])
+
+    def test_control_de_versiones_vuelve_a_primero(self):
+        self.assertEqual(self.z("control_primero")["pretextuales"], ["Control de versiones", "Portada"])
+        self.assertEqual(self.catalogo["pre"][0]["nombre"], "Control de versiones")
+
+    def test_sin_numerar_base_igual_en_el_configurador_y_el_verificador(self):
+        self.assertEqual(set(self.sin_numerar_base), vd.SIN_NUMERAR_BASE)
+
+    def test_encabezado_pretextual_con_formato_elegido(self):
+        self.assertIn("### Pretextuales (sin número, paginación arábiga, sin salto de página entre uno y otro)",
+                      self.salida["formato"]["prompt"])
+
+    def test_alineacion_y_estilo_del_epigrafe(self):
+        self.assertIn("El epígrafe va a la izquierda, en redonda.", self.seccion("epigrafe", "Pretextuales"))
+
+    def test_un_nombre_esta_en_una_sola_zona(self):
+        s = self.salida["dos_zonas"]
+        self.assertEqual(s["resultados"][:4], [True, False, False, None])  # «notas» y «Glosario» ya están en una zona
+        self.assertTrue(s["resultados"][4])  # sin Glosario en post, se puede agregar en pre
+        self.assertEqual(s["zonas"]["pretextuales"], ["Control de versiones", "Notas"])  # marcarlo en post lo saca de pre
+        self.assertEqual(s["zonas"]["postextuales"], ["Glosario"])
+
+    def test_quitar_propio(self):
+        z = self.z("quitar")
+        self.assertEqual(z["postextuales"], ["Glosario"])
+        self.assertEqual(z["propios"], [])
+        self.assertNotIn("Fe de erratas", self.salida["quitar"]["prompt"].split("<!--")[0])
+
+    def test_formato_y_propios_invalidos_vuelven_al_valor_por_defecto(self):
+        z = self.z("invalido")
+        self.assertEqual(z["formato_zonas"], self.z("nuevo")["formato_zonas"])
+        self.assertEqual(z["propios"], [{"zona": "post", "nombre": "Fe de erratas", "regla": "5"}])
+
+    def test_nombre_con_barra_no_rompe_la_tabla(self):
+        pre = self.seccion("tuberia", "Pretextuales")
+        self.assertIn("| Uso A\\|B | Columna a\\|b. |", pre)
+        self.assertIn("| 2 Entrada\\|salida |", self.seccion("tuberia", "Textuales"))
+
+    def test_duplicados_entre_textual_y_zonas_gana_la_zona(self):
+        self.assertEqual(self.fm("duplicado", "estructura"), ["Control de versiones", "Introducción", "Uso", "Glosario"])
+        txt = self.seccion("duplicado", "Textuales")
+        self.assertNotIn("Glosario", txt)
+        self.assertIn("| 2 Uso |", txt)
+        self.assertNotIn("| 3 ", txt)
+
+    def test_editar_las_zonas_marca_la_estructura_como_editada(self):
+        for nombre in ("orden", "propio", "prologo", "quitar", "control_primero"):
+            self.assertTrue(self.salida[nombre]["editada"], nombre)
+        self.assertFalse(self.salida["nuevo"]["editada"])
+        self.assertFalse(self.salida["academica"]["editada"])
+
+    def test_formato_elegido_y_dedicatoria(self):
+        self.assertEqual(self.fm("formato", "paginacion_pretextual"), "arabiga")
+        self.assertEqual(self.fm("formato", "pagina_nueva_pretextual"), "no")
+        self.assertEqual(self.fm("formato", "dedicatoria_alineacion"), "centro")
+        self.assertEqual(self.fm("formato", "epigrafe_estilo"), "cursiva")  # lo no indicado queda por defecto
+        self.assertIn("La dedicatoria va centrada, en redonda.", self.seccion("formato", "Pretextuales"))
+
+    def test_reimportar_recupera_las_zonas_y_su_formato(self):
+        for nombre, s in self.salida.items():
+            self.assertEqual(s["reimportado"]["zonas"], s["zonas"], nombre)
+
+    def test_reglas_del_catalogo_estan_en_escritura_md(self):
+        referencia = (CONFIGURADOR.parents[1] / "references" / "escritura.md").read_text(encoding="utf-8")
+        for zona, elementos in self.catalogo.items():
+            for e in elementos:
+                self.assertIn(f"| {e['nombre']} | {e['regla']} |", referencia, f"{zona}: {e['nombre']}")
+        self.assertEqual(self.catalogo["pre"][0]["nombre"], "Control de versiones")
+
+    def test_tabla_textual_sigue_numerada(self):
+        txt = self.seccion("nuevo", "Textuales")
+        self.assertIn("| 1 Introducción |", txt)
+        self.assertNotIn("Control de versiones", txt)
+        self.assertNotIn("Glosario", txt)
 
 
 if __name__ == "__main__":
