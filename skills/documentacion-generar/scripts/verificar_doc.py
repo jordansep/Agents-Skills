@@ -28,6 +28,13 @@ SIGLAS_BASE = {"URL", "PDF", "HTML", "CSS", "HTTP", "HTTPS", "JSON", "XML", "USB
 METODOS_HTTP = {"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 SIGLAS_BASE |= METODOS_HTTP
 AVISOS = {"nota", "consejo", "advertencia", "peligro"}
+# Ejes de clasificación del prompt (references/escritura.md, §4 bis). Son opcionales: los prompts
+# viejos solo traen `audiencia`, que se acepta sin aviso.
+EJES = {
+    "proposito": {"expositivo", "analitico", "argumentativo", "instructivo", "narrativo", "mixto"},
+    "ambito": {"cientifico", "tecnico", "academico", "institucional", "profesional"},
+    "lector": {"experto", "especialista", "publico_general", "mixto"},
+}
 ROMANOS = re.compile(r"^[IVXLC]+$")
 CONTEXTO_NUMERO = re.compile(r"(secci[oó]n|apartado|cap[ií]tulo|versi[oó]n|figura|tabla|v)\s*$", re.I)
 
@@ -418,7 +425,18 @@ def verificar_memoria(lineas, memorias, inf):
                 inf.aviso(donde, f"se cita {ident}, que está descartada")
 
 
+def verificar_ejes(prompt, inf):
+    for eje, validos in EJES.items():
+        valor = prompt.get(eje)
+        if valor in (None, [], ""):
+            continue
+        # Valor exacto: el configurador escribe identificadores en minúscula y sin tildes.
+        if str(valor).strip() not in validos:
+            inf.aviso("prompt", f"valor de eje desconocido: {eje}: {valor} (válidos: {', '.join(sorted(validos))})")
+
+
 def verificar(prompt, archivos, inf, memorias=None):
+    verificar_ejes(prompt, inf)
     lineas = bloques(archivos)
     documento = normalizar(prompt.get("documento", ""))
     sin_numerar = SIN_NUMERAR_BASE | {normalizar(s) for s in prompt.get("sin_numerar", []) or []}

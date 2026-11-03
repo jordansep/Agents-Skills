@@ -2,6 +2,18 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.12.0] - 2026-11-02
+
+### Agregado
+
+- Ejes de clasificación propósito y ámbito en el configurador y en el prompt, con sus reglas de redacción en la sección 5 (references/escritura.md, §4 bis)
+- Reglas de divulgación automáticas con ámbito científico o técnico, lector público general y propósito expositivo o narrativo
+- El verificador advierte sobre valores desconocidos en proposito, ambito y lector
+
+### Cambiado
+
+- Audiencia pasa a Lector (experto, especialista de otra área, público general, mixto); las configuraciones del configurador con audiencia se traducen solas (propósito y ámbito se completan según el tipo); los prompts con audiencia siguen siendo válidos
+
 ## [0.11.0] - 2026-11-02
 
 ### Agregado

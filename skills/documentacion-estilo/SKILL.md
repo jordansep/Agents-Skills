@@ -127,7 +127,9 @@ Si un paso necesita algo que no está en la memoria ni en las referencias (una m
 |---|---|---|
 | Tipo de documento | manual, tesis, especificación, informe, diagrama, arquitectura, otro | informe |
 | Metodología | RUP, UP, Scrum, ISO/IEEE 29148, Diátaxis, académica, ninguna | Diátaxis (manual), académica (tesis), ISO 29148 (especificación); en otro caso, ninguna |
-| Audiencia | técnica, no técnica, académica, mixta | mixta |
+| Propósito | expositivo, analítico, argumentativo, instructivo, narrativo, mixto | instructivo (manual); argumentativo (tesis); analítico (informe); expositivo en otro caso |
+| Ámbito | científico, técnico, académico, institucional, profesional | académico (tesis); técnico en otro caso |
+| Lector | experto, especialista de otra área, público general, mixto | público general (manual); mixto en otro caso |
 | Medio | impreso (A4 o carta), digital, ambos | digital |
 | Variante | español neutro, rioplatense | neutro |
 | Tratamiento | usted, tú, vos, impersonal | usted (manuales); impersonal (tesis y especificaciones) |

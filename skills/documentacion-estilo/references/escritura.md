@@ -105,6 +105,54 @@ Entonces se descarga un archivo PDF con los datos visibles en pantalla
 - **Cifras con fuente**: cada dato tiene su origen o se marca como estimación.
 - **Decisiones con motivo**: cada decisión de arquitectura o de alcance indica por qué se tomó y qué alternativa se descartó.
 
+## 4 bis. Propósito, ámbito y lector
+
+Además del tipo de documento, el prompt clasifica el texto en tres ejes independientes: **propósito** (qué busca el texto), **ámbito** (en qué campo circula) y **lector** (quién lo lee). Cada valor suma sus reglas a la sección 5 del prompt, después de las del tipo. El configurador emite exactamente estos textos. En el frontmatter, los valores se escriben como identificadores, en minúscula y sin tildes (`proposito`, `ambito`, `lector`).
+
+Los prompts anteriores traen `audiencia` en lugar de `lector` y siguen siendo válidos. Al importar una configuración anterior en el configurador, `audiencia` se traduce así: `técnica` y `académica` → `experto`; `no técnica` → `publico_general`; `mixta` → `mixto`.
+
+Esa configuración tampoco trae `proposito` ni `ambito`, así que se completan según el tipo. Si `audiencia` es `académica`, el ámbito pasa a ser `academico`. Esta tabla solo se usa en la migración: cambiar el tipo en el configurador no modifica los ejes.
+
+| Tipo | Propósito | Ámbito |
+|---|---|---|
+| Manual | `instructivo` | `tecnico` |
+| Tesis | `argumentativo` | `academico` |
+| Especificación y arquitectura | `expositivo` | `tecnico` |
+| Informe | `analitico` | `tecnico` |
+| Diagrama y otro | `expositivo` | `tecnico` |
+
+### Propósito
+
+- **Expositivo** (`expositivo`): Define cada concepto antes de usarlo y ordena el contenido de lo general a lo particular.
+- **Analítico** (`analitico`): Separa los datos de su interpretación y declara los criterios del análisis antes de aplicarlos.
+- **Argumentativo** (`argumentativo`): Enuncia la tesis al comienzo, sostiene cada afirmación con evidencia o cita y responde la objeción principal.
+- **Instructivo** (`instructivo`): Una acción por paso, en el orden de ejecución, con el resultado esperado de cada paso.
+- **Narrativo** (`narrativo`): Sigue el orden cronológico y marca las fechas o etapas de cada hecho.
+- **Mixto** (`mixto`): Declara el propósito de cada capítulo en su primer párrafo.
+
+### Ámbito
+
+- **Científico** (`cientifico`): Precisión terminológica (un término, un solo significado), cautela epistémica (distingue lo demostrado de lo probable) y verificabilidad (cada afirmación remite a su fuente o a su método).
+- **Técnico** (`tecnico`): Nombres exactos del sistema y de sus componentes, con su versión, y cada magnitud con su unidad.
+- **Académico** (`academico`): Sigue las normas de la institución y cita en el estilo elegido.
+- **Institucional** (`institucional`): Registro formal e impersonal; cada obligación remite a la normativa que la establece.
+- **Profesional** (`profesional`): Orientado a decisiones: las conclusiones y las acciones van primero y el detalle después.
+
+### Lector
+
+- **Experto** (`experto`): Usa la terminología del campo sin definirla.
+- **Especialista de otra área** (`especialista`): Define los términos del campo en su primera aparición y relaciona cada concepto con su uso.
+- **Público general** (`publico_general`): Sin jerga, un ejemplo concreto por cada concepto abstracto y oraciones cortas.
+- **Mixto** (`mixto`): Abre cada capítulo con un resumen sin jerga y deja el detalle técnico para después.
+
+### Divulgación
+
+No es una opción de ningún eje. Se activa sola cuando se dan tres condiciones a la vez: el ámbito es científico o técnico, el lector es público general y el propósito es expositivo o narrativo. Así, un manual instructivo no la recibe. Suma estas reglas:
+
+- Parte de una pregunta o de una situación cotidiana.
+- Usa analogías y márcalas como tales («es como…»).
+- No simplifiques hasta volver falso un enunciado.
+
 ## 5. Inclusividad
 
 - Usa términos neutros cuando el sentido lo permita: "personas usuarias", "equipo de desarrollo", "la población estudiantil".

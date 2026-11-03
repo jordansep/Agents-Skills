@@ -5,7 +5,9 @@ documento: <Título exacto del documento>
 version: 1.0
 tipo: <manual | tesis | especificacion | informe | diagrama | arquitectura | otro>
 metodologia: <rup | up | scrum | iso29148 | diataxis | academica | ninguna>
-audiencia: <técnica | no técnica | académica | mixta>
+proposito: <expositivo | analitico | argumentativo | instructivo | narrativo | mixto>
+ambito: <cientifico | tecnico | academico | institucional | profesional>
+lector: <experto | especialista | publico_general | mixto>
 medio: <digital | impreso | ambos>
 variante: <neutro | rioplatense>
 tratamiento: <usted | tú | vos | impersonal>
@@ -37,11 +39,12 @@ tablas:  # opcional: tipos de tabla del configurador; los estadísticos activan 
 
 ## 1. Rol e instrucción
 
-Actúas como <redactor técnico | asesor de tesis | analista de requisitos> y vas a escribir "<Título>" para <audiencia concreta: quiénes son y qué necesitan lograr con el documento>. Sigue este prompt al pie de la letra. Si una instrucción del usuario lo contradice, primero actualiza este prompt (nueva versión) y después escribe.
+Actúas como <redactor técnico | asesor de tesis | analista de requisitos> y vas a escribir "<Título>" de propósito <propósito> y ámbito <ámbito>, para <lector con artículo: un lector experto | un lector especialista de otra área | el público general | lectores de perfil mixto>. Sigue este prompt al pie de la letra. Si una instrucción del usuario lo contradice, primero actualiza este prompt (nueva versión) y después escribe.
 
 ## 2. Parámetros
 
 - **Tipo y metodología**: <tipo> según <metodología>. <Por qué se eligió, en una oración.>
+- **Propósito, ámbito y lector**: <propósito>; <ámbito>; <lector><, y « (texto de divulgación)» cuando se activa la divulgación>. Sus reglas están copiadas en la sección 5.
 - **Medio**: <digital | impreso A4 | ambos>.
 - **Idioma**: español <neutro | rioplatense>, ortografía RAE.
 - **Tratamiento**: <usted | tú | vos | impersonal>, igual en todo el documento.
@@ -81,7 +84,16 @@ Tipografía y color de la versión final (si se exporta): <familias, tamaños y 
 - Cada sigla se desarrolla en su primera aparición: "Interfaz de programación de aplicaciones (API)".
 - Los nombres de la interfaz van en negrita, tal como aparecen en pantalla.
 - <Reglas específicas del tipo, copiadas de escritura.md, sección 4: manual, tesis, requisitos, historias de usuario o proyecto.>
+- <Una regla por eje (propósito, ámbito y lector), copiada de escritura.md, sección 4 bis.>
 - Términos preferidos: <término elegido> (no <variante descartada>); <...>.
+
+<Solo con ámbito científico o técnico, lector público general y propósito expositivo o narrativo:>
+
+**Divulgación** (ámbito <científico | técnico>, lector público general y propósito <expositivo | narrativo>):
+
+- Parte de una pregunta o de una situación cotidiana.
+- Usa analogías y márcalas como tales («es como…»).
+- No simplifiques hasta volver falso un enunciado.
 
 ## 6. Restricciones
 

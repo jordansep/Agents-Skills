@@ -514,6 +514,27 @@ class LineaDeComandos(Base):
         self.assertEqual(r.returncode, 2)
 
 
+class EjesDeClasificacion(Base):
+    def test_ejes_validos_no_dan_aviso(self):
+        inf = self.verificar(DOC_VALIDO, proposito="instructivo", ambito="tecnico", lector="publico_general")
+        self.assertSinProblemas(inf)
+
+    def test_valor_de_eje_desconocido_es_advertencia(self):
+        inf = self.verificar(DOC_VALIDO, lector="niños")
+        self.assertEqual(inf.errores, [])
+        self.assertMensaje(inf.advertencias, r"valor de eje desconocido: lector: niños")
+
+    def test_valor_con_tilde_o_mayuscula_es_desconocido(self):
+        # Se compara el identificador exacto, como lo escribe el configurador.
+        inf = self.verificar(DOC_VALIDO, ambito="Técnico", lector="público general")
+        self.assertMensaje(inf.advertencias, r"valor de eje desconocido: ambito: Técnico")
+        self.assertMensaje(inf.advertencias, r"valor de eje desconocido: lector: público general")
+
+    def test_prompt_viejo_sin_ejes_con_audiencia_no_cambia(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO, audiencia='"no técnica"'))
+        self.assertSinProblemas(self.verificar(DOC_VALIDO))
+
+
 class Configurador(unittest.TestCase):
     @unittest.skipUnless(shutil.which("node"), "node no está instalado")
     def test_script_del_configurador_es_javascript_valido(self):
@@ -525,6 +546,122 @@ class Configurador(unittest.TestCase):
             js.write_text(codigo, encoding="utf-8")
             r = subprocess.run(["node", "--check", str(js)], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stderr)
+
+
+@unittest.skipUnless(shutil.which("node"), "node no está instalado")
+class EjesDelConfigurador(unittest.TestCase):
+    """Ejecuta el configurador en Node (configurador_node.js) y revisa el prompt que genera."""
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        estados = {
+            "nuevo": None,
+            "divulgacion": {"proposito": "expositivo", "ambito": "cientifico", "lector": "publico_general"},
+            "tecnico_expositivo": {"proposito": "expositivo", "ambito": "tecnico", "lector": "publico_general"},
+            "institucional": {"proposito": "expositivo", "ambito": "institucional", "lector": "publico_general"},
+            "viejo": {"tipo": "tesis", "metodologia": "academica", "audiencia": "académica"},
+            "viejo_no_tecnico": {"tipo": "informe", "metodologia": "ninguna", "audiencia": "no técnica"},
+            "desconocido": {"proposito": "expositivo", "ambito": "tecnico", "lector": "niños"},
+            "constructor": {"proposito": "constructor", "ambito": "tecnico", "lector": "constructor"},
+            "mixto": {"proposito": "mixto", "ambito": "profesional", "lector": "mixto"},
+            "informe_academica": {"tipo": "informe", "audiencia": "académica"},
+            "manual_tecnica": {"tipo": "manual", "audiencia": "técnica"},
+            "manual_mixta": {"tipo": "manual", "audiencia": "mixta"},
+            "narrativo": {"proposito": "narrativo", "ambito": "cientifico", "lector": "publico_general"},
+            "especialista": {"lector": "especialista"},
+        }
+        r = subprocess.run(
+            ["node", str(Path(__file__).with_name("configurador_node.js")), str(CONFIGURADOR), json.dumps(estados)],
+            capture_output=True, text=True, encoding="utf-8")
+        if r.returncode:
+            raise AssertionError(r.stderr)
+        cls.salida = json.loads(r.stdout)
+
+    def test_estado_por_defecto_escribe_los_tres_ejes_y_sus_reglas(self):
+        p = self.salida["nuevo"]["prompt"]
+        for linea in ("proposito: instructivo", "ambito: tecnico", "lector: publico_general"):
+            self.assertIn("\n" + linea + "\n", p)
+        self.assertNotIn("audiencia:", p)
+        for regla in ("- Propósito instructivo:", "- Ámbito técnico:", "- Lector público general:"):
+            self.assertIn(regla, p)
+        # Un manual instructivo no recibe las reglas de divulgación.
+        self.assertNotIn("**Divulgación**", p)
+        self.assertNotIn("(texto de divulgación)", p)
+
+    def test_cientifico_con_publico_general_y_expositivo_suma_divulgacion(self):
+        p = self.salida["divulgacion"]["prompt"]
+        self.assertIn("**Divulgación** (ámbito científico, lector público general y propósito expositivo)", p)
+        self.assertIn("No simplifiques hasta volver falso un enunciado.", p)
+
+    def test_tecnico_con_publico_general_y_expositivo_suma_divulgacion(self):
+        p = self.salida["tecnico_expositivo"]["prompt"]
+        self.assertIn("**Divulgación** (ámbito técnico, lector público general y propósito expositivo)", p)
+
+    def test_institucional_con_publico_general_no_suma_divulgacion(self):
+        self.assertNotIn("**Divulgación**", self.salida["institucional"]["prompt"])
+
+    def test_tesis_vieja_se_migra_por_tipo(self):
+        s = self.salida["viejo"]
+        self.assertEqual((s["proposito"], s["ambito"], s["lector"]), ("argumentativo", "academico", "experto"))
+        self.assertIn("\nlector: experto\n", s["prompt"])
+        self.assertNotIn("audiencia:", s["prompt"])
+
+    def test_informe_viejo_no_tecnico_se_migra_sin_divulgacion(self):
+        s = self.salida["viejo_no_tecnico"]
+        self.assertEqual((s["proposito"], s["ambito"], s["lector"]), ("analitico", "tecnico", "publico_general"))
+        self.assertNotIn("**Divulgación**", s["prompt"])
+
+    def test_valor_desconocido_vuelve_al_valor_por_defecto(self):
+        for nombre in ("desconocido", "constructor"):
+            s = self.salida[nombre]
+            self.assertEqual(s["lector"], "publico_general", nombre)
+            self.assertNotIn("undefined", s["prompt"], nombre)
+        self.assertEqual(self.salida["constructor"]["proposito"], "instructivo")
+
+    def test_lector_mixto_usa_la_frase_de_perfil_mixto(self):
+        self.assertIn("para lectores de perfil mixto.", self.salida["mixto"]["prompt"])
+
+    def test_audiencia_academica_en_informe_pasa_a_ambito_academico(self):
+        s = self.salida["informe_academica"]
+        self.assertEqual((s["ambito"], s["lector"]), ("academico", "experto"))
+
+    def test_audiencia_tecnica_y_mixta_se_traducen_a_lector(self):
+        self.assertEqual(self.salida["manual_tecnica"]["lector"], "experto")
+        self.assertEqual(self.salida["manual_mixta"]["lector"], "mixto")
+
+    def test_cientifico_con_publico_general_y_narrativo_suma_divulgacion(self):
+        self.assertIn("**Divulgación** (ámbito científico, lector público general y propósito narrativo)",
+                      self.salida["narrativo"]["prompt"])
+
+    def test_lector_especialista(self):
+        p = self.salida["especialista"]["prompt"]
+        for texto in ("\nlector: especialista\n", "para un lector especialista de otra área", "- Lector especialista de otra área:"):
+            self.assertIn(texto, p)
+        self.assertNotIn("undefined", p)
+
+    def test_las_reglas_emitidas_coinciden_con_escritura_md(self):
+        referencia = (CONFIGURADOR.parents[1] / "references" / "escritura.md").read_text(encoding="utf-8")
+        patron = re.compile(r"^- (Propósito|Ámbito|Lector) [^:\n]+: (.+)$", re.M)
+        vistos = {"Propósito": set(), "Ámbito": set(), "Lector": set()}
+        for nombre, s in self.salida.items():
+            p = s["prompt"]
+            for eje, texto in patron.findall(p):
+                self.assertIn(texto, referencia, f"{nombre}: {eje}")
+            vistos["Propósito"].add(s["proposito"]); vistos["Ámbito"].add(s["ambito"]); vistos["Lector"].add(s["lector"])
+            if "**Divulgación**" in p:
+                bloque = p.split("**Divulgación**", 1)[1].split("## 6.", 1)[0]
+                reglas = re.findall(r"^- (.+)$", bloque, re.M)
+                self.assertEqual(len(reglas), 3, nombre)
+                for regla in reglas:
+                    self.assertIn(regla, referencia, f"{nombre}: divulgación")
+        self.assertEqual(vistos["Propósito"], set(vd.EJES["proposito"]))
+        self.assertEqual(vistos["Ámbito"], set(vd.EJES["ambito"]))
+        self.assertEqual(vistos["Lector"], set(vd.EJES["lector"]))
+
+    def test_los_ejes_se_recuperan_al_reimportar(self):
+        for nombre, s in self.salida.items():
+            self.assertEqual(s["reimportado"], {k: s[k] for k in ("proposito", "ambito", "lector")}, nombre)
 
 
 if __name__ == "__main__":
