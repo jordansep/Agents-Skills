@@ -6,7 +6,7 @@ Uso:
     python3 verificar_doc.py --prompt docs/prompt-estilo.md docs/manual/01-intro.md docs/manual/02-uso.md
 
 Revisa estructura, numeración de títulos, tablas, figuras, avisos, siglas,
-números y largo de oraciones. Si el prompt declara tablas estadísticas
+números, largo de oraciones y que el prólogo no esté redactado. Si el prompt declara tablas estadísticas
 (`tablas:`), también revisa las reglas de APA 7 (cero inicial, separador
 decimal y nota de los asteriscos). Termina con código 1 si encuentra errores.
 Solo usa la biblioteca estándar.
@@ -23,7 +23,9 @@ SIN_NUMERAR_BASE = {
     "dedicatoria", "indice", "indice general", "indice de figuras", "indice de tablas",
     "lista de siglas y abreviaturas", "siglas y abreviaturas", "glosario",
     "referencias", "bibliografia", "anexos", "apendices",
+    "prefacio", "prologo", "epigrafe", "indice alfabetico", "colofon",
 }
+MARCADOR_PROLOGO = "[PENDIENTE: texto del prologuista]"
 SIGLAS_BASE = {"URL", "PDF", "HTML", "CSS", "HTTP", "HTTPS", "JSON", "XML", "USB", "ID", "OK", "SI", "PNG", "SVG", "SQL"}
 METODOS_HTTP = {"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 SIGLAS_BASE |= METODOS_HTTP
@@ -435,6 +437,30 @@ def verificar_ejes(prompt, inf):
             inf.aviso("prompt", f"valor de eje desconocido: {eje}: {valor} (válidos: {', '.join(sorted(validos))})")
 
 
+def verificar_prologo(lineas, inf):
+    """El prólogo lo escribe otra persona: su sección solo puede tener el marcador del prologuista,
+    aunque esté en cursiva o en negrita. Una sección vacía también da aviso: el marcador es obligatorio."""
+    nivel_prologo, inicio, redactado, con_marcador = None, None, False, False
+    for donde, linea, tipo, _ in lineas + [("", "# fin", "texto", "")]:
+        m = re.match(r"^(#{1,6})\s+(.*?)\s*#*\s*$", linea) if tipo == "texto" else None
+        if m and (nivel_prologo is None or len(m.group(1)) <= nivel_prologo):
+            if nivel_prologo is not None and redactado:
+                inf.aviso(inicio, "la sección «Prólogo» tiene texto: el prólogo lo escribe otra persona; "
+                                  "deja «[PENDIENTE: texto del prologuista]»")
+            elif nivel_prologo is not None and not con_marcador:
+                inf.aviso(inicio, "la sección «Prólogo» está vacía: deja «[PENDIENTE: texto del prologuista]»")
+            nombre = re.sub(r"^\d+(?:\.\d+)*\.?\s+", "", m.group(2)).rstrip(".")
+            nivel_prologo = len(m.group(1)) if normalizar(nombre) == "prologo" else None
+            inicio, redactado, con_marcador = donde, False, False
+            continue
+        texto = linea.strip().strip("*_").strip()
+        if nivel_prologo is not None and texto:
+            if normalizar(texto) == normalizar(MARCADOR_PROLOGO):
+                con_marcador = True
+            else:
+                redactado = True
+
+
 def verificar(prompt, archivos, inf, memorias=None):
     verificar_ejes(prompt, inf)
     lineas = bloques(archivos)
@@ -554,6 +580,7 @@ def verificar(prompt, archivos, inf, memorias=None):
     if tipos_tabla & {"endpoints", "riesgos", "trazabilidad"}:
         verificar_tecnicas(lineas, tipos_tabla, inf)
     verificar_academicos(lineas, set(prompt.get("componentes", []) or []), numeros, inf)
+    verificar_prologo(lineas, inf)
     if memorias is not None:
         verificar_memoria(lineas, memorias, inf)
 

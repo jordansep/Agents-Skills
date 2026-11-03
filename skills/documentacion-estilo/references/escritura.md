@@ -153,6 +153,89 @@ No es una opción de ningún eje. Se activa sola cuando se dan tres condiciones 
 - Usa analogías y márcalas como tales («es como…»).
 - No simplifiques hasta volver falso un enunciado.
 
+## 4 ter. Partes pretextuales y postextuales
+
+La estructura del documento tiene tres zonas, en este orden:
+
+- **Pretextual**: las partes que van antes del cuerpo.
+- **Textual**: los capítulos del cuerpo. Son los únicos que llevan número (1, 1.1, 1.1.1).
+- **Postextual**: las partes que van después del cuerpo.
+
+Las partes pretextuales y postextuales llevan título sin número, salvo Portada, Dedicatoria y Epígrafe, que no llevan título. En el configurador se eligen de un catálogo, se ordenan y se pueden sumar elementos propios con su regla. Cada elemento del catálogo trae una regla de contenido fija, que el configurador copia en la sección 3 del prompt con este mismo texto.
+
+### Pretextuales
+
+En el orden por defecto:
+
+| Elemento | Regla |
+|---|---|
+| Control de versiones | Tabla con las columnas Versión, Fecha, Autor y Descripción del cambio. Va primero por defecto. |
+| Portada | Título, autor, institución y fecha; sin número de página. |
+| Dedicatoria | Una o dos líneas del autor, sin título. |
+| Epígrafe | Cita breve con su autor, sin título. |
+| Agradecimientos | Personas e instituciones, sin datos inventados; si faltan, `[PENDIENTE: nombres]`. |
+| Prefacio | Lo escribe el autor: origen y propósito de la obra. |
+| Prólogo | Lo escribe otra persona: deja `[PENDIENTE: texto del prologuista]` y nunca lo redactes. |
+| Resumen | Síntesis del trabajo y palabras clave. |
+| Abstract | El resumen en inglés. |
+| Índice general | Se genera a partir de los títulos; no se escribe a mano. |
+| Índice de figuras | Se genera a partir de las leyendas de las figuras. |
+| Índice de tablas | Se genera a partir de las leyendas de las tablas. |
+| Lista de siglas y abreviaturas | Cada sigla con su desarrollo, en orden alfabético. |
+
+«Control de versiones» es el primer elemento pretextual por defecto: el configurador lo pone primero al cargar un esqueleto, al repartir capítulos y al volver a marcarlo. El usuario puede moverlo a mano.
+
+Portada, Dedicatoria y Epígrafe no llevan título. El prompt las pide en su zona, pero no entran en `estructura`, porque el verificador exige el título de cada parte de esa lista. Los índices sí llevan título y sí entran.
+
+### Postextuales
+
+| Elemento | Regla |
+|---|---|
+| Glosario | Términos con su definición, en orden alfabético. |
+| Referencias | Obras citadas, en el estilo de citas elegido. |
+| Bibliografía | Obras consultadas y no citadas. |
+| Anexos | Material propio, con letras: Anexo A, Anexo B… |
+| Apéndices | Material de terceros. |
+| Índice alfabético | Términos con la página en que aparecen. |
+| Colofón | Datos de la edición. |
+
+### Prefacio y prólogo
+
+Son elementos distintos:
+
+- **El prefacio lo escribe el autor**: cuenta el origen y el propósito de la obra.
+- **El prólogo lo escribe otra persona**: el agente nunca lo redacta. Su sección lleva solo `[PENDIENTE: texto del prologuista]`. El verificador da una advertencia si la sección «Prólogo» tiene otro texto.
+
+### Formato de cada zona
+
+Cada zona fija su paginación (romana, arábiga o ninguna) y si cada elemento empieza en página nueva. En la zona pretextual también se fijan la alineación (izquierda, centro o derecha) y el estilo (normal o cursiva) de la dedicatoria y del epígrafe. Por defecto:
+
+| Zona | Paginación | Página nueva |
+|---|---|---|
+| Pretextual | Romana | Sí, cada elemento |
+| Textual | Arábiga | Sí, cada capítulo |
+| Postextual | Arábiga | Sí, cada elemento |
+
+La dedicatoria y el epígrafe van alineados a la derecha y en cursiva.
+
+### Frontmatter y compatibilidad
+
+El prompt escribe `pretextuales` y `postextuales` (listas en orden) y el formato: `paginacion_pretextual`, `paginacion_textual`, `paginacion_postextual`, `pagina_nueva_pretextual`, `pagina_nueva_textual`, `pagina_nueva_postextual` (`si` o `no`), `dedicatoria_alineacion`, `dedicatoria_estilo`, `epigrafe_alineacion` y `epigrafe_estilo`.
+
+También escribe `estructura` y `sin_numerar`, que se derivan de las zonas para que el verificador y los prompts existentes sigan funcionando:
+
+- `estructura` lleva las tres zonas en orden, menos las partes sin título (Portada, Dedicatoria y Epígrafe). Si un nombre está en una zona y también en la textual, cuenta una sola vez, en su zona.
+- `sin_numerar` lleva las partes pretextuales y postextuales. Una parte de la zona textual nunca figura en `sin_numerar`.
+
+Una configuración anterior trae `estructura` y `sin_numerar` pero no las zonas. Al importarla, se reparte así:
+
+- Las partes sin número que están antes del primer capítulo numerado van a la zona pretextual.
+- Las que están después del último van a la postextual.
+- Una parte sin número que quedó entre capítulos va a su zona: a la pretextual o a la postextual según el catálogo y, si no está en ninguno, a la postextual como elemento propio. El configurador avisa qué partes cambiaron de lugar.
+- El resto va a la zona textual.
+
+El botón «Cargar esqueleto» y el de usar los capítulos de un documento subido reparten los títulos con la misma regla, y el segundo también avisa qué partes movió. En esos dos casos, una parte es sin número si está en el catálogo o es una de las partes sin número habituales.
+
 ## 5. Inclusividad
 
 - Usa términos neutros cuando el sentido lo permita: "personas usuarias", "equipo de desarrollo", "la población estudiantil".

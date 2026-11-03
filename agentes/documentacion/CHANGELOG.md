@@ -2,6 +2,21 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.13.0] - 2026-11-02
+
+### Agregado
+
+- Configurador: estructura en tres zonas (pretextual, textual y postextual) con catálogo, orden y elementos propios; cada elemento trae su regla de contenido (references/escritura.md, §4 ter)
+- Configurador: formato por zona (paginación romana, arábiga o ninguna y página nueva) y alineación y estilo de la dedicatoria y del epígrafe
+- Prólogo distinto del prefacio: el prólogo lo escribe otra persona y el agente nunca lo redacta y deja el marcador del prologuista; el verificador advierte si la sección «Prólogo» tiene otro texto
+
+### Cambiado
+
+- El prompt escribe pretextuales, postextuales y el formato de las zonas; estructura y sin_numerar se derivan de las zonas y siguen siendo válidos. estructura deja fuera Portada, Dedicatoria y Epígrafe, que no llevan título, así que el verificador ya no les exige un H1; sin_numerar nunca incluye un capítulo de la zona textual
+- Las configuraciones sin zonas se reparten solas al importarlas: las partes sin número anteriores al primer capítulo van a pretextual, las posteriores al último a postextual, y una parte sin número que quedó entre capítulos va a su zona según el catálogo (o a postextual como elemento propio), con un aviso. «Cargar esqueleto» y «usar capítulos» usan la misma regla
+- Control de versiones va primero por defecto en la zona pretextual: en el catálogo, al volver a marcarlo y al repartir capítulos; el usuario puede moverlo
+- Verificador: prefacio, prólogo, epígrafe, índice alfabético y colofón se reconocen como partes sin número
+
 ## [0.12.0] - 2026-11-02
 
 ### Agregado
