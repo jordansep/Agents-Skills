@@ -2,11 +2,13 @@
 // para los estados que recibe por argumento (JSON: { nombre: estadoParcial | null }).
 // Un estado puede traer `__acciones`: lista de [accion, ...args] que se aplican después de cargarlo,
 // como lo haría la interfaz: ["esqueleto"], ["mover", zona, nombre, delta], ["alternar", zona, nombre, on],
-// ["propio", zona, nombre, regla], ["quitar", zona, nombre] y ["capitulos", [títulos]] (botón «usar capítulos»,
-// que devuelve el aviso de las partes movidas).
+// ["propio", zona, nombre, regla], ["quitar", zona, nombre], ["capitulos", [títulos]] (botón «usar capítulos»,
+// que devuelve el aviso de las partes movidas), ["plantilla", id] (primer paso «Plantilla») y
+// ["formato", zona, campo, valor] (formato de una zona, como los selectores de la estructura).
 // Uso: node configurador_node.js <configurador.html> '<json>'
-// Imprime JSON: { nombre: { prompt, proposito, ambito, lector, zonas, resultados, aviso_importar, editada, reimportado },
-// __catalogo }. `aviso_importar` es el aviso que el importador muestra al cargar el estado.
+// Imprime JSON: { nombre: { prompt, vista, proposito, ambito, lector, zonas, resultados, aviso_importar, editada, reimportado },
+// __catalogo }. `aviso_importar` es el aviso que el importador muestra al cargar el estado y `vista`, el HTML
+// del ejemplo de la vista previa.
 "use strict";
 const fs = require("fs");
 const vm = require("vm");
@@ -35,8 +37,15 @@ function falso(hoja) {
   return p;
 }
 const D = falso();
+// La hoja de la vista previa guarda el HTML que se le asigna; el resto del DOM es falso.
+// Lo que no se asignó responde como el DOM falso (métodos y propiedades que no hacen nada).
+const HOJA = new Proxy({ innerHTML: "", offsetWidth: 0, offsetHeight: 0 }, {
+  get: (t, k) => (k in t ? t[k] : D[k]),
+  set: (t, k, v) => { t[k] = v; return true; }
+});
+const DOCUMENTO = new Proxy(D, { get: (t, k) => (k === "getElementById" ? id => (id === "doc" ? HOJA : D) : D[k]) });
 const ctx = {
-  document: D, navigator: D, location: D, URL: D, console,
+  document: DOCUMENTO, navigator: D, location: D, URL: D, console,
   localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
   setTimeout: () => 0, clearTimeout() {}, setInterval: () => 0, clearInterval() {}, requestAnimationFrame: () => 0,
   matchMedia: () => ({ matches: false, addEventListener() {}, addListener() {} }),
@@ -52,7 +61,8 @@ vm.createContext(ctx);
 vm.runInContext(codigo + "\n;globalThis.__api = { generarPrompt, combinar, fijar(v) { S = v; }, estado() { return S; }," +
   " cargarEsqueleto, moverElemento, alternarElemento, agregarPropio, quitarPropio," +
   " capitulos(c) { return aplicarZonas(S, zonasDesdeCapitulos(c)); }, SIN_NUMERAR_BASE," +
-  " avisoImportar() { return combinar.aviso; }, CATALOGO_PRE, CATALOGO_POST };", ctx);
+  " avisoImportar() { return combinar.aviso; }, CATALOGO_PRE, CATALOGO_POST, aplicarPlantilla, PLANTILLAS, COMPONENTES_PLANTILLA," +
+  " formato(z, c, v) { S.formato_zonas[z][c] = v; derivarEstructura(); }, vista() { vistaPrevia(); } };", ctx);
 
 const api = ctx.__api;
 const copia = x => JSON.parse(JSON.stringify(x === undefined ? null : x));
@@ -73,11 +83,16 @@ for (const [nombre, estado] of Object.entries(estados)) {
     else if (accion === "propio") r = api.agregarPropio(...args);
     else if (accion === "quitar") r = api.quitarPropio(...args);
     else if (accion === "capitulos") r = api.capitulos(...args);
+    else if (accion === "plantilla") r = api.aplicarPlantilla(...args);
+    else if (accion === "formato") r = api.formato(...args);
     else throw new Error(`acción desconocida: ${accion}`);
     return r === undefined ? null : r;
   });
   const s = api.estado();
   const prompt = api.generarPrompt();
+  HOJA.innerHTML = "";
+  api.vista();
+  const vista = HOJA.innerHTML;
   // Vuelve a importar el prompt generado, igual que el botón «Importar».
   const m = prompt.match(/<!-- configurador:v1 ([\s\S]*?) -->/);
   if (!m) {
@@ -86,10 +101,11 @@ for (const [nombre, estado] of Object.entries(estados)) {
   }
   const r = api.combinar(JSON.parse(m[1]));
   salida[nombre] = {
-    prompt, proposito: s.proposito, ambito: s.ambito, lector: s.lector, zonas: zonas(s), resultados,
+    prompt, vista, plantilla: s.plantilla, componentes_plantilla: copia(s.componentes_plantilla), proposito: s.proposito, ambito: s.ambito, lector: s.lector, zonas: zonas(s), resultados,
     aviso_importar: avisoImportar, editada: !!s.estructura_editada,
     reimportado: { proposito: r.proposito, ambito: r.ambito, lector: r.lector, zonas: zonas(r) }
   };
 }
-salida.__catalogo = copia({ pre: api.CATALOGO_PRE, post: api.CATALOGO_POST, sin_numerar_base: api.SIN_NUMERAR_BASE });
+salida.__catalogo = copia({ pre: api.CATALOGO_PRE, post: api.CATALOGO_POST, sin_numerar_base: api.SIN_NUMERAR_BASE,
+  plantillas: api.PLANTILLAS, componentes_plantilla: api.COMPONENTES_PLANTILLA });
 process.stdout.write(JSON.stringify(salida));

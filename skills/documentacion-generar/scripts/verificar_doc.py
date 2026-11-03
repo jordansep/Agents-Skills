@@ -461,6 +461,179 @@ def verificar_prologo(lineas, inf):
                 redactado = True
 
 
+# Componentes propios de las plantillas (COMPONENTES_PLANTILLA en configurador.html y references/plantillas/).
+ESTADOS_PUNTO = {"completo", "parcial", "no"}
+CUMPLE = {"si", "parcial", "no"}
+TITULO_PUNTO = re.compile(r"^###\s+\d+ · .+ — (Completo|Parcial|No) \((\d+)\s?%\)\s*$")
+FUENTE_CAPITULO = re.compile(r"^\*\*Documento fuente:\s*(\*[^*]+\*|\[PENDIENTE[^\]]*\])\.?\*\*\s*$")
+RAYAS = {"", "—", "-", "–"}
+
+
+def capitulos_del_documento(lineas, documento):
+    """[(nombre normalizado, ubicación, líneas de texto del capítulo)] y las líneas anteriores al primer capítulo.
+    El primer H1 igual al título del documento no es un capítulo."""
+    texto = [(d, l) for d, l, t, _ in lineas if t == "texto"]
+    caps, antes, actual, primero = [], [], None, True
+    for d, l in texto:
+        m = re.match(r"^#\s+(?:\d+\.?\s+)?(.*?)\s*$", l)
+        if m:
+            nombre = normalizar(m.group(1).rstrip("."))
+            if primero and documento and nombre == documento:
+                primero = False
+                continue
+            primero = False
+            actual = (nombre, d, [])
+            caps.append(actual)
+        elif actual is None:
+            antes.append((d, l))
+        else:
+            actual[2].append((d, l))
+    return caps, antes
+
+
+def oraciones(texto):
+    texto = re.sub(r"\([^)]*\)", "", texto)
+    return [o for o in re.split(r"(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡])", texto.strip()) if re.search(r"\w", o)]
+
+
+def verificar_plantilla(lineas, propios, prompt, inf):
+    """Controles de los componentes propios que se pueden revisar en Markdown."""
+    documento = normalizar(prompt.get("documento", ""))
+    caps, antes = capitulos_del_documento(lineas, documento)
+    zonas = {normalizar(str(x)) for k in ("pretextuales", "postextuales") for x in prompt.get(k, []) or []}
+    textuales = [c for c in caps if c[0] not in zonas]
+    preambulo = "\n".join(l for _, l in antes)
+    tablas = tablas_markdown(lineas)
+
+    if "documento_fuente" in propios:
+        for nombre, d, cuerpo in textuales:
+            ultima = next((l.strip() for _, l in reversed(cuerpo) if l.strip()), "")
+            if not FUENTE_CAPITULO.match(ultima):
+                inf.aviso(d, f"el capítulo «{nombre}» no cierra con «**Documento fuente: *nombre del documento*.**»")
+
+    if "termino_definido" in propios:
+        for d, l, t, _ in lineas:
+            if t == "texto" and re.match(r"^\s*[-*+]\s+\*\*[^*:]+\*\*\s*:", l):
+                inf.aviso(d, "los dos puntos del término van dentro de la negrita: «**Término:** texto»")
+
+    for clave, campos in (("datos_documento", ("Sistema", "Documento", "Estado")), ("ficha_corrida", ("Commit", "Fecha", "Criterio")), ("familia", ("Familia",))):
+        if clave in propios:
+            for campo in campos:
+                if not re.search(rf"\*\*{campo}:\*\*", preambulo):
+                    inf.aviso("encabezado", f"falta «**{campo}:**» debajo del título, antes del primer capítulo")
+    if "ficha_corrida" in propios and re.search(r"\*\*Commit:\*\*", preambulo) and not re.search(r"\*\*Commit:\*\*\s*`[^`]+`", preambulo):
+        inf.aviso("encabezado", "el commit de la ficha de corrida va en código: «**Commit:** `abc1234`»")
+
+    for donde, cab, filas in tablas:
+        est, compl = columna(cab, "estado"), columna(cab, "completitud")
+        if "estado_completitud" in propios and est is not None and compl is not None:
+            for d, fila in filas:
+                valor = normalizar(re.sub(r"[*`]", "", fila[est])) if est < len(fila) else ""
+                if valor not in ESTADOS_PUNTO:
+                    inf.aviso(d, f"estado «{fila[est] if est < len(fila) else ''}»: se esperaba Completo, Parcial o No")
+                m = re.search(r"(\d+)\s?%", fila[compl]) if compl < len(fila) else None
+                if m and (valor == "completo") != (m.group(1) == "100"):
+                    inf.aviso(d, f"estado «{fila[est]}» con {m.group(1)} %: Completo es siempre 100 %")
+        cumple, evid = columna(cab, "¿cumple?", "cumple"), columna(cab, "evidencia")
+        if "criterio_evidencia" in propios and cumple is not None:
+            for d, fila in filas:
+                valor = normalizar(re.sub(r"[*`]", "", fila[cumple])) if cumple < len(fila) else ""
+                if valor not in CUMPLE:
+                    inf.aviso(d, f"«¿Cumple?» es «{fila[cumple] if cumple < len(fila) else ''}»: se esperaba Sí, Parcial o No")
+                elif valor != "no" and evid is not None:
+                    ev = fila[evid].strip() if evid < len(fila) else ""
+                    if not re.search(r"\([^)]+\)", ev):
+                        inf.aviso(d, "la evidencia no cita el lugar exacto entre paréntesis, como «(01:124-152)»")
+        estimado = columna(cab, "tiempo estimado")
+        if "agenda" in propios and estimado is not None and filas:
+            d, ultima = filas[-1]
+            if normalizar(re.sub(r"[*`]", "", ultima[0])) != "tiempo total":
+                inf.aviso(donde, "la agenda no termina con la fila «**Tiempo total**»")
+            else:
+                minutos = [re.match(r"^\**\s*(\d+)\s*min", f[estimado].strip()) if estimado < len(f) else None for _, f in filas]
+                if all(minutos):
+                    suma, total = sum(int(m.group(1)) for m in minutos[:-1]), int(minutos[-1].group(1))
+                    if suma != total:
+                        inf.aviso(d, f"el tiempo total es {total} min, pero los tiempos estimados suman {suma} min")
+
+    if "criterio_evidencia" in propios:
+        texto = [(d, l) for d, l, t, _ in lineas if t == "texto"]
+        puntos = [k for k, (_, l) in enumerate(texto) if re.match(r"^###\s+\d+ ·", l)]
+        for n, k in enumerate(puntos):
+            d, l = texto[k]
+            if not TITULO_PUNTO.match(l.strip()):
+                inf.aviso(d, "el título del punto debe ser «### N · Nombre — Estado (NN %)», con Completo, Parcial o No")
+            fin = puntos[n + 1] if n + 1 < len(puntos) else next((j for j in range(k + 1, len(texto)) if re.match(r"^#{1,2}\s", texto[j][1])), len(texto))
+            bloque = [x for _, x in texto[k + 1:fin]]
+            siguiente = next((x.strip() for x in bloque if x.strip()), "")
+            if not re.match(r"^Archivo:", siguiente):
+                inf.aviso(d, "falta la línea «Archivo: `ruta`» debajo del título del punto")
+            if not any(re.match(r"^\s*\*\*Para completar:\*\*", x) for x in bloque):
+                inf.aviso(d, "el punto no tiene el párrafo «**Para completar:**»")
+
+    if "preguntas_abiertas" in propios:
+        texto = [(d, l) for d, l, t, _ in lineas if t == "texto"]
+        anterior = None
+        for k, (d, l) in enumerate(texto):
+            m = re.match(r"^\s*\*\*(\d+)\.(\d+)\*\*\s+\S", l)
+            if not m:
+                continue
+            bloque, numero = int(m.group(1)), int(m.group(2))
+            esperado = (anterior[0], anterior[1] + 1) if anterior and anterior[0] == bloque else (bloque, 1)
+            if (bloque, numero) != esperado or (anterior and bloque < anterior[0]):
+                inf.aviso(d, f"pregunta {bloque}.{numero}: la numeración no es continua; se esperaba {esperado[0]}.{esperado[1]}")
+            anterior = (bloque, numero)
+            n = 0
+            for _, x in texto[k + 1:]:
+                if not x.strip():
+                    continue
+                if re.match(r"^\s*_{3,}\s*$", x):
+                    n += 1
+                    continue
+                break
+            if not 3 <= n <= 4:
+                inf.aviso(d, f"la pregunta {bloque}.{numero} tiene {n} líneas para responder; deben ser de 3 a 4")
+
+    def capitulo(nombre):
+        return next((c for c in caps if c[0] == normalizar(nombre)), None)
+
+    if "intencion" in propios:
+        c = capitulo("Intención")
+        if c:
+            prosa = " ".join(l.strip().strip("*_") for _, l in c[2] if l.strip() and not re.match(r"^\s*(#|\||!\[)", l))
+            if len(oraciones(prosa)) > 2:
+                inf.aviso(c[1], f"la intención tiene {len(oraciones(prosa))} oraciones; debe tener una o dos")
+
+    if "cuando_usar" in propios:
+        c = capitulo("Cuándo usarlo")
+        if c:
+            dentro = {d for d, _ in c[2]}
+            cabs = [cab for donde, cab, _ in tablas if donde in dentro]
+            if not any([normalizar(x) for x in cab] == ["si usarlo", "no usarlo"] for cab in cabs):
+                inf.aviso(c[1], "«Cuándo usarlo» debe ser una tabla con solo dos columnas: «Sí usarlo» y «No usarlo»")
+
+    if "antetitulo" in propios or "una_idea" in propios:
+        for nombre, d, cuerpo in textuales:
+            if "una_idea" in propios and any(re.match(r"^##\s", l) for _, l in cuerpo):
+                inf.aviso(d, f"la lámina «{nombre}» tiene secciones: una idea por lámina; divídela en varias")
+            if "antetitulo" in propios:
+                parrafos = [l.strip() for _, l in cuerpo if l.strip()]
+                if not parrafos or not re.match(r"^\*\*[^*]+\*\*$", parrafos[0]):
+                    inf.aviso(d, f"la lámina «{nombre}» no empieza con el antetítulo en negrita, en su propia línea")
+                    continue
+                bajada = []
+                for _, l in cuerpo[next(i for i, (_, x) in enumerate(cuerpo) if x.strip()) + 1:]:
+                    if not l.strip():
+                        if bajada:
+                            break
+                        continue
+                    if re.match(r"^\s*(#|\||!\[|[-*+]\s|>|```)", l):
+                        break
+                    bajada.append(l.strip())
+                if len(oraciones(" ".join(bajada))) > 3:
+                    inf.aviso(d, f"la bajada de «{nombre}» tiene {len(oraciones(' '.join(bajada)))} oraciones; deben ser de una a tres")
+
+
 def verificar(prompt, archivos, inf, memorias=None):
     verificar_ejes(prompt, inf)
     lineas = bloques(archivos)
@@ -474,6 +647,10 @@ def verificar(prompt, archivos, inf, memorias=None):
     decimal_coma = normalizar(str(prompt.get("decimal", "coma"))) == "coma"
     digital = normalizar(str(prompt.get("medio", "digital"))) in {"digital", "ambos"}
     apa = estilo_leyendas(prompt) == "apa7"
+    try:
+        niveles = int(prompt.get("niveles_numerados", 3))
+    except ValueError:
+        niveles = 3
 
     # Títulos y numeración
     contadores, capitulos, en_numerado, primer_h1 = [0, 0, 0], [], False, True
@@ -487,7 +664,8 @@ def verificar(prompt, archivos, inf, memorias=None):
             continue
         if titulo.endswith(".") and not titulo.endswith("..."):
             inf.error(donde, f"el título termina en punto: «{titulo}»")
-        num = re.match(r"^(\d+(?:\.\d+)*)\.?\s+(.+)$", titulo)
+        # «2 · Requisitos — Parcial (60 %)» (puntos de una auditoría) no es numeración decimal.
+        num = re.match(r"^(\d+(?:\.\d+)*)\.?\s+(?!·)(.+)$", titulo)
         nombre = (num.group(2) if num else titulo).rstrip(".")
         if nivel == 1 and primer_h1 and not num and documento and normalizar(nombre) == documento:
             primer_h1 = False
@@ -501,7 +679,7 @@ def verificar(prompt, archivos, inf, memorias=None):
                     inf.aviso(donde, f"«{nombre}» suele ir sin número")
                 continue
             en_numerado = True
-        if nivel == 4:
+        if nivel == 4 or nivel > niveles:
             continue
         if not num:
             if en_numerado:
@@ -581,6 +759,9 @@ def verificar(prompt, archivos, inf, memorias=None):
         verificar_tecnicas(lineas, tipos_tabla, inf)
     verificar_academicos(lineas, set(prompt.get("componentes", []) or []), numeros, inf)
     verificar_prologo(lineas, inf)
+    propios = {normalizar(str(c)) for c in prompt.get("componentes_plantilla", []) or []}
+    if propios:
+        verificar_plantilla(lineas, propios, prompt, inf)
     if memorias is not None:
         verificar_memoria(lineas, memorias, inf)
 
@@ -616,6 +797,7 @@ def verificar(prompt, archivos, inf, memorias=None):
             continue
         sin_codigo = re.sub(r"`[^`]*`", "", linea)
         sin_codigo = re.sub(r"\]\([^)]*\)", "]", sin_codigo)
+        sin_codigo = re.sub(r"^\s*\*\*\d+(?:\.\d+)*\*\*", "", sin_codigo)  # número de pregunta: **1.2**
         for m in re.finditer(r"(?<![\w-])([A-ZÁÉÍÓÚÑ]{2,6})s?(?![\w-])", sin_codigo):
             sigla = m.group(1)
             if sigla in vistas or sigla in siglas_ok or ROMANOS.match(sigla):

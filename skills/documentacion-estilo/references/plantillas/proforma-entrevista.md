@@ -42,7 +42,24 @@ Solo grises; se imprime en blanco y negro sin perder nada.
 - **Listas de objetivos y notas guía**: viñetas simples, una línea cada una.
 - Secciones: 1. Datos · 2. Objetivos · 3. Agenda y control de tiempos · 4. Notas guía del entrevistador · 5. Cuerpo de la proforma (bloques temáticos: Misión, Estructura, Diagnóstico de dolores…).
 
-## 5. Puntos abiertos
+## 5. En el configurador
+
+La plantilla **Proforma de entrevista** es el primer paso del configurador (`assets/configurador.html`). Carga un punto de partida completo, y después se puede cambiar cualquier valor:
+
+- **Ejes**: tipo otro, metodología ninguna, propósito instructivo, ámbito académico, lector experto, medio impreso.
+- **Estructura**: pretextual ninguna; textual Datos de la entrevista, Objetivos, Agenda y control de tiempos, Notas guía del entrevistador, Cuerpo de la proforma; postextual ninguna; capítulos seguidos, sin página nueva.
+- **Presentación**: la de las secciones de arriba (fuentes, tamaños, márgenes y colores).
+
+Componentes propios. Cada uno tiene su ejemplo en la vista previa y su regla en el prompt; la regla de esta tabla es la que copia el prompt, palabra por palabra.
+
+| Componente | Regla del prompt | Qué revisa `verificar_doc.py` |
+|---|---|---|
+| Barras de sección | cada capítulo empieza con una barra de sección: en Markdown, `# 1. Título` con mayúscula inicial; al exportar, una franja de ancho completo con fondo gris claro, borde inferior gris y el título en mayúsculas sostenidas. | — (no se puede revisar en Markdown) |
+| Campos para completar | los datos se piden en una tabla de pares campo y espacio para completar: fechas `___ / ___ / ______`, horas `___ : ___` y opciones separadas por barra («Presencial / Virtual»); nunca se completan con datos inventados. | — (no se puede revisar en Markdown) |
+| Agenda con tiempos | tabla Bloque · Tema · Tiempo estimado · Tiempo real · Tiempo total, con los tiempos en minutos (`10 min`) y las columnas de tiempo real en blanco; la última fila es `**Tiempo total**` (en mayúsculas al exportar) con la suma de los tiempos estimados. | Que la última fila sea Tiempo total y que sume los tiempos estimados. |
+| Preguntas con líneas | cada pregunta es un párrafo que empieza con su número en negrita, `**1.2** Texto de la pregunta`, numerado por bloque temático (1.1, 1.2… y 2.1 al cambiar de bloque); debajo, de 3 a 4 líneas para responder, cada una como `___` en su propio párrafo. | Que cada pregunta tenga de 3 a 4 líneas y que la numeración sea continua. |
+
+## 6. Puntos abiertos
 
 1. ¿El código del formulario (por ejemplo, P-06) va en el encabezado de cada página, o solo en la tabla de datos?
 2. ¿Cuántas líneas de respuesta por pregunta? El modelo usa 3 o 4 según la pregunta.

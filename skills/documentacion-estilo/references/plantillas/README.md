@@ -2,7 +2,7 @@
 
 Una plantilla es el diseño tomado de un documento real que el usuario entregó como modelo («así es como lo quiero»). Funciona como una guía de marca: cuando el prompt de estilo la declara en `plantilla`, sus valores mandan sobre los predeterminados de `estilo-visual.md`.
 
-| Plantilla | Archivo | Origen | Preajuste del configurador |
+| Plantilla | Archivo | Origen | Plantilla del configurador |
 |---|---|---|---|
 | Trabajo de campo (UNC · AUSI) | `trabajo-campo-unc.md` | *Trabajo de Campo v3.6* (y v2.2, *Ponderación de metodologías v3*) | Trabajo de campo UNC |
 | Proforma de entrevista | `proforma-entrevista.md` | *Proforma de entrevista académica* (A4) | Proforma de entrevista |
@@ -13,6 +13,8 @@ Una plantilla es el diseño tomado de un documento real que el usuario entregó 
 | Diagramas de relevamiento | `diagramas.md` | Contexto, organigrama y secuencias AS-IS del Instituto; página Mermaid de la pasarela de pagos | — |
 
 Para elegir: un entregable académico largo (informe, trabajo de campo) usa *Trabajo de campo*; un formulario para completar a mano, *Proforma*; un resumen de estudio de una página, *Ficha*; una arquitectura o propuesta para presentar, *Arquitectura en láminas*; una especificación o informe técnico, *Informe técnico*; la revisión de un entregable contra criterios, *Informe de completitud*. Los diagramas de cualquiera de ellos siguen *Diagramas de relevamiento*. Si no está claro, pregunta.
+
+*Diagramas de relevamiento* no es una plantilla del configurador: es el estilo de las figuras de las demás, no un tipo de documento, así que no tiene punto de partida ni componentes propios.
 
 ## Cómo se crea una plantilla a partir de un documento
 
@@ -27,6 +29,10 @@ Para elegir: un entregable académico largo (informe, trabajo de campo) usa *Tra
 3. Escribe `references/plantillas/<nombre>.md` con las mismas secciones que `trabajo-campo-unc.md`: página, tipografía, color, tablas, figuras, portada, estructura y puntos abiertos.
 4. Si el documento es inconsistente en algo, no elijas tú: anótalo en «Puntos abiertos» y pregúntalo según `memoria.md`.
 5. Registra la plantilla en `memoria/decisiones.md` y agrégala a la tabla de arriba.
-6. Si conviene, agrega un preajuste en `assets/configurador.html` (`PRESETS` y un botón `data-preset`).
+6. Si conviene, agrégala al configurador (`assets/configurador.html`) como punto de partida completo:
+   - en `PRESETS`, la presentación (fuentes, tamaños, márgenes y colores);
+   - en `PLANTILLAS`, los ejes, las tres zonas, el formato de las zonas, los componentes y sus componentes propios;
+   - en `COMPONENTES_PLANTILLA`, cada componente propio con su regla y, si se puede revisar en Markdown, su control en `verificar_doc.py`.
+   Agrega a la plantilla la sección «En el configurador», con la regla de cada componente igual a la del configurador (un test lo comprueba). Si un componente del modelo no se distingue del general, dilo ahí en lugar de inventarle uno propio.
 
 Si llega un segundo documento del mismo tipo, compáralo con la plantilla existente. Lo que coincide confirma la regla; lo que difiere es un punto abierto, no un cambio automático.
