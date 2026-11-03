@@ -119,6 +119,18 @@ input[type=text]:hover, input[type=number]:hover, select:hover, textarea:hover {
 input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus { border-color: var(--c, var(--accent)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--c, var(--accent)) 25%, transparent); outline: none; }
 textarea { min-height: 70px; resize: vertical; }
 textarea.alta { min-height: 170px; }
+/* ===== Zonas de la estructura ===== */
+.zona-lista { display: grid; gap: 6px; }
+.zona-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); font-size: 13.5px; }
+.zona-item.on { border-color: var(--c, var(--accent)); background: color-mix(in srgb, var(--c, var(--accent)) 8%, var(--panel)); }
+.zona-item label { flex: 1; display: flex; gap: 8px; align-items: flex-start; cursor: pointer; min-width: 0; }
+.zona-item label input { margin-top: 2px; flex: none; accent-color: var(--c, var(--accent)); }
+.zona-item small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.4; overflow-wrap: anywhere; }
+.zona-item .mover { display: flex; gap: 4px; flex: none; }
+.zona-item .mover button { width: 28px; height: 28px; padding: 0; justify-content: center; font-size: 13px; }
+.zona-propio { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 8px; }
+@media (max-width: 560px) { .zona-propio { grid-template-columns: 1fr; } }
+label.campo-check { display: flex; align-items: center; gap: 8px; font-size: 13px; align-self: end; padding-bottom: 8px; cursor: pointer; }
 .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .fila3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .fila.apilada, .fila3.apilada { grid-template-columns: 1fr; }
@@ -485,11 +497,48 @@ pre.texto-salida {
     </section>
 
     <section style="--c:#3b6ea5" class="grupo sin-local" data-sec="Estructura">
-      <h2>Estructura <small>capítulos en orden</small><span class="cnt"></span></h2>
-      <div class="cuerpo-grupo">
-        <label class="campo"><span>Capítulos (uno por línea, sin número)</span><textarea class="alta" data-k="estructura"></textarea></label>
+      <h2>Estructura <small>pretextual, textual y postextual</small><span class="cnt"></span></h2>
+      <div class="cuerpo-grupo" id="zonas">
+        <p class="nota-ui">Las partes pretextuales y postextuales van sin número; los capítulos de la zona textual, numerados.</p>
+        <p class="subtitulo">Pretextual</p>
+        <div class="zona-lista" id="zona-pre" data-zona="pre"></div>
+        <div class="zona-propio" data-zona="pre">
+          <input type="text" class="propio-nombre" placeholder="Elemento propio (p. ej., Lista de símbolos)" aria-label="Nombre del elemento pretextual propio">
+          <input type="text" class="propio-regla" placeholder="Regla de contenido" aria-label="Regla del elemento pretextual propio">
+          <button type="button" class="propio-agregar">Agregar</button>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Paginación pretextual</span><select data-fz="pre.paginacion"><option value="romana">Romana (i, ii, iii)</option><option value="arabiga">Arábiga (1, 2, 3)</option><option value="ninguna">Ninguna</option></select></label>
+          <label class="campo-check"><input type="checkbox" data-fz="pre.pagina_nueva"> Cada elemento en página nueva</label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Alineación de la dedicatoria</span><select data-fz="dedicatoria.alineacion"><option value="izquierda">Izquierda</option><option value="centro">Centro</option><option value="derecha">Derecha</option></select></label>
+          <label class="campo"><span>Estilo de la dedicatoria</span><select data-fz="dedicatoria.estilo"><option value="normal">Normal</option><option value="cursiva">Cursiva</option></select></label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Alineación del epígrafe</span><select data-fz="epigrafe.alineacion"><option value="izquierda">Izquierda</option><option value="centro">Centro</option><option value="derecha">Derecha</option></select></label>
+          <label class="campo"><span>Estilo del epígrafe</span><select data-fz="epigrafe.estilo"><option value="normal">Normal</option><option value="cursiva">Cursiva</option></select></label>
+        </div>
+
+        <p class="subtitulo">Textual</p>
+        <label class="campo"><span>Capítulos numerados (uno por línea, sin número)</span><textarea class="alta" data-k="textual"></textarea></label>
         <button type="button" id="esqueleto">Cargar esqueleto de la metodología</button>
-        <label class="campo"><span>Partes sin numerar (uno por línea)</span><textarea data-k="sin_numerar"></textarea></label>
+        <div class="fila">
+          <label class="campo"><span>Paginación textual</span><select data-fz="textual.paginacion"><option value="romana">Romana (i, ii, iii)</option><option value="arabiga">Arábiga (1, 2, 3)</option><option value="ninguna">Ninguna</option></select></label>
+          <label class="campo-check"><input type="checkbox" data-fz="textual.pagina_nueva"> Cada capítulo en página nueva</label>
+        </div>
+
+        <p class="subtitulo">Postextual</p>
+        <div class="zona-lista" id="zona-post" data-zona="post"></div>
+        <div class="zona-propio" data-zona="post">
+          <input type="text" class="propio-nombre" placeholder="Elemento propio" aria-label="Nombre del elemento postextual propio">
+          <input type="text" class="propio-regla" placeholder="Regla de contenido" aria-label="Regla del elemento postextual propio">
+          <button type="button" class="propio-agregar">Agregar</button>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Paginación postextual</span><select data-fz="post.paginacion"><option value="romana">Romana (i, ii, iii)</option><option value="arabiga">Arábiga (1, 2, 3)</option><option value="ninguna">Ninguna</option></select></label>
+          <label class="campo-check"><input type="checkbox" data-fz="post.pagina_nueva"> Cada elemento en página nueva</label>
+        </div>
       </div>
     </section>
 
@@ -837,7 +886,7 @@ const NOTA_METODOLOGIA = {
   scrum: "Scrum: documentación mínima y viva, por iteración.",
   ninguna: "Estructura genérica, sin metodología formal."
 };
-const SIN_NUMERAR_BASE = ["control de versiones","portada","resumen","abstract","agradecimientos","dedicatoria","indice","indice general","indice de figuras","indice de tablas","lista de siglas y abreviaturas","glosario","referencias","bibliografia","anexos","apendices"];
+const SIN_NUMERAR_BASE = ["control de versiones","portada","resumen","abstract","agradecimientos","dedicatoria","indice","indice general","indice de figuras","indice de tablas","lista de siglas y abreviaturas","glosario","referencias","bibliografia","anexos","apendices","prefacio","prologo","epigrafe","indice alfabetico","colofon","siglas y abreviaturas"];
 const NOTACIONES = {
   "uml-casos": "UML casos de uso", "uml-clases": "UML clases", "uml-secuencia": "UML secuencia", "uml-actividad": "UML actividad",
   "uml-componentes": "UML componentes/despliegue", "bpmn": "BPMN 2.0", "er": "Entidad-relación", "c4": "C4 (contexto)"
@@ -968,13 +1017,167 @@ function datosCapitulos() {
   const otras = Object.entries(ESQUELETOS).filter(([m]) => m !== S.metodologia).flatMap(([, e]) => e);
   return Object.fromEntries([...otras, ...esqueleto(S.metodologia)].map(e => [norm(e[0]), e]));
 }
-function sinNumerarDe(caps) { return caps.filter(c => SIN_NUMERAR_BASE.includes(norm(c))); }
+
+/* ---------- Zonas de la estructura (references/escritura.md, «Partes pretextuales y postextuales») ---------- */
+/* Mismo texto de regla que la referencia. El orden es el orden por defecto. */
+const CATALOGO_PRE = [
+  { k: "control_versiones", nombre: "Control de versiones", regla: "Tabla con las columnas Versión, Fecha, Autor y Descripción del cambio. Va primero por defecto." },
+  { k: "portada", nombre: "Portada", regla: "Título, autor, institución y fecha; sin número de página." },
+  { k: "dedicatoria", nombre: "Dedicatoria", regla: "Una o dos líneas del autor, sin título." },
+  { k: "epigrafe", nombre: "Epígrafe", regla: "Cita breve con su autor, sin título." },
+  { k: "agradecimientos", nombre: "Agradecimientos", regla: "Personas e instituciones, sin datos inventados; si faltan, `[PENDIENTE: nombres]`." },
+  { k: "prefacio", nombre: "Prefacio", regla: "Lo escribe el autor: origen y propósito de la obra." },
+  { k: "prologo", nombre: "Prólogo", regla: "Lo escribe otra persona: deja `[PENDIENTE: texto del prologuista]` y nunca lo redactes." },
+  { k: "resumen", nombre: "Resumen", regla: "Síntesis del trabajo y palabras clave." },
+  { k: "abstract", nombre: "Abstract", regla: "El resumen en inglés." },
+  { k: "indice_general", nombre: "Índice general", regla: "Se genera a partir de los títulos; no se escribe a mano." },
+  { k: "indice_figuras", nombre: "Índice de figuras", regla: "Se genera a partir de las leyendas de las figuras." },
+  { k: "indice_tablas", nombre: "Índice de tablas", regla: "Se genera a partir de las leyendas de las tablas." },
+  { k: "siglas", nombre: "Lista de siglas y abreviaturas", regla: "Cada sigla con su desarrollo, en orden alfabético." }
+];
+const CATALOGO_POST = [
+  { k: "glosario", nombre: "Glosario", regla: "Términos con su definición, en orden alfabético." },
+  { k: "referencias", nombre: "Referencias", regla: "Obras citadas, en el estilo de citas elegido." },
+  { k: "bibliografia", nombre: "Bibliografía", regla: "Obras consultadas y no citadas." },
+  { k: "anexos", nombre: "Anexos", regla: "Material propio, con letras: Anexo A, Anexo B…" },
+  { k: "apendices", nombre: "Apéndices", regla: "Material de terceros." },
+  { k: "indice_alfabetico", nombre: "Índice alfabético", regla: "Términos con la página en que aparecen." },
+  { k: "colofon", nombre: "Colofón", regla: "Datos de la edición." }
+];
+const CATALOGO = { pre: CATALOGO_PRE, post: CATALOGO_POST };
+const CLAVE_ZONA = { pre: "pretextuales", post: "postextuales" };
+const FORMATO_ZONAS_BASE = {
+  pre: { paginacion: "romana", pagina_nueva: true }, textual: { paginacion: "arabiga", pagina_nueva: true }, post: { paginacion: "arabiga", pagina_nueva: true },
+  dedicatoria: { alineacion: "derecha", estilo: "cursiva" }, epigrafe: { alineacion: "derecha", estilo: "cursiva" }
+};
+const VALORES_FORMATO = { paginacion: ["romana", "arabiga", "ninguna"], alineacion: ["izquierda", "centro", "derecha"], estilo: ["normal", "cursiva"] };
+function delCatalogo(nombre) { return [...CATALOGO_PRE, ...CATALOGO_POST].find(c => norm(c.nombre) === norm(nombre)); }
+/* Partes que van sin número cuando se reparten capítulos sueltos (esqueleto o .docx). */
+function esParteSinNumero(c) { return SIN_NUMERAR_BASE.includes(norm(c)) || !!delCatalogo(c); }
+const CONTROL_VERSIONES = "control de versiones";
+/* Partes sin título: el prompt las pide en su zona, pero no entran en `estructura` (el verificador exige su H1). */
+const SIN_TITULO = ["portada", "dedicatoria", "epigrafe"];
+function enCatalogo(z, n) { return CATALOGO[z].some(c => norm(c.nombre) === norm(n)); }
+function unicos(l) { return l.filter((n, k) => l.findIndex(m => norm(m) === norm(n)) === k); }
+/* «Control de versiones» va siempre primero en la zona pretextual (DEC vigente). */
+function controlPrimero(lista) {
+  const i = lista.findIndex(n => norm(n) === CONTROL_VERSIONES);
+  if (i > 0) lista.unshift(lista.splice(i, 1)[0]);
+  return lista;
+}
+/* Reparte una lista de capítulos en zonas (references/escritura.md, §4 ter):
+   - las partes sin número antes del primer capítulo numerado van a pretextual;
+   - las que están después del último, a postextual;
+   - una parte sin número entre capítulos va a su zona: a pre o a post según el catálogo y, si no está
+     en ninguno, a postextual como elemento propio. Se devuelve en `movidos` para avisar al usuario;
+   - el resto va a textual.
+   Los nombres que no están en el catálogo de su zona pasan a ser elementos propios. */
+function zonasDesdeCapitulos(caps, sinNumero) {
+  const esSin = sinNumero || esParteSinNumero;
+  let i = caps.findIndex(c => !esSin(c));
+  if (i < 0) i = caps.length;
+  let j = caps.length - 1;
+  while (j >= i && esSin(caps[j])) j--;
+  const pre = caps.slice(0, i), post = caps.slice(Math.max(i, j + 1)), textual = [], movidos = [], aPre = [], aPost = [];
+  caps.slice(i, j + 1).forEach(c => {
+    if (!esSin(c)) { textual.push(c); return; }
+    movidos.push(c);
+    (enCatalogo("pre", c) ? aPre : aPost).push(c);
+  });
+  const pretextuales = controlPrimero(unicos([...pre, ...aPre])), postextuales = unicos([...aPost, ...post]);
+  const propios = [];
+  [["pre", pretextuales], ["post", postextuales]].forEach(([z, lista]) => lista.forEach(n => {
+    if (!enCatalogo(z, n) && !propios.some(p => p.zona === z && norm(p.nombre) === norm(n))) {
+      const c = delCatalogo(n);
+      propios.push({ zona: z, nombre: n, regla: c ? c.regla : "" });
+    }
+  }));
+  return { pretextuales, textual: textual.join("\n"), postextuales, propios, movidos };
+}
+/* Aviso para el usuario cuando una parte sin número estaba entre capítulos y cambió de lugar. */
+function avisoMovidos(movidos, propios) {
+  const partes = [];
+  if (movidos && movidos.length) partes.push(`Se movieron a su zona las partes sin número que estaban entre capítulos: ${movidos.join(", ")}`);
+  const sinRegla = (propios || []).filter(p => !p.regla).map(p => p.nombre);
+  if (partes.length && sinRegla.length) partes.push(`sin regla: ${sinRegla.join(", ")}`);
+  return partes.join("; ");
+}
+/* Aplica el reparto al estado conservando los elementos propios que ya tenía. Devuelve los nombres movidos. */
+function aplicarZonas(st, z) {
+  st.pretextuales = z.pretextuales; st.postextuales = z.postextuales; st.textual = z.textual;
+  const previos = (st.propios || []).filter(p => !z.propios.some(n => n.zona === p.zona && norm(n.nombre) === norm(p.nombre)));
+  st.propios = [...previos, ...z.propios];
+  derivarEstructura(st);
+  return avisoMovidos(z.movidos, z.propios);
+}
+/* Capítulos de la zona textual sin los que ya están en pre o post: si un nombre está en las dos, gana la zona. */
+function textualDe(st) {
+  const enZonas = new Set([...st.pretextuales, ...st.postextuales].map(norm));
+  return unicos(lineas(st.textual)).filter(n => !enZonas.has(norm(n)));
+}
+/* `estructura` y `sin_numerar` se derivan de las zonas: los leen el verificador y los prompts existentes.
+   `estructura` deja fuera las partes sin título; la zona textual nunca entra en `sin_numerar`. */
+function derivarEstructura(st) {
+  st = st || S;
+  const conTitulo = l => l.filter(n => !SIN_TITULO.includes(norm(n)));
+  st.estructura = unicos([...conTitulo(st.pretextuales), ...textualDe(st), ...conTitulo(st.postextuales)]).join("\n");
+  st.sin_numerar = unicos([...st.pretextuales, ...st.postextuales]).join("\n");
+}
+/* Elementos que se muestran en una zona: los elegidos en su orden y después los demás del catálogo y propios. */
+function elementosZona(z, st) {
+  st = st || S;
+  const elegidos = st[CLAVE_ZONA[z]];
+  const todos = [...CATALOGO[z].map(c => ({ nombre: c.nombre, regla: c.regla, propio: false })),
+    ...(st.propios || []).filter(p => p.zona === z).map(p => ({ nombre: p.nombre, regla: p.regla, propio: true }))];
+  const buscar = n => todos.find(t => norm(t.nombre) === norm(n)) || { nombre: n, regla: "", propio: true };
+  return [...elegidos.map(n => Object.assign({ on: true }, buscar(n))), ...todos.filter(t => !elegidos.some(n => norm(n) === norm(t.nombre))).map(t => Object.assign({ on: false }, t))];
+}
+function reglaElemento(z, nombre, st) {
+  const e = elementosZona(z, st).find(t => norm(t.nombre) === norm(nombre));
+  return e && e.regla ? e.regla : "[PENDIENTE: regla de contenido]";
+}
+function alternarElemento(z, nombre, on) {
+  const clave = CLAVE_ZONA[z], lista = S[clave].filter(n => norm(n) !== norm(nombre));
+  if (on) {
+    const otra = CLAVE_ZONA[z === "pre" ? "post" : "pre"];
+    S[otra] = S[otra].filter(n => norm(n) !== norm(nombre)); // un nombre está en una sola zona
+    // Los del catálogo vuelven a su lugar por defecto respecto de los demás del catálogo; los propios, al final.
+    const pos = CATALOGO[z].findIndex(c => norm(c.nombre) === norm(nombre));
+    let i = lista.length;
+    if (pos >= 0) { const k = lista.findIndex(n => { const p = CATALOGO[z].findIndex(c => norm(c.nombre) === norm(n)); return p > pos; }); if (k >= 0) i = k; }
+    // «Control de versiones» va siempre primero (DEC vigente); el usuario puede moverlo a mano.
+    if (z === "pre" && norm(nombre) === CONTROL_VERSIONES) i = 0;
+    else if (i === 0 && lista.length && norm(lista[0]) === CONTROL_VERSIONES) i = 1;
+    lista.splice(i, 0, nombre);
+  }
+  S[clave] = lista; S.estructura_editada = true; derivarEstructura();
+}
+function moverElemento(z, nombre, delta) {
+  const lista = S[CLAVE_ZONA[z]], i = lista.findIndex(n => norm(n) === norm(nombre)), j = i + delta;
+  if (i < 0 || j < 0 || j >= lista.length) return false;
+  [lista[i], lista[j]] = [lista[j], lista[i]]; S.estructura_editada = true; derivarEstructura(); return true;
+}
+function agregarPropio(z, nombre, regla) {
+  nombre = String(nombre || "").trim(); regla = String(regla || "").trim();
+  if (!nombre) return false;
+  if ([...S.pretextuales, ...S.postextuales].some(n => norm(n) === norm(nombre))) return false; // ya está en una zona
+  if (!elementosZona(z).some(t => norm(t.nombre) === norm(nombre))) S.propios.push({ zona: z, nombre, regla });
+  if (!S[CLAVE_ZONA[z]].some(n => norm(n) === norm(nombre))) S[CLAVE_ZONA[z]].push(nombre);
+  S.estructura_editada = true; derivarEstructura(); return true;
+}
+function quitarPropio(z, nombre) {
+  S.propios = S.propios.filter(p => !(p.zona === z && norm(p.nombre) === norm(nombre)));
+  S[CLAVE_ZONA[z]] = S[CLAVE_ZONA[z]].filter(n => norm(n) !== norm(nombre)); S.estructura_editada = true; derivarEstructura();
+}
+const ZONAS_DEF = zonasDesdeCapitulos(esqueleto("diataxis").map(e => e[0]));
 
 const DEF = {
   documento: "Manual de usuario del Sistema de Gestión", version: "1.0", tipo: "manual", metodologia: "diataxis",
   proposito: "instructivo", ambito: "tecnico", lector: "publico_general", medio: "digital", formato: "markdown", salida: "docs/manual/", ubicacion_prompt: "proyecto",
-  estructura: esqueleto("diataxis").map(e => e[0]).join("\n"),
-  sin_numerar: sinNumerarDe(esqueleto("diataxis").map(e => e[0])).join("\n"),
+  pretextuales: ZONAS_DEF.pretextuales, textual: ZONAS_DEF.textual, postextuales: ZONAS_DEF.postextuales, propios: ZONAS_DEF.propios,
+  formato_zonas: JSON.parse(JSON.stringify(FORMATO_ZONAS_BASE)),
+  /* Derivados de las zonas: los calcula derivarEstructura(DEF) más abajo */
+  estructura: "", sin_numerar: "",
   componentes: ["tablas", "figuras", "avisos", "pasos", "codigo", "glosario"],
   avisos: ["nota", "consejo", "advertencia", "peligro"],
   tablas_tipos: [],
@@ -992,8 +1195,10 @@ const DEF = {
   alcance: "agente", modo: "digital", estructura_editada: false,
   fuente_vista: "ejemplo", numerar_subido: true, aplicar_texto: false, marcar_desvios: true, seleccionando: false, ver_todo: false
 };
+derivarEstructura(DEF);
 const CLAVE = "configurador-estilo-documentacion-v1";
 let S = cargar();
+const AVISO_INICIAL = combinar.aviso; // la configuración guardada se migró y movió partes de lugar
 
 /* ---------- Utilidades ---------- */
 function norm(t) { return String(t).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " "); }
@@ -1005,6 +1210,7 @@ function cargar() {
   return combinar(guardado);
 }
 function combinar(o) {
+  combinar.aviso = ""; // aviso de las partes sin número que la migración sacó de entre los capítulos
   const r = JSON.parse(JSON.stringify(DEF));
   if (o && typeof o === "object") {
     const tiene = (obj, k) => Object.prototype.hasOwnProperty.call(obj, k);
@@ -1019,6 +1225,38 @@ function combinar(o) {
     // Un valor de eje desconocido vuelve al de DEF para no emitir reglas vacías.
     [["proposito", REGLAS_PROPOSITO], ["ambito", REGLAS_AMBITO], ["lector", REGLAS_LECTOR]].forEach(([k, reglas]) => { if (typeof r[k] !== "string" || !tiene(reglas, r[k])) r[k] = DEF[k]; });
     r.colores = Object.assign({}, PALETA_BASE, o.colores || {});
+    // Migración de configuraciones sin zonas (0.12.0 y anteriores): `estructura` y `sin_numerar` se
+    // reparten en pretextual, textual y postextual según dónde está cada parte sin número.
+    const conZonas = ["pretextuales", "postextuales", "textual"].some(k => tiene(o, k));
+    if (!conZonas && tiene(o, "estructura")) {
+      const sinNum = new Set(lineas(o.sin_numerar).map(norm));
+      const z = zonasDesdeCapitulos(lineas(o.estructura), c => sinNum.has(norm(c)));
+      r.pretextuales = z.pretextuales; r.textual = z.textual; r.postextuales = z.postextuales; r.propios = z.propios;
+      combinar.aviso = avisoMovidos(z.movidos, z.propios);
+    }
+    const listaTxt = v => Array.isArray(v) ? v.map(x => String(x).trim()).filter(Boolean) : lineas(v);
+    r.pretextuales = listaTxt(r.pretextuales); r.postextuales = listaTxt(r.postextuales);
+    r.textual = Array.isArray(r.textual) ? r.textual.join("\n") : String(r.textual || "");
+    r.propios = (Array.isArray(r.propios) ? r.propios : [])
+      .filter(p => p && (p.zona === "pre" || p.zona === "post") && String(p.nombre || "").trim())
+      .map(p => ({ zona: p.zona, nombre: String(p.nombre).trim(), regla: String(p.regla || "").trim() }));
+    // Un nombre elegido que no está en el catálogo de su zona ni entre los propios pasa a ser propio.
+    [["pre", r.pretextuales], ["post", r.postextuales]].forEach(([zn, lista]) => lista.forEach(n => {
+      if (!CATALOGO[zn].some(c => norm(c.nombre) === norm(n)) && !r.propios.some(p => p.zona === zn && norm(p.nombre) === norm(n))) {
+        const c = delCatalogo(n); r.propios.push({ zona: zn, nombre: n, regla: c ? c.regla : "" });
+      }
+    }));
+    const fz = o.formato_zonas && typeof o.formato_zonas === "object" ? o.formato_zonas : {};
+    r.formato_zonas = {};
+    Object.entries(FORMATO_ZONAS_BASE).forEach(([zn, base]) => {
+      const dado = fz[zn] && typeof fz[zn] === "object" ? fz[zn] : {};
+      r.formato_zonas[zn] = {};
+      Object.entries(base).forEach(([c, v]) => {
+        const x = dado[c];
+        r.formato_zonas[zn][c] = c === "pagina_nueva" ? (typeof x === "boolean" ? x : v) : (VALORES_FORMATO[c].includes(x) ? x : v);
+      });
+    });
+    derivarEstructura(r);
   }
   return r;
 }
@@ -1206,7 +1444,56 @@ function pintarFormulario() {
   const cont = document.getElementById("colores");
   cont.innerHTML = COLORES.map(([k, n]) => `<label class="color"><input type="color" data-color="${k}" value="${EF.colores[k]}"><span>${n}<br><code>${EF.colores[k].toUpperCase()}</code></span></label>`).join("");
   pintarSelectorDiagrama();
+  pintarZonas();
 }
+/* ---------- Zonas: catálogo, orden, propios y formato ---------- */
+function pintarZonas() {
+  ["pre", "post"].forEach(z => {
+    const cont = document.getElementById("zona-" + z); if (!cont) return;
+    const els = elementosZona(z), n = S[CLAVE_ZONA[z]].length;
+    cont.innerHTML = els.map((e, i) => `<div class="zona-item${e.on ? " on" : ""}" data-nombre="${esc(e.nombre)}">` +
+      `<label><input type="checkbox" class="zona-check"${e.on ? " checked" : ""}><span><b>${esc(e.nombre)}</b>${e.propio ? " <small style=\"display:inline\">(propio)</small>" : ""}<small>${esc(e.regla || "Sin regla: el prompt la deja pendiente.")}</small></span></label>` +
+      `<span class="mover">${e.on ? `<button type="button" data-mover="-1" aria-label="Subir ${esc(e.nombre)}"${i === 0 ? " disabled" : ""}>↑</button><button type="button" data-mover="1" aria-label="Bajar ${esc(e.nombre)}"${i === n - 1 ? " disabled" : ""}>↓</button>` : ""}` +
+      `${e.propio ? `<button type="button" data-quitar aria-label="Quitar ${esc(e.nombre)}">✕</button>` : ""}</span></div>`).join("");
+  });
+  form.querySelectorAll("[data-fz]").forEach(el => {
+    const [z, c] = el.dataset.fz.split("."), v = S.formato_zonas[z][c];
+    if (el.type === "checkbox") el.checked = !!v; else el.value = v;
+  });
+}
+(function () {
+  const zonas = document.getElementById("zonas"); if (!zonas || !zonas.addEventListener) return;
+  zonas.addEventListener("input", e => {
+    const el = e.target;
+    if (el.dataset && el.dataset.fz) {
+      const [z, c] = el.dataset.fz.split(".");
+      S.formato_zonas[z][c] = el.type === "checkbox" ? el.checked : el.value;
+    } else if (el.classList && el.classList.contains("zona-check")) {
+      const item = el.closest(".zona-item"), z = el.closest("[data-zona]").dataset.zona;
+      alternarElemento(z, item.dataset.nombre, el.checked); pintarZonas();
+    } else if (el.closest && el.closest(".zona-propio")) {
+      e.stopPropagation(); return; // se aplica al pulsar «Agregar»
+    }
+  });
+  zonas.addEventListener("click", e => {
+    const b = e.target.closest && e.target.closest("button"); if (!b) return;
+    const caja = b.closest("[data-zona]"); if (!caja) return;
+    const z = caja.dataset.zona;
+    if (b.classList.contains("propio-agregar")) {
+      const nombre = caja.querySelector(".propio-nombre"), regla = caja.querySelector(".propio-regla");
+      if (!agregarPropio(z, nombre.value, regla.value)) { aviso(nombre.value.trim() ? "Ese elemento ya está en la estructura" : "Escriba el nombre del elemento"); nombre.focus(); return; }
+      nombre.value = ""; regla.value = ""; aviso("Elemento agregado");
+    } else if (b.dataset.mover) {
+      moverElemento(z, b.closest(".zona-item").dataset.nombre, Number(b.dataset.mover));
+    } else if (b.hasAttribute("data-quitar")) {
+      quitarPropio(z, b.closest(".zona-item").dataset.nombre);
+    } else return;
+    pintarZonas(); actualizar();
+  });
+  zonas.addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.target.closest && e.target.closest(".zona-propio")) { e.preventDefault(); e.target.closest(".zona-propio").querySelector(".propio-agregar").click(); }
+  });
+})();
 function pintarSelectorDiagrama() {
   const sel = document.getElementById("diag-vista");
   const lista = S.notaciones.length ? S.notaciones : [];
@@ -1233,7 +1520,7 @@ form.addEventListener("input", e => {
     if (el.type === "checkbox") S[k] = el.checked;
     else if (el.type === "number") S[k] = el.value === "" ? "" : Number(el.value);
     else S[k] = el.value;
-    if (k === "estructura") S.estructura_editada = true;
+    if (k === "textual") { S.estructura_editada = true; derivarEstructura(); }
     if (k === "metodologia") cambiarMetodologia();
     if (k === "medio" && S.medio !== "ambos") S.modo = S.medio;
   } else if (el.closest("[data-grupo]")) {
@@ -1252,11 +1539,10 @@ form.addEventListener("change", e => { if (e.target.id === "diag-vista") { S.dia
 document.querySelector("[data-k=alcance]").addEventListener("change", e => { S.alcance = e.target.value; actualizar(); });
 
 function cargarEsqueleto() {
-  const caps = esqueleto(S.metodologia).map(e => e[0]);
-  S.estructura = caps.join("\n"); S.sin_numerar = sinNumerarDe(caps).join("\n"); S.estructura_editada = false;
+  aplicarZonas(S, zonasDesdeCapitulos(esqueleto(S.metodologia).map(e => e[0]))); S.estructura_editada = false;
 }
 function cambiarMetodologia() {
-  if (!S.estructura_editada || confirm("¿Reemplazar los capítulos por el esqueleto de la nueva metodología? Se perderán tus cambios en la estructura.")) {
+  if (!S.estructura_editada || confirm("¿Reemplazar la estructura por el esqueleto de la nueva metodología? Se reemplazarán los capítulos y las partes pretextuales y postextuales elegidas, y se perderán tus cambios en la estructura.")) {
     cargarEsqueleto(); pintarFormulario();
   }
 }
@@ -1594,16 +1880,35 @@ function generarPrompt() {
     lista("notaciones", S.notaciones.map(n => NOTACIONES[n])),
     lista("componentes", S.componentes),
     ...(tiposTabla.length ? [lista("tablas", tiposTabla.map(x => x.k))] : []),
+    lista("pretextuales", S.pretextuales), lista("postextuales", S.postextuales),
+    ...[["pretextual", "pre"], ["textual", "textual"], ["postextual", "post"]].flatMap(([nombre, z]) =>
+      [`paginacion_${nombre}: ${S.formato_zonas[z].paginacion}`, `pagina_nueva_${nombre}: ${S.formato_zonas[z].pagina_nueva ? "si" : "no"}`]),
+    `dedicatoria_alineacion: ${S.formato_zonas.dedicatoria.alineacion}`, `dedicatoria_estilo: ${S.formato_zonas.dedicatoria.estilo}`,
+    `epigrafe_alineacion: ${S.formato_zonas.epigrafe.alineacion}`, `epigrafe_estilo: ${S.formato_zonas.epigrafe.estilo}`,
+    "# estructura y sin_numerar se derivan de las tres zonas.",
     lista("estructura", caps), lista("sin_numerar", sinNum), lista("siglas_conocidas", siglas),
     "---"
   ].join("\n");
 
-  const sinNumSet = new Set(sinNum.map(norm)); let n = 0;
-  const filas = caps.map(cp => {
-    const info = datos[norm(cp)], num = sinNumSet.has(norm(cp)) ? "" : (++n) + " ";
-    const min = info && info[2].length ? info[2].join("; ") : (norm(cp) === "control de versiones" ? "Tabla: Versión, Fecha, Autor, Descripción del cambio" : "[PENDIENTE: contenido mínimo]");
-    return `| ${num}${cp} | ${info ? info[1] : "[PENDIENTE: propósito]"} | ${min} |`;
+  const celda = t => String(t).replace(/\|/g, "\\|");
+  const filas = textualDe(S).map((cp, i) => {
+    const info = datos[norm(cp)];
+    const min = info && info[2].length ? info[2].join("; ") : "[PENDIENTE: contenido mínimo]";
+    return `| ${i + 1} ${celda(cp)} | ${info ? info[1] : "[PENDIENTE: propósito]"} | ${min} |`;
   });
+  const PAGINACION = { romana: "paginación romana", arabiga: "paginación arábiga", ninguna: "sin paginación" };
+  const ALINEACION = { izquierda: "a la izquierda", centro: "centrada", derecha: "a la derecha" };
+  const formatoZona = (z, unidad) => `${PAGINACION[S.formato_zonas[z].paginacion]}, ${S.formato_zonas[z].pagina_nueva ? `cada ${unidad} en página nueva` : "sin salto de página entre uno y otro"}`;
+  const tablaZona = z => S[CLAVE_ZONA[z]].length
+    ? "| Elemento | Regla |\n|---|---|\n" + S[CLAVE_ZONA[z]].map(e => `| ${celda(e)} | ${celda(reglaElemento(z, e))} |`).join("\n")
+    : "Ninguno.";
+  const elegido = (z, nombre) => S[CLAVE_ZONA[z]].some(e => norm(e) === norm(nombre));
+  const notaFz = k => { const f = S.formato_zonas[k]; return `${ALINEACION[f.alineacion]}${f.estilo === "cursiva" ? " y en cursiva" : ", en redonda"}`; };
+  const notasPre = [];
+  if (elegido("pre", "Dedicatoria")) notasPre.push(`La dedicatoria va ${notaFz("dedicatoria")}.`);
+  if (elegido("pre", "Epígrafe")) notasPre.push(`El epígrafe va ${notaFz("epigrafe")}.`);
+  const conPrologo = elegido("pre", "Prólogo");
+  if (conPrologo) notasPre.push("El prólogo lo escribe otra persona, no el autor: no lo redactes; su sección lleva solo `[PENDIENTE: texto del prologuista]`." + (elegido("pre", "Prefacio") ? " El prefacio, en cambio, lo escribe el autor." : ""));
   const ej = { usted: "Seleccione el archivo", "tú": "Selecciona el archivo", vos: "Seleccioná el archivo", impersonal: "Se propone un modelo" }[S.tratamiento];
   const comillas = { dobles: "dobles (“así”)", angulares: "angulares («así»)", rectas: 'rectas ("así")' }[S.comillas];
   const citasTxt = { apa7: "APA 7", ieee: "IEEE", iso690: "ISO 690", vancouver: "Vancouver", institucional: "las del reglamento institucional", ninguna: "sin citas" }[S.citas];
@@ -1665,11 +1970,19 @@ Actúas como ${ROL[S.tipo]} y vas a escribir «${S.documento}», ${TIPO_CON_ARTI
 
 ## 3. Estructura
 
-Escribe los capítulos en este orden, con numeración decimal (1, 1.1, 1.1.1). Las partes de \`sin_numerar\` llevan título sin número.
+El documento tiene tres zonas, en este orden: pretextual, textual y postextual. Solo los capítulos de la zona textual llevan numeración decimal (1, 1.1, 1.1.1). Las partes pretextuales y postextuales (las de \`sin_numerar\`) llevan título sin número, salvo Portada, Dedicatoria y Epígrafe, que no llevan título. Cada parte sigue su regla de contenido.
 
-| Capítulo | Propósito | Contenido mínimo |
-|---|---|---|
-${filas.join("\n")}
+### Pretextuales (sin número, ${formatoZona("pre", "elemento")})
+
+${tablaZona("pre")}
+${notasPre.length ? "\n" + notasPre.join("\n") + "\n" : ""}
+### Textuales (numerados, ${formatoZona("textual", "capítulo")})
+
+${filas.length ? "| Capítulo | Propósito | Contenido mínimo |\n|---|---|---|\n" + filas.join("\n") : "[PENDIENTE: capítulos de la zona textual]"}
+
+### Postextuales (sin número, ${formatoZona("post", "elemento")})
+
+${tablaZona("post")}
 
 ## 4. Componentes visuales
 
@@ -1702,7 +2015,7 @@ ${lineas(S.restricciones).map(r => "- " + r).join("\n")}
 
 - El script \`verificar_doc.py\` de documentacion-generar termina sin errores.
 - Todos los capítulos de \`estructura\` están presentes y en orden.
-${lineas(S.criterios).map(r => "- " + r).join("\n")}
+${conPrologo ? "- La sección «Prólogo» solo tiene `[PENDIENTE: texto del prologuista]`.\n" : ""}${lineas(S.criterios).map(r => "- " + r).join("\n")}
 ${seccionExcepciones()}`.replace(/\n{3,}/g, "\n\n");
   const conf = JSON.stringify(Object.assign({}, S, { modo: undefined, ver_todo: undefined })).replace(/>/g, "\\u003e").replace(/--/g, "-\\u002d");
   return fm + "\n" + cuerpo + `\n<!-- configurador:v1 ${conf} -->\n`;
@@ -2142,7 +2455,8 @@ function renderSubido(doc, impreso) {
   // Títulos: título del documento, numeración y capítulos
   const hs = [...cont.querySelectorAll("h1,h2,h3,h4,h5,h6")];
   let titulo = null;
-  if (hs[0] && hs[0].tagName === "H1" && !estructura.includes(norm(quitarNum(hs[0].textContent).replace(/\.$/, "")))) { titulo = hs[0]; titulo.classList.add("titulo-doc"); }
+  const conocidos = new Set([...estructura, ...S.pretextuales.map(norm), ...S.postextuales.map(norm), ...SIN_TITULO]);
+  if (hs[0] && hs[0].tagName === "H1" && !conocidos.has(norm(quitarNum(hs[0].textContent).replace(/\.$/, "")))) { titulo = hs[0]; titulo.classList.add("titulo-doc"); }
   let cnt = [0, 0, 0], enNumerado = false; const capitulos = [];
   hs.forEach(h => {
     if (h === titulo) return;
@@ -2159,7 +2473,7 @@ function renderSubido(doc, impreso) {
   });
   const presentes = capitulos.map(c => c.k);
   estructura.forEach((e, k) => { if (!presentes.includes(e)) marcar(null, `Falta el capítulo «${estructuraTxt[k]}» de la estructura.`); });
-  capitulos.filter(c => !estructura.includes(c.k)).forEach(c => marcar(c.h, "Este capítulo no está en la estructura del estilo."));
+  capitulos.filter(c => !conocidos.has(c.k)).forEach(c => marcar(c.h, "Este capítulo no está en la estructura del estilo."));
   const orden = presentes.filter(p => estructura.includes(p));
   if (orden.join("|") !== estructura.filter(e => orden.includes(e)).join("|")) marcar(null, "Los capítulos no siguen el orden de la estructura.");
 
@@ -2410,8 +2724,8 @@ document.getElementById("usar-capitulos").addEventListener("click", () => {
   if (!caps.length) { aviso("El documento no tiene títulos de nivel 1"); return; }
   if (!confirm(`¿Reemplazar la estructura por los ${caps.length} capítulos del documento?${titulo ? `\nEl título del documento pasará a ser «${titulo}».` : ""}`)) return;
   if (titulo) S.documento = titulo;
-  S.estructura = caps.join("\n"); S.sin_numerar = caps.filter(c => SIN_NUMERAR_BASE.includes(norm(c))).join("\n"); S.estructura_editada = true;
-  pintarFormulario(); actualizar(); aviso("Estructura tomada del documento");
+  const avisoZonas = aplicarZonas(S, zonasDesdeCapitulos(caps)); S.estructura_editada = true;
+  pintarFormulario(); actualizar(); aviso(avisoZonas || "Estructura tomada del documento");
 });
 document.getElementById("imprimir").addEventListener("click", () => {
   document.getElementById("t-vista").click();
@@ -2507,12 +2821,13 @@ document.getElementById("importar").addEventListener("change", async e => {
   try { datos = JSON.parse(m ? m[1] : txt); } catch (err) { datos = null; }
   if (!datos) { aviso("El archivo no tiene una configuración de este configurador"); return; }
   S = combinar(datos); S.modo = S.medio === "impreso" ? "impreso" : "digital"; EDIT = null; pintarBarraDoc();
-  pintarFormulario(); actualizar(); aviso("Configuración importada");
+  pintarFormulario(); actualizar(); aviso(combinar.aviso || "Configuración importada");
 });
 
 pintarBarraDoc();
 pintarFormulario();
 actualizar();
+if (AVISO_INICIAL) aviso(AVISO_INICIAL);
 /* ===== Componentes del selector (tarjetas, filtro «Útil para», saltos y vista previa) =====
    Los <select> y casillas originales siguen siendo la fuente de verdad: las tarjetas solo los manejan,
    así el resto del configurador (estado, prompt, memoria, ajustes locales) no cambia. */
