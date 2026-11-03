@@ -37,7 +37,7 @@ Es cualquier elemento que el documento necesita y que ninguna de las fuentes ant
 - Un tipo de documento o una metodología que no está en `metodologias.md`.
 - Un componente sin formato definido: una línea de tiempo, una matriz de trazabilidad con otras columnas, una tabla con celdas combinadas, un formulario.
 - Una notación de diagrama, un tipo de cita o una norma institucional nueva.
-- Un parámetro del encargo que el usuario no indicó y que no está fijado en ninguna de las dos memorias (tipo, metodología, audiencia, medio, variante, tratamiento, citas, formato).
+- Un parámetro del encargo que el usuario no indicó y que no está fijado en ninguna de las dos memorias (tipo, metodología, propósito, ámbito, lector, medio, variante, tratamiento, citas, formato).
 - Una contradicción entre dos reglas, o entre una regla y un pedido del usuario.
 - Una decisión que figura como **pendiente** y que el documento en curso necesita.
 

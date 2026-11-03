@@ -443,15 +443,29 @@ pre.texto-salida {
         </div>
         <p class="nota-ui" id="nota-metodologia"></p>
         <div class="fila">
-          <label class="campo"><span>Audiencia</span>
-            <select data-k="audiencia">
-              <option>no técnica</option><option>técnica</option><option>académica</option><option>mixta</option>
+          <label class="campo"><span>Propósito</span>
+            <select data-k="proposito">
+              <option value="expositivo">Expositivo</option><option value="analitico">Analítico</option><option value="argumentativo">Argumentativo</option>
+              <option value="instructivo">Instructivo</option><option value="narrativo">Narrativo</option><option value="mixto">Mixto</option>
+            </select></label>
+          <label class="campo"><span>Ámbito</span>
+            <select data-k="ambito">
+              <option value="cientifico">Científico</option><option value="tecnico">Técnico</option><option value="academico">Académico</option>
+              <option value="institucional">Institucional</option><option value="profesional">Profesional</option>
+            </select></label>
+        </div>
+        <div class="fila">
+          <label class="campo"><span>Lector</span>
+            <select data-k="lector">
+              <option value="experto">Experto</option><option value="especialista">Especialista de otra área</option>
+              <option value="publico_general">Público general</option><option value="mixto">Mixto</option>
             </select></label>
           <label class="campo"><span>Medio</span>
             <select data-k="medio">
               <option value="digital">Digital</option><option value="impreso">Impreso</option><option value="ambos">Ambos</option>
             </select></label>
         </div>
+        <p class="nota-ui" id="nota-divulgacion" aria-live="polite"></p>
         <div class="fila">
           <label class="campo"><span>Formato de salida</span>
             <select data-k="formato">
@@ -898,6 +912,50 @@ const REGLAS_TIPO = {
   ],
   otro: []
 };
+/* Ejes de clasificación (references/escritura.md, §4 bis). Mismo texto que la referencia. */
+const REGLAS_PROPOSITO = {
+  expositivo: "Define cada concepto antes de usarlo y ordena el contenido de lo general a lo particular.",
+  analitico: "Separa los datos de su interpretación y declara los criterios del análisis antes de aplicarlos.",
+  argumentativo: "Enuncia la tesis al comienzo, sostiene cada afirmación con evidencia o cita y responde la objeción principal.",
+  instructivo: "Una acción por paso, en el orden de ejecución, con el resultado esperado de cada paso.",
+  narrativo: "Sigue el orden cronológico y marca las fechas o etapas de cada hecho.",
+  mixto: "Declara el propósito de cada capítulo en su primer párrafo."
+};
+const REGLAS_AMBITO = {
+  cientifico: "Precisión terminológica (un término, un solo significado), cautela epistémica (distingue lo demostrado de lo probable) y verificabilidad (cada afirmación remite a su fuente o a su método).",
+  tecnico: "Nombres exactos del sistema y de sus componentes, con su versión, y cada magnitud con su unidad.",
+  academico: "Sigue las normas de la institución y cita en el estilo elegido.",
+  institucional: "Registro formal e impersonal; cada obligación remite a la normativa que la establece.",
+  profesional: "Orientado a decisiones: las conclusiones y las acciones van primero y el detalle después."
+};
+const REGLAS_LECTOR = {
+  experto: "Usa la terminología del campo sin definirla.",
+  especialista: "Define los términos del campo en su primera aparición y relaciona cada concepto con su uso.",
+  publico_general: "Sin jerga, un ejemplo concreto por cada concepto abstracto y oraciones cortas.",
+  mixto: "Abre cada capítulo con un resumen sin jerga y deja el detalle técnico para después."
+};
+const REGLAS_DIVULGACION = [
+  "Parte de una pregunta o de una situación cotidiana.",
+  "Usa analogías y márcalas como tales («es como…»).",
+  "No simplifiques hasta volver falso un enunciado."
+];
+const PROPOSITO_NOMBRE = { expositivo: "expositivo", analitico: "analítico", argumentativo: "argumentativo", instructivo: "instructivo", narrativo: "narrativo", mixto: "mixto" };
+const AMBITO_NOMBRE = { cientifico: "científico", tecnico: "técnico", academico: "académico", institucional: "institucional", profesional: "profesional" };
+const LECTOR_NOMBRE = { experto: "experto", especialista: "especialista de otra área", publico_general: "público general", mixto: "mixto" };
+/* Frase con artículo para «dirigido a…» y «para…» (§1 y vista previa). */
+const LECTOR_FRASE = { experto: "un lector experto", especialista: "un lector especialista de otra área", publico_general: "el público general", mixto: "lectores de perfil mixto" };
+/* Compatibilidad: los prompts y configuraciones anteriores traen `audiencia` en lugar de `lector`. */
+const AUDIENCIA_A_LECTOR = { "tecnica": "experto", "academica": "experto", "no tecnica": "publico_general", "mixta": "mixto" };
+/* Migración: propósito y ámbito según el tipo, solo para configuraciones que no traen los ejes. */
+const EJES_POR_TIPO = {
+  manual: ["instructivo", "tecnico"], tesis: ["argumentativo", "academico"],
+  especificacion: ["expositivo", "tecnico"], arquitectura: ["expositivo", "tecnico"],
+  informe: ["analitico", "tecnico"], diagrama: ["expositivo", "tecnico"], otro: ["expositivo", "tecnico"]
+};
+function esDivulgacion(st) {
+  return (st.ambito === "cientifico" || st.ambito === "tecnico") && st.lector === "publico_general"
+    && (st.proposito === "expositivo" || st.proposito === "narrativo");
+}
 const TIPO_NOMBRE = { manual: "manual de usuario", tesis: "tesis", especificacion: "especificación de requisitos", informe: "informe técnico", arquitectura: "documento de arquitectura", diagrama: "diagrama", otro: "documento" };
 const TIPO_CON_ARTICULO = { manual: "un manual de usuario", tesis: "una tesis", especificacion: "una especificación de requisitos", informe: "un informe técnico", arquitectura: "un documento de arquitectura", diagrama: "un diagrama", otro: "un documento" };
 const ROL = { manual: "redactor técnico", tesis: "asesor de tesis y redactor académico", especificacion: "analista de requisitos", informe: "redactor técnico", arquitectura: "arquitecto de software y redactor técnico", diagrama: "diseñador de diagramas técnicos", otro: "redactor técnico" };
@@ -914,7 +972,7 @@ function sinNumerarDe(caps) { return caps.filter(c => SIN_NUMERAR_BASE.includes(
 
 const DEF = {
   documento: "Manual de usuario del Sistema de Gestión", version: "1.0", tipo: "manual", metodologia: "diataxis",
-  audiencia: "no técnica", medio: "digital", formato: "markdown", salida: "docs/manual/", ubicacion_prompt: "proyecto",
+  proposito: "instructivo", ambito: "tecnico", lector: "publico_general", medio: "digital", formato: "markdown", salida: "docs/manual/", ubicacion_prompt: "proyecto",
   estructura: esqueleto("diataxis").map(e => e[0]).join("\n"),
   sin_numerar: sinNumerarDe(esqueleto("diataxis").map(e => e[0])).join("\n"),
   componentes: ["tablas", "figuras", "avisos", "pasos", "codigo", "glosario"],
@@ -949,7 +1007,17 @@ function cargar() {
 function combinar(o) {
   const r = JSON.parse(JSON.stringify(DEF));
   if (o && typeof o === "object") {
-    for (const k of Object.keys(r)) if (k in o) r[k] = o[k];
+    const tiene = (obj, k) => Object.prototype.hasOwnProperty.call(obj, k);
+    for (const k of Object.keys(r)) if (tiene(o, k)) r[k] = o[k];
+    // Migración de configuraciones viejas: `audiencia` pasa a `lector`, y `proposito` y `ambito`
+    // se completan según el tipo. Solo se usa aquí: cambiar el tipo en el formulario no toca los ejes.
+    const audiencia = typeof o.audiencia === "string" ? norm(o.audiencia) : "";
+    if (!tiene(o, "lector") && audiencia) r.lector = tiene(AUDIENCIA_A_LECTOR, audiencia) ? AUDIENCIA_A_LECTOR[audiencia] : r.lector;
+    const migrado = tiene(EJES_POR_TIPO, r.tipo) ? EJES_POR_TIPO[r.tipo] : EJES_POR_TIPO.otro;
+    if (!tiene(o, "proposito")) r.proposito = migrado[0];
+    if (!tiene(o, "ambito")) r.ambito = audiencia === "academica" ? "academico" : migrado[1];
+    // Un valor de eje desconocido vuelve al de DEF para no emitir reglas vacías.
+    [["proposito", REGLAS_PROPOSITO], ["ambito", REGLAS_AMBITO], ["lector", REGLAS_LECTOR]].forEach(([k, reglas]) => { if (typeof r[k] !== "string" || !tiene(reglas, r[k])) r[k] = DEF[k]; });
     r.colores = Object.assign({}, PALETA_BASE, o.colores || {});
   }
   return r;
@@ -1420,7 +1488,7 @@ function vistaPrevia() {
     }
     if ((k === "anexos" || k === "apendices") && comp.has("anexos")) { html += ej.anexos(); return; }
     if (numerado && numerados === 1) {
-      html += P(`${S.tratamiento === "impersonal" ? "En este documento se describe" : "Este documento describe"} el ${sigla}. Está dirigido a una audiencia ${esc(S.audiencia)}. Durante el último trimestre, el sistema atendió a ${num(12500)} usuarios, con una tasa de error del ${pct(3.5, 1)}${ref ? " " + ref : ""}.`);
+      html += P(`${S.tratamiento === "impersonal" ? "En este documento se describe" : "Este documento describe"} el ${sigla}. Está dirigido a ${esc(LECTOR_FRASE[S.lector] || S.lector)}. Durante el último trimestre, el sistema atendió a ${num(12500)} usuarios, con una tasa de error del ${pct(3.5, 1)}${ref ? " " + ref : ""}.`);
       html += P(`Según la guía institucional, ${q("la documentación debe poder verificarse")}${ref ? " " + ref : ""}.`);
       if (comp.has("cita_bloque")) html += ej.citaBloque();
       if (comp.has("notas_pie")) html += ej.notaPie();
@@ -1513,7 +1581,7 @@ function generarPrompt() {
     "---",
     "# Generado con el configurador de estilo (assets/configurador.html).",
     `documento: ${y(S.documento)}`, `version: ${y(S.version)}`, `tipo: ${S.tipo}`, `metodologia: ${S.metodologia}`,
-    `audiencia: ${y(S.audiencia)}`, `medio: ${S.medio}`, `variante: ${S.variante}`, `tratamiento: ${S.tratamiento}`,
+    `proposito: ${S.proposito}`, `ambito: ${S.ambito}`, `lector: ${S.lector}`, `medio: ${S.medio}`, `variante: ${S.variante}`, `tratamiento: ${S.tratamiento}`,
     `citas: ${S.citas}`, `comillas: ${S.comillas}`, `decimal: ${S.decimal}`, `miles: ${S.miles}`,
     `porcentaje_con_espacio: ${S.pct_espacio ? "si" : "no"}`, `formato_fecha: ${y(S.fecha)}`, `max_palabras_oracion: ${S.max_palabras}`,
     `formato: ${S.formato}`, `salida: ${y(S.salida)}`, `prompt: ${y(rutaPrompt)}`, `alcance_decisiones: ${S.alcance}`, ...(S.plantilla ? [`plantilla: ${y("references/plantillas/" + S.plantilla + ".md")}`] : []),
@@ -1583,11 +1651,12 @@ function generarPrompt() {
 
 ## 1. Rol e instrucción
 
-Actúas como ${ROL[S.tipo]} y vas a escribir «${S.documento}», ${TIPO_CON_ARTICULO[S.tipo]} para una audiencia ${S.audiencia}. Sigue este prompt al pie de la letra. Si una instrucción del usuario lo contradice, primero actualiza este prompt (nueva versión) y después escribe. No decidas nada que este prompt no defina: pregunta al usuario.
+Actúas como ${ROL[S.tipo]} y vas a escribir «${S.documento}», ${TIPO_CON_ARTICULO[S.tipo]} de propósito ${PROPOSITO_NOMBRE[S.proposito]} y ámbito ${AMBITO_NOMBRE[S.ambito]}, para ${LECTOR_FRASE[S.lector]}. Sigue este prompt al pie de la letra. Si una instrucción del usuario lo contradice, primero actualiza este prompt (nueva versión) y después escribe. No decidas nada que este prompt no defina: pregunta al usuario.
 
 ## 2. Parámetros
 
 - **Tipo y metodología**: ${TIPO_NOMBRE[S.tipo]} según ${{ diataxis: "Diátaxis", academica: "estructura académica", iso29148: "ISO/IEC/IEEE 29148", rup: "RUP", up: "UP", scrum: "Scrum", ninguna: "una estructura genérica" }[S.metodologia]}.
+- **Propósito, ámbito y lector**: ${PROPOSITO_NOMBRE[S.proposito]}; ${AMBITO_NOMBRE[S.ambito]}; ${LECTOR_NOMBRE[S.lector]}${esDivulgacion(S) ? " (texto de divulgación)" : ""}.
 - **Medio**: ${{ digital: "digital", impreso: "impreso " + S.p_papel, ambos: "digital e impreso " + S.p_papel }[S.medio]}; formato de entrega ${S.formato}.
 - **Idioma**: español ${S.variante}, ortografía RAE.
 - **Tratamiento**: ${S.tratamiento}, igual en todo el documento (ejemplo: "${ej}").
@@ -1618,8 +1687,11 @@ ${tip.join("\n")}
 - Cada sigla se desarrolla en su primera aparición; no hace falta con: ${siglas.join(", ") || "ninguna"}.
 - Nombres de la interfaz en negrita, tal como aparecen en pantalla.
 ${(REGLAS_TIPO[S.tipo] || []).map(r => "- " + r).join("\n")}
+- Propósito ${PROPOSITO_NOMBRE[S.proposito]}: ${REGLAS_PROPOSITO[S.proposito]}
+- Ámbito ${AMBITO_NOMBRE[S.ambito]}: ${REGLAS_AMBITO[S.ambito]}
+- Lector ${LECTOR_NOMBRE[S.lector]}: ${REGLAS_LECTOR[S.lector]}
 ${terminos.length ? "- Términos preferidos: " + terminos.join("; ") + "." : "- Términos preferidos: [PENDIENTE: definir con el usuario a medida que aparezcan]."}
-
+${esDivulgacion(S) ? "\n**Divulgación** (ámbito " + AMBITO_NOMBRE[S.ambito] + ", lector público general y propósito " + PROPOSITO_NOMBRE[S.proposito] + "):\n\n" + REGLAS_DIVULGACION.map(r => "- " + r).join("\n") + "\n" : ""}
 ## 6. Restricciones
 
 - No inventes datos, cifras, nombres, citas ni referencias. Si falta información, escribe \`[PENDIENTE: qué falta]\`.
@@ -2400,6 +2472,8 @@ function actualizar() {
     pendiente = false;
     document.querySelectorAll("#modo button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === S.modo)));
     document.getElementById("nota-metodologia").textContent = NOTA_METODOLOGIA[S.metodologia] || "";
+    document.getElementById("nota-divulgacion").textContent = esDivulgacion(S)
+      ? `Ámbito ${AMBITO_NOMBRE[S.ambito]}, lector público general y propósito ${PROPOSITO_NOMBRE[S.proposito]}: el prompt suma las reglas de divulgación.` : "";
     document.getElementById("alerta-numeros").hidden = !((S.decimal === "coma" && S.miles === "coma") || (S.decimal === "punto" && S.miles === "punto"));
     document.getElementById("ruta-prompt").textContent = S.ubicacion_prompt === "documento" ? S.salida.replace(/\/?$/, "/") + "prompt-estilo.md" : "docs/prompt-estilo.md";
     pintarContraste();
@@ -2483,10 +2557,21 @@ actualizar();
     "metodologia:up": "Proceso Unificado: fases e iteraciones.",
     "metodologia:scrum": "Producto ágil: épicas, historias y criterios.",
     "metodologia:ninguna": "Estructura libre, sin una metodología fija.",
-    "audiencia:no técnica": "Usuarios finales, sin vocabulario técnico.",
-    "audiencia:técnica": "Desarrolladores u operadores del sistema.",
-    "audiencia:académica": "Tribunal, docentes o pares investigadores.",
-    "audiencia:mixta": "Lectores técnicos y no técnicos a la vez.",
+    "proposito:expositivo": "Explica un tema: conceptos y relaciones.",
+    "proposito:analitico": "Examina datos o casos con criterios declarados.",
+    "proposito:argumentativo": "Defiende una tesis con evidencia.",
+    "proposito:instructivo": "Guía al lector paso a paso en una tarea.",
+    "proposito:narrativo": "Relata hechos o etapas en orden.",
+    "proposito:mixto": "Cada capítulo tiene su propio propósito.",
+    "ambito:cientifico": "Investigación: precisión, cautela y verificabilidad.",
+    "ambito:tecnico": "Sistemas y productos: nombres, versiones y unidades exactos.",
+    "ambito:academico": "Universidad: normas institucionales y citas.",
+    "ambito:institucional": "Organismos y normativa: registro formal.",
+    "ambito:profesional": "Empresa y clientes: decisiones y acciones primero.",
+    "lector:experto": "Conoce el campo y su terminología.",
+    "lector:especialista": "Es experto en otro campo: se le definen los términos.",
+    "lector:publico_general": "Sin formación en el tema: sin jerga y con ejemplos.",
+    "lector:mixto": "Lectores expertos y no expertos a la vez.",
     "medio:digital": "Se lee en pantalla.", "medio:impreso": "Se imprime en papel.", "medio:ambos": "Pantalla y papel.",
     "formato:markdown": "Texto plano versionable.", "formato:docx": "Documento de Word.", "formato:pdf": "Listo para imprimir o enviar.",
     "ubicacion_prompt:proyecto": "Un solo prompt para todo el repositorio.",
