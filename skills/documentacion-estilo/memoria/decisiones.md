@@ -43,7 +43,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: español rioplatense con voseo y tratamiento impersonal en manuales, tesis, especificaciones e informes técnicos.
 **Aplicada en**: `references/escritura.md` §3, §4 y §6; `references/estilo-visual.md` (Pasos de manual); `SKILL.md`; `assets/configurador.html`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/39
 
 ---
 
@@ -69,7 +69,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: coma decimal, punto para miles, espacio antes de % y fechas dd/mm/aaaa en tablas.
 **Aplicada en**: `references/escritura.md` §3; `assets/plantilla-prompt-estilo.md`; `assets/configurador.html`; `verificar_doc.py`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/39
 
 ---
 
@@ -95,7 +95,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: Calibri en títulos y cuerpo, Consolas en código y `#2E74B5` como primario. Catálogo formal: Calibri, Arial, Helvetica, Source Sans 3, Times New Roman, Cambria, Georgia, Palatino Linotype, Garamond y STIX Two Text. El usuario nombró Calibri, Arial y la categoría Sans Serif; el resto lo propuso el agente porque el usuario pidió sumar «algunas más». Los tamaños y márgenes generales no cambian.
 **Aplicada en**: `references/estilo-visual.md` §4 y §5; `assets/plantilla-prompt-estilo.md`; `assets/configurador.html`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/39
 
 ---
 
@@ -119,7 +119,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: citas en APA 7, con las referencias en un archivo BibTeX (`.bib`).
 **Aplicada en**: `references/escritura.md` §3; `SKILL.md`; `assets/configurador.html`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/39
 
 ---
 
@@ -143,7 +143,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: un prompt por proyecto en `docs/prompt-estilo.md` y cada documento en `docs/<documento>/`.
 **Aplicada en**: `SKILL.md`; `assets/configurador.html`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/39
 
 ---
 
@@ -165,7 +165,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: se usan comillas dobles (“así”).
 **Aplicada en**: `references/escritura.md` §3; `assets/plantilla-prompt-estilo.md`; `assets/configurador.html`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/39
 
 ---
 
