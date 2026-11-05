@@ -2,6 +2,12 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.7.0] - 2026-11-05
+
+### Cambiado
+
+- La variante docente pasa a ser la variante de entrega académica, sin datos de ninguna materia: puntos y criterios salen de la consigna auditada
+
 ## [0.6.2] - 2026-11-05
 
 ### Corregido

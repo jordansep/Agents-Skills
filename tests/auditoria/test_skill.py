@@ -10,7 +10,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[2]
 CARPETA = RAIZ / "skills" / "auditoria-sistemas"
 SKILL = (CARPETA / "SKILL.md").read_text(encoding="utf-8")
-VARIANTE = (CARPETA / "references" / "formato-devolucion-docente.md").read_text(encoding="utf-8")
+VARIANTE = (CARPETA / "references" / "variante-entrega-academica.md").read_text(encoding="utf-8")
 
 
 class Skill(unittest.TestCase):
@@ -19,7 +19,7 @@ class Skill(unittest.TestCase):
         self.assertLessEqual(len(" ".join(m[1].split())), 1024)
 
     def test_sin_herramienta_ni_ruta_fijas(self):
-        self.assertNotRegex(SKILL, r"\bREA\b|BonoCorreciones|mcp__rea|reverse-engineer")
+        self.assertNotRegex(SKILL, r"\bREA\b|mcp__rea|reverse-engineer")
 
     def test_completo_exige_que_no_haya_defectos(self):
         self.assertIn("**Defecto abierto**", SKILL)
@@ -46,14 +46,14 @@ class Skill(unittest.TestCase):
         self.assertIn("`Adicional · Seguridad y otros defectos`", SKILL)
         self.assertIn("**Sin promedio general.**", SKILL)
 
-    def test_variante_con_la_escala_de_la_catedra(self):
-        self.assertIn("también es la de la cátedra", VARIANTE)
+    def test_variante_usa_la_escala_de_la_consigna(self):
+        self.assertIn("Si la consigna trae otra escala, usá esa", VARIANTE)
 
     def test_cruces_de_detalle_en_el_nivel_medio(self):
         self.assertIn("**Cruces de detalle**", SKILL)
 
     def test_variante_no_parte_los_items_de_su_lista(self):
-        self.assertIn("«MoSCoW y SP en cada HU» es una sola fila", VARIANTE)
+        self.assertIn("«Título y estado» es una sola fila", VARIANTE)
 
     def test_documento_sin_consigna_con_puntos_y_filas_fijos(self):
         self.assertIn("**Documentos sin consigna.**", SKILL)
@@ -68,7 +68,7 @@ class Skill(unittest.TestCase):
         self.assertIn("**No listo** si alguna pregunta abierta cambia el alcance", SKILL)
 
     def test_documento_sin_consigna_no_pisa_la_variante(self):
-        self.assertIn("aplican si hay consigna, norma o variante docente", SKILL)
+        self.assertIn("aplican si hay consigna, norma o variante de entrega académica", SKILL)
 
     def test_lista_de_tareas_sin_agrupar(self):
         self.assertIn("No juntes correcciones distintas", SKILL)
@@ -77,7 +77,7 @@ class Skill(unittest.TestCase):
         for archivo in CARPETA.rglob("*.md"):
             with self.subTest(archivo=archivo.name):
                 texto = archivo.read_text(encoding="utf-8")
-                self.assertNotRegex(texto, r"(?i)hemocentro|grupo \d|bonocorreciones|[A-Z]:\\?Experimentos")
+                self.assertNotRegex(texto, r"(?i)grupo \d|\bmyd\b|trabajo integrador|\b[a-z]:\\(?!program files)")
 
     def test_cada_nivel_suma_una_exigencia(self):
         self.assertIn("**Intento de refutar cada Completo**", SKILL)
@@ -92,10 +92,10 @@ class Skill(unittest.TestCase):
         self.assertIn("**No ejecutes ni cargues el objetivo**", SKILL)
         self.assertIn("**Declará el método**", SKILL)
 
-    def test_plantilla_general_con_variante_docente(self):
+    def test_plantilla_general_con_variante_academica(self):
         for seccion in ("## Resumen", "## Detalle por punto", "## Coherencia entre fuentes", "## Lista de tareas"):
             self.assertIn(seccion, SKILL)
-        self.assertIn("## Variante docente", VARIANTE)
+        self.assertIn("# Variante de entrega académica", VARIANTE)
         self.assertIn("Completo con defectos abiertos", VARIANTE)
 
 

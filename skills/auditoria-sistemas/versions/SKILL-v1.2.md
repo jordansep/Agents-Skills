@@ -297,7 +297,7 @@ Falta; Inicial se agregó para los puntos empezados que no llegan a la mitad.
 
 **Criterios de cada punto.** Si hay una consigna, los criterios salen de ella, uno por
 renglón y con la misma redacción (por ejemplo, "≥ 15 HU en formato Como/quiero/para"). Para el
-trabajo integrador de MyD 2026, usá la lista de `references/formato-devolucion-docente.md`.
+trabajo de la consigna, usá la lista de `references/formato-devolucion-docente.md`.
 Si no hay consigna, armá los criterios a partir de lo que el sistema dice que hace (README,
 documentación, manifiesto).
 

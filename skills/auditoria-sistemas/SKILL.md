@@ -12,8 +12,8 @@ description: >-
   Da por sentado un encuadre autorizado (sistema propio, pentest, CTF, investigación de seguridad,
   trabajo académico); si no está claro, pedilo antes de avanzar.
 metadata:
-  version: "1.7"
-  baseline: "plantilla general basada en la devolución docente, que queda como variante en references/; versiones anteriores en versions/"
+  version: "1.8"
+  baseline: "plantilla general; la variante de entrega académica queda en references/; versiones anteriores en versions/"
 ---
 
 # Auditoría de un sistema
@@ -251,8 +251,8 @@ No las reordenes ni las fusiones. Con el nivel cambia la profundidad de cada sec
 presencia: en *simple* se completa la tabla del resumen y, en el detalle, sólo los criterios
 que no se cumplen.
 
-**Variante docente.** Si se audita contra la consigna o la devolución de una cátedra, o el usuario
-la pide, aplicá también `references/formato-devolucion-docente.md`: mantiene estas cinco secciones
+**Variante de entrega académica.** Si se audita una entrega académica contra su consigna, su rúbrica
+o una devolución docente, o el usuario la pide, aplicá también `references/variante-entrega-academica.md`: mantiene estas cinco secciones
 y cambia lo que ahí se indica.
 
 **Tono:** se le habla a quien tiene que corregir, en plural, con "ustedes" e imperativos directos
@@ -333,7 +333,7 @@ en una casilla ("Corrijan lo menor: …"): cada una lleva la suya, aunque sea de
 **Una fila por requisito.** Partí sólo las enumeraciones explícitas de una línea: "SP, prioridad y
 dependencias" son tres filas. "A con B" es una sola, como "Arquitectura coherente con los RNF". Si no
 hay consigna, fijá la lista de criterios antes de evaluar. Si la variante o *Documentos sin consigna*
-traen una lista fija, manda esa lista.
+fijan cómo armar las filas, manda esa regla.
 
 **Completitud y estado.** Cada criterio vale 1 si dice Sí, 0,5 si dice Parcial y 0 si dice No. La
 completitud es la suma dividida por la cantidad de criterios, redondeada al entero (por ejemplo,
@@ -360,7 +360,7 @@ Si el objetivo es un documento, seguí *Documentos sin consigna*.
 
 **Documentos sin consigna.** Si el objetivo es un documento (PDF, Word, Doc) y no hay criterio externo,
 estas reglas fijan puntos, filas, severidad y veredicto para que dos corridas sean comparables. No se
-aplican si hay consigna, norma o variante docente.
+aplican si hay consigna, norma o variante de entrega académica.
 
 - **Puntos:** uno por cada título con nombre del primer nivel del índice del documento (marcadores o
   tabla de contenido), en ese orden y con ese nombre. Ignorá las entradas sin nombre. No fusiones ni
