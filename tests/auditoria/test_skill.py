@@ -49,6 +49,30 @@ class Skill(unittest.TestCase):
     def test_variante_con_la_escala_de_la_catedra(self):
         self.assertIn("también es la de la cátedra", VARIANTE)
 
+    def test_cruces_de_detalle_en_el_nivel_medio(self):
+        self.assertIn("**Cruces de detalle**", SKILL)
+
+    def test_variante_no_parte_los_items_de_su_lista(self):
+        self.assertIn("«MoSCoW y SP en cada HU» es una sola fila", VARIANTE)
+
+    def test_documento_sin_consigna_con_puntos_y_filas_fijos(self):
+        self.assertIn("**Documentos sin consigna.**", SKILL)
+        self.assertIn("uno por cada título con nombre del primer nivel del índice", SKILL)
+        self.assertIn("`Forma del documento` y `Datos personales y seguridad`", SKILL)
+        for fila in ("Contenido anunciado presente", "Cuentas correctas", "Formalidades declaradas"):
+            self.assertIn(fila, SKILL)
+
+    def test_documento_sin_consigna_con_severidad_y_veredicto_fijos(self):
+        self.assertIn("cambia el resultado de una decisión del documento", SKILL)
+        self.assertIn("o un error que no cambia lo decidido", SKILL)
+        self.assertIn("**No listo** si alguna pregunta abierta cambia el alcance", SKILL)
+
+    def test_documento_sin_consigna_no_pisa_la_variante(self):
+        self.assertIn("aplican si hay consigna, norma o variante docente", SKILL)
+
+    def test_lista_de_tareas_sin_agrupar(self):
+        self.assertIn("No juntes correcciones distintas", SKILL)
+
     def test_cada_nivel_suma_una_exigencia(self):
         self.assertIn("**Intento de refutar cada Completo**", SKILL)
         self.assertIn("**Segunda pasada independiente**", SKILL)

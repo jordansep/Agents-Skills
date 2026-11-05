@@ -2,6 +2,28 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.6.1] - 2026-11-05
+
+### Corregido
+
+- La lista de tareas no agrupa correcciones distintas en una sola casilla
+
+## [0.6.0] - 2026-11-05
+
+### Agregado
+
+- Regla para documentos sin consigna: puntos, filas, severidad y veredicto fijos para que dos corridas sean comparables
+
+## [0.5.0] - 2026-11-05
+
+### Cambiado
+
+- El nivel medio agrega cruces de detalle: nombre, actor y relaciones por ID, y métodos públicos que puedan saltear una regla
+
+### Corregido
+
+- La variante docente no parte los ítems de su lista de criterios
+
 ## [0.4.0] - 2026-11-05
 
 ### Agregado
