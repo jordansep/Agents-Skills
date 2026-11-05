@@ -1,6 +1,24 @@
 # Changelog: agente de auditoría
 
-Cambios relevantes del agente (`skills/auditoria-sistemas-experimental`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
+Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
+
+## [0.4.0] - 2026-11-05
+
+### Agregado
+
+- Punto fijo para lo que queda fuera de la consigna
+
+### Cambiado
+
+- El skill pasa a llamarse auditoria-sistemas y deja de ser experimental; la description vuelve a incluir cuándo usarlo
+- Toda falla verificada es No, con la cuenta en la evidencia; Parcial queda para lo que no se pudo verificar
+- Si un criterio admite dos lecturas se usa la más exigente; hay una fila por requisito en lugar de una por línea
+- Falta queda para cuando no hay material; 0 % con material es Inicial
+- La variante docente vuelve a la escala de la cátedra
+
+### Eliminado
+
+- Promedio general del sistema
 
 ## [0.3.0] - 2026-11-05
 

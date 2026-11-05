@@ -21,9 +21,11 @@ de una cátedra. Mantiene las cinco secciones y cambia sólo esto:
 - **Estado:** se usa la escala de la cátedra, para que se pueda comparar con su devolución:
   **Completo** de 90 a 100 %, **Avanzado** de 50 a 89 %, **Inicial** de 1 a 49 % y **Falta** con 0 %
   (Inicial se agregó para los puntos empezados que no llegan a la mitad).
+- **Escala:** también es la de la cátedra, para que los porcentajes se puedan comparar: Sí se cumple,
+  Parcial se cumple en parte y No no se cumple. Los criterios son los de la lista de abajo.
 - **Marca obligatoria:** si un punto queda Completo con defectos abiertos, escribí
-  `Completo con defectos abiertos` en el estado y en el resumen. Lo demás de la skill sigue valiendo:
-  la escala Sí/Parcial/No, una fila por línea de la consigna y lo que cada nivel exige.
+  `Completo con defectos abiertos` en el estado y en el resumen. Lo demás de la skill sigue valiendo,
+  incluido lo que cada nivel exige.
 - **Punto 8:** "¿Listo para implementar?" responde por las historias del punto 8 o las del próximo
   sprint. Si no hay historias elegidas, usá la del primer sprint.
 

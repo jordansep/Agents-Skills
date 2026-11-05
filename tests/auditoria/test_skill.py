@@ -1,4 +1,4 @@
-"""Reglas de auditoria-sistemas-experimental que no deben perderse.
+"""Reglas de auditoria-sistemas que no deben perderse.
 
 Ejecutar desde la raíz del repositorio:
     python -m unittest discover -s tests -v
@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
-CARPETA = RAIZ / "skills" / "auditoria-sistemas-experimental"
+CARPETA = RAIZ / "skills" / "auditoria-sistemas"
 SKILL = (CARPETA / "SKILL.md").read_text(encoding="utf-8")
 VARIANTE = (CARPETA / "references" / "formato-devolucion-docente.md").read_text(encoding="utf-8")
 
@@ -29,9 +29,25 @@ class Skill(unittest.TestCase):
         self.assertIn("Sin defectos a la vista", SKILL)
         self.assertIn("**Nunca se certifica**", SKILL)
 
-    def test_escala_para_requisitos_universales(self):
-        self.assertIn("**una sola falla es No**", SKILL)
-        self.assertIn("**Una fila por línea del criterio.**", SKILL)
+    def test_nombre_y_sin_rastros_de_la_version_de_prueba(self):
+        self.assertRegex(SKILL, r"(?m)^name: auditoria-sistemas\s*$")
+        self.assertNotRegex(SKILL.lower(), "experimental")
+
+    def test_toda_falla_verificada_es_no(self):
+        self.assertIn("encontraste al menos una falla verificada", SKILL)
+        self.assertIn("**Lectura estricta.**", SKILL)
+        self.assertIn("**Una fila por requisito.**", SKILL)
+
+    def test_falta_exige_que_no_haya_material(self):
+        self.assertIn("0 % con material entregado", SKILL)
+        self.assertIn("0 % y sin material", SKILL)
+
+    def test_punto_adicional_sin_promedio(self):
+        self.assertIn("`Adicional · Seguridad y otros defectos`", SKILL)
+        self.assertIn("**Sin promedio general.**", SKILL)
+
+    def test_variante_con_la_escala_de_la_catedra(self):
+        self.assertIn("también es la de la cátedra", VARIANTE)
 
     def test_cada_nivel_suma_una_exigencia(self):
         self.assertIn("**Intento de refutar cada Completo**", SKILL)

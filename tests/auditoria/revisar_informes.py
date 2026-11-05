@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Intenta voltear informes reales del skill auditoria-sistemas-experimental.
+"""Intenta voltear informes reales del skill auditoria-sistemas.
 
 Cada chequeo compara una promesa de SKILL.md con el PDF entregado y, cuando se
 indica el repo auditado, con el contenido real de ese repo en el commit citado.
@@ -184,7 +184,7 @@ def revisar(ruta: Path, repo: Repo) -> dict:
             if calc != p["pct"]:
                 malos.append(f"{p['n']}: dice {p['pct']} %, {'/'.join(p['filas'])} da {calc} %")
         estado = "Completo" if p["estado"].startswith(("Completo", "Sin defectos")) else p["estado"]
-        if estado_de(p["pct"]) != estado and not (estado == "Avanzado" and p["pct"] >= 90):
+        if estado_de(p["pct"]) != estado and not (estado == "Avanzado" and p["pct"] >= 90) and not (estado == "Inicial" and p["pct"] == 0):
             estados.append(f"{p['n']}: {p['pct']} % no es {p['estado']}")
         if not p["tiene_para_completarlo"]:
             sinfin.append(str(p["n"]))
