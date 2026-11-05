@@ -207,6 +207,19 @@ class Escritura(Base):
         inf = self.verificar(DOC_VALIDO + "\nEl tiempo medio es 2.5 segundos.\n")
         self.assertMensaje(inf.advertencias, r"«2\.5»: usa coma decimal")
 
+    def test_miles_con_punto_es_valido_si_el_prompt_lo_pide(self):
+        prompt = PROMPT.replace("tratamiento: usted", "tratamiento: usted\nmiles: punto")
+        self.assertSinProblemas(self.verificar(DOC_VALIDO + "\nHay 12.500 usuarios.\n", prompt=prompt))
+
+    def test_con_miles_punto_sigue_avisando_el_punto_decimal(self):
+        prompt = PROMPT.replace("tratamiento: usted", "tratamiento: usted\nmiles: punto")
+        inf = self.verificar(DOC_VALIDO + "\nEl tiempo medio es 2.5 segundos.\n", prompt=prompt)
+        self.assertMensaje(inf.advertencias, r"«2\.5»: usa coma decimal o punto para miles")
+
+    def test_sin_miles_punto_avisa_el_punto_de_miles(self):
+        inf = self.verificar(DOC_VALIDO + "\nHay 12.500 usuarios.\n")
+        self.assertMensaje(inf.advertencias, r"«12\.500»: usa coma decimal o espacio para miles")
+
     def test_porcentaje_sin_espacio_es_advertencia(self):
         inf = self.verificar(DOC_VALIDO + "\nEl uso llega al 15%.\n")
         self.assertMensaje(inf.advertencias, r"falta un espacio antes de «%»")
@@ -578,6 +591,18 @@ class EjesDelConfigurador(unittest.TestCase):
             raise AssertionError(r.stderr)
         cls.salida = json.loads(r.stdout)
         cls.salida.pop("__catalogo")
+
+    def test_estado_por_defecto_trae_las_decisiones_confirmadas(self):
+        p = self.salida["nuevo"]["prompt"]
+        for linea in ("variante: rioplatense", "tratamiento: impersonal", "citas: apa7", "comillas: dobles",
+                      "decimal: coma", "miles: punto", "porcentaje_con_espacio: si"):
+            self.assertIn("\n" + linea + "\n", p)
+        for valor in ("Calibri", "Consolas", "#2E74B5"):
+            self.assertIn(valor, p)
+        self.assertIn("docs/prompt-estilo.md", p)
+
+    def test_vista_previa_del_manual_usa_pasos_impersonales(self):
+        self.assertIn("Se selecciona", self.salida["nuevo"]["vista"])
 
     def test_estado_por_defecto_escribe_los_tres_ejes_y_sus_reglas(self):
         p = self.salida["nuevo"]["prompt"]

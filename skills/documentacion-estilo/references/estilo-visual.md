@@ -47,9 +47,9 @@ Una idea por párrafo, de 3 a 6 líneas. Sin sangría en documentos digitales. E
 Cada paso contiene una sola acción. El resultado esperado va al final del paso, precedido por una flecha:
 
 ```
-1. Seleccione **Archivo** > **Nuevo proyecto**.
+1. Se selecciona **Archivo** > **Nuevo proyecto**.
    → Se abre el asistente de creación.
-2. Escriba un nombre en el campo **Nombre del proyecto**.
+2. Se escribe un nombre en el campo **Nombre del proyecto**.
 ```
 
 Si un paso puede causar pérdida de datos o daño, usa un aviso de "Advertencia" antes del paso, no después.
@@ -144,8 +144,10 @@ Primera página después de la portada. Tabla con columnas: Versión, Fecha, Aut
 
 | Rol | Digital | Impreso académico | Monoespaciada |
 |---|---|---|---|
-| Títulos | Inter, Source Sans 3 | Mismo que el cuerpo, en negrita | JetBrains Mono, Consolas |
-| Cuerpo | Inter, Source Sans 3 | Times New Roman 12 pt o Arial 11 pt, según el reglamento | JetBrains Mono, Consolas |
+| Títulos | Calibri (DEC-003) | Calibri, en negrita (DEC-003) | Consolas (DEC-003) |
+| Cuerpo | Calibri (DEC-003) | Calibri (DEC-003) | Consolas (DEC-003) |
+
+**Catálogo formal (DEC-003)**: se admiten fuentes que respeten la integridad formal, académica y científica del documento. Sin serifa (Sans Serif): Calibri, Arial, Helvetica, Source Sans 3. Con serifa: Times New Roman, Cambria, Georgia, Palatino Linotype, Garamond, STIX Two Text.
 
 Usa como máximo dos familias por documento. Si el reglamento exige una fuente específica, esa manda sobre la tabla.
 
@@ -179,7 +181,7 @@ Define estos tokens una sola vez y úsalos en todo el documento. Todos los pares
 |---|---|---|---|
 | `texto` | `#1F2328` | Cuerpo y títulos | 15,8 : 1 |
 | `texto-secundario` | `#57606A` | Fuentes, notas, pies | 6,4 : 1 |
-| `primario` | `#1F4E79` | Títulos H1 y H2, enlaces, elementos de diagrama | 8,7 : 1 |
+| `primario` | `#2E74B5` (DEC-003) | Títulos H1 y H2, enlaces, elementos de diagrama | 4,9 : 1 |
 | `borde` | `#D0D7DE` | Líneas de tablas, bordes de capturas | Decorativo |
 | `superficie` | `#F6F8FA` | Encabezados de tabla, fondo de código | Texto sobre superficie: 14,8 : 1 |
 | `info` / `info-fondo` | `#0969DA` / `#DDF4FF` | Aviso Nota | 4,6 : 1 sobre su fondo |
@@ -193,7 +195,7 @@ Versión en CSS, para documentos digitales:
 :root {
   --texto: #1F2328;
   --texto-secundario: #57606A;
-  --primario: #1F4E79;
+  --primario: #2E74B5;
   --borde: #D0D7DE;
   --superficie: #F6F8FA;
   --info: #0969DA;      --info-fondo: #DDF4FF;

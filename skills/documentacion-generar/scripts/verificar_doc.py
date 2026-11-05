@@ -645,6 +645,7 @@ def verificar(prompt, archivos, inf, memorias=None):
     except ValueError:
         max_palabras = 25
     decimal_coma = normalizar(str(prompt.get("decimal", "coma"))) == "coma"
+    miles_punto = normalizar(str(prompt.get("miles", ""))) == "punto"
     digital = normalizar(str(prompt.get("medio", "digital"))) in {"digital", "ambos"}
     apa = estilo_leyendas(prompt) == "apa7"
     try:
@@ -808,8 +809,11 @@ def verificar(prompt, archivos, inf, memorias=None):
                 inf.aviso(donde, f"la sigla {sigla} no se desarrolla en su primera aparición")
         if decimal_coma and capitulo_actual != "control de versiones":
             for m in re.finditer(r"(?<![\w.,])(\d+)\.(\d+)(?![\w.])", sin_codigo):
+                if miles_punto and re.fullmatch(r"\d{1,3}\.\d{3}", m.group(0)):
+                    continue
                 if not CONTEXTO_NUMERO.search(sin_codigo[: m.start()]):
-                    inf.aviso(donde, f"«{m.group(0)}»: usa coma decimal o espacio para miles")
+                    miles = "punto" if miles_punto else "espacio"
+                    inf.aviso(donde, f"«{m.group(0)}»: usa coma decimal o {miles} para miles")
         for m in re.finditer(r"\d%", sin_codigo):
             inf.aviso(donde, "falta un espacio antes de «%»")
         if "[PENDIENTE" in linea.upper():

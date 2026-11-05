@@ -13,6 +13,8 @@ variante: <neutro | rioplatense>
 tratamiento: <usted | tú | vos | impersonal>
 citas: <apa7 | ieee | institucional | ninguna>
 decimal: coma
+miles: punto
+comillas: dobles
 max_palabras_oracion: 25
 formato: <markdown | docx | pdf>
 salida: <docs/nombre-del-documento/>
@@ -112,12 +114,12 @@ Usa exactamente estos formatos en Markdown:
 - **Componentes propios de la plantilla** (solo si hay `componentes_plantilla`): una línea por componente con su regla, copiada del configurador (`references/plantillas/<nombre>.md`, «En el configurador»).
 - **Numeración**: figuras y tablas se numeran de forma continua en todo el documento, y cada una se menciona en el texto antes de aparecer.
 
-Tipografía y color de la versión final (si se exporta): <familias, tamaños y tokens confirmados por el usuario (ver DEC-003 en memoria/decisiones.md)>.
+Tipografía y color de la versión final (si se exporta): Calibri en títulos y cuerpo, Consolas en código y color primario `#2E74B5` (DEC-003), salvo que `plantilla` o un reglamento indiquen otra cosa.
 
 ## 5. Normas de escritura
 
 - Oraciones de <max_palabras_oracion> palabras como máximo, en voz activa, con una idea por párrafo.
-- Números con coma decimal y espacio para miles (`12 500`, `3,5 %`), unidades SI y fechas dd/mm/aaaa en tablas.
+- Números con coma decimal y punto para miles (`12.500`, `3,5 %`), unidades SI y fechas dd/mm/aaaa en tablas.
 - Cada sigla se desarrolla en su primera aparición: "Interfaz de programación de aplicaciones (API)".
 - Los nombres de la interfaz van en negrita, tal como aparecen en pantalla.
 - <Reglas específicas del tipo, copiadas de escritura.md, sección 4: manual, tesis, requisitos, historias de usuario o proyecto.>

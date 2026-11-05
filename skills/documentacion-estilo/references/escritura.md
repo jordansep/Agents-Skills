@@ -38,14 +38,15 @@ Si la interfaz usa un término en inglés (por ejemplo, "Login"), escribe el té
 
 ## 3. Ortografía, números y ortotipografía
 
-- **Ortografía**: normas de la RAE. El español neutro es el predeterminado. Si el documento es rioplatense, el voseo se aplica de forma coherente en todo el texto (vos tenés, sos, podés).
-- **Números decimales**: coma. Ejemplo: `3,5 %`. Los decimales se separan con coma, nunca con punto.
-- **Miles**: espacio fino. Ejemplo: `12 500 usuarios`. Para cifras de cuatro dígitos, la separación es opcional, pero debe ser la misma en todo el documento.
-- **Porcentajes**: un espacio antes del signo: `15 %`.
+- **Ortografía**: normas de la RAE. La variante es el español rioplatense con voseo (DEC-001). El tratamiento es impersonal; si el texto se dirige al lector, el voseo se aplica de forma coherente (vos tenés, sos, podés).
+- **Números decimales**: coma (DEC-002). Ejemplo: `3,5 %`. Los decimales se separan con coma, nunca con punto.
+- **Miles**: punto (DEC-002). Ejemplo: `12.500 usuarios`. Para cifras de cuatro dígitos, la separación es opcional, pero debe ser la misma en todo el documento.
+- **Porcentajes**: un espacio antes del signo (DEC-002): `15 %`.
 - **Unidades**: sistema internacional. Un espacio entre el número y la unidad: `10 km`, `250 ms`, `2 GB`. Los símbolos no llevan punto ni plural: `5 kg`, no `5 kgs.`.
-- **Fechas**: en texto, "12 de marzo de 2026". En tablas y encabezados, `12/03/2026` (dd/mm/aaaa).
+- **Fechas**: en texto, "12 de marzo de 2026". En tablas y encabezados, `12/03/2026` (dd/mm/aaaa) (DEC-002).
 - **Horas**: formato de 24 horas, `14:30`.
-- **Comillas**: elige un solo estilo. Recomendado: comillas dobles en español (“así”) para citas breves; comillas angulares (« ») si la institución las pide. Los términos dentro de texto se escriben en cursiva, no entre comillas, salvo que sea una cita.
+- **Comillas**: dobles (“así”) (DEC-006). Solo se usan otras si un reglamento institucional las exige.
+- **Citas**: APA 7, con las referencias en un archivo BibTeX (`.bib`) (DEC-004). Los términos dentro de texto se escriben en cursiva, no entre comillas, salvo que sea una cita.
 - **Signos de apertura**: siempre usa ¿ y ¡.
 - **Espacios**: un espacio después de coma, punto, punto y coma y dos puntos. Ningún espacio antes de los signos de cierre.
 - **Mayúsculas**: se escriben en mayúscula solo los nombres propios, la primera palabra de una oración y las siglas. Los cargos y disciplinas van en minúscula: "el jefe de proyecto", "la ingeniería de software".
@@ -55,7 +56,7 @@ Si la interfaz usa un término en inglés (por ejemplo, "Login"), escribe el té
 
 ### Manual de usuario
 
-- **Imperativo con el tratamiento definido**. Con usted: "Seleccione el archivo", "Haga clic en Guardar". Con tú: "Selecciona el archivo".
+- **Instrucciones en forma impersonal (DEC-001)**: "Se selecciona el archivo", "Se hace clic en Guardar".
 - **Títulos de tareas en infinitivo**: "Exportar un informe", "Cambiar la contraseña".
 - **Una acción por paso**. Si el paso tiene dos acciones, divídelo.
 - **Describe la pantalla antes de la acción** cuando el lector la ve por primera vez: "En el panel izquierdo, aparece la lista de proyectos."
@@ -65,7 +66,7 @@ Si la interfaz usa un término en inglés (por ejemplo, "Login"), escribe el té
 
 ### Tesis e informes de investigación
 
-- **Tercera persona o impersonal**. "Se propone un modelo", "Este trabajo propone". Evita "yo" y "nosotros" salvo que el reglamento lo permita.
+- **Impersonal (DEC-001)**. "Se propone un modelo", "Este trabajo propone". Evita "yo" y "nosotros" salvo que el reglamento lo permita.
 - **Tiempos verbales**: pasado para métodos y resultados ("Se aplicó la encuesta"). Presente para marco teórico, discusión y conclusiones ("Los resultados indican").
 - **Cautela**: usa verbos moderados cuando la evidencia no es concluyente: "los resultados sugieren", "parece indicar". Evita "prueba que" o "demuestra" salvo en sentido matemático.
 - **Citas**: toda idea ajena lleva cita en el estilo definido. Verifica que cada cita esté en la lista de referencias y viceversa.
@@ -247,11 +248,11 @@ El botón «Cargar esqueleto» y el de usar los capítulos de un documento subid
 
 | Mal | Bien | Regla |
 |---|---|---|
-| Se procede a la apertura del menú de configuración. | Abra el menú **Configuración**. | Voz activa, verbo directo, tratamiento usted |
+| Se procede a la apertura del menú de configuración. | Se abre el menú **Configuración**. | Verbo directo, tratamiento impersonal (DEC-001) |
 | El sistema debe ser rápido y amigable. | El sistema debe responder cada solicitud en menos de 2 s. | Verificable y cuantificado |
 | Se realizó un análisis en base a los datos previamente recolectados. | Se analizaron los datos recolectados en la encuesta. | Sin expresiones vagas, pasado simple |
 | El 3.5% de los encuestados... | El 3,5 % de los encuestados... | Coma decimal, espacio antes del % |
-| Haga click en el botón setup. | Haga clic en **Configuración**. | Sin anglicismos, nombre exacto de la interfaz |
+| Haga click en el botón setup. | Se hace clic en **Configuración**. | Sin anglicismos, nombre exacto de la interfaz |
 | Este trabajo demuestra que la solución es la mejor. | Los resultados sugieren que la solución mejora el tiempo de respuesta en un 20 %. | Cautela y cifra con respaldo |
 | Ver tabla abajo. | En la Tabla 2 se comparan los tiempos de respuesta. | Referencia explícita a la numeración |
 

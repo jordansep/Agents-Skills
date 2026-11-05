@@ -132,9 +132,9 @@ Si un paso necesita algo que no está en la memoria ni en las referencias (una m
 | Ámbito | científico, técnico, académico, institucional, profesional | académico (tesis); técnico en otro caso |
 | Lector | experto, especialista de otra área, público general, mixto | público general (manual); mixto en otro caso |
 | Medio | impreso (A4 o carta), digital, ambos | digital |
-| Variante | español neutro, rioplatense | neutro |
-| Tratamiento | usted, tú, vos, impersonal | usted (manuales); impersonal (tesis y especificaciones) |
-| Citas | APA 7, IEEE, institucional, ninguna | APA 7 si hay citas |
+| Variante | español neutro, rioplatense | rioplatense (DEC-001) |
+| Tratamiento | usted, tú, vos, impersonal | impersonal (DEC-001) |
+| Citas | APA 7, IEEE, institucional, ninguna | APA 7 si hay citas (DEC-004) |
 | Formato de salida | Markdown, docx, pdf | Markdown |
 
 Pregunta siempre si hay un reglamento institucional o una guía de marca. Si existe, manda sobre las recomendaciones y hay que pedir el documento.
@@ -166,5 +166,5 @@ Desde `references/escritura.md`, copia las reglas generales y las específicas d
 1. Copia `assets/plantilla-prompt-estilo.md` y reemplaza cada `<...>`. Elimina las líneas que no apliquen.
 2. El encabezado YAML debe tener al menos estos campos: `documento`, `tipo`, `metodologia`, `medio`, `tratamiento`, `salida` y `estructura`. Los nombres de `estructura` deben coincidir exactamente con los títulos de capítulo que se usarán, sin número.
 3. El cuerpo debe poder leerse sin las referencias: quien lo use no necesita abrir este skill.
-4. Guárdalo en `docs/prompt-estilo.md`, salvo que el usuario indique otra ruta. Si ya existe, léelo, súbele la versión y conserva las decisiones que el usuario no pidió cambiar.
+4. Guárdalo en `docs/prompt-estilo.md` (DEC-005; los documentos van en `docs/<documento>/`), salvo que el usuario indique otra ruta. Si ya existe, léelo, súbele la versión y conserva las decisiones que el usuario no pidió cambiar.
 5. Muestra al usuario un resumen de una línea por parámetro y la ruta del archivo.

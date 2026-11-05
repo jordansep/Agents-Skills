@@ -715,7 +715,8 @@ pre.texto-salida {
           <option>Inter</option><option>Source Sans 3</option><option>Roboto</option><option>Open Sans</option><option>Lato</option>
           <option>IBM Plex Sans</option><option>Noto Sans</option><option>Arial</option><option>Calibri</option>
           <option>Merriweather</option><option>Source Serif 4</option><option>Lora</option><option>Georgia</option>
-          <option>Times New Roman</option><option>Cambria</option>
+          <option>Times New Roman</option><option>Cambria</option><option>Helvetica</option>
+          <option>Palatino Linotype</option><option>Garamond</option><option>STIX Two Text</option>
           <option>JetBrains Mono</option><option>Fira Code</option><option>IBM Plex Mono</option><option>Source Code Pro</option>
           <option>Consolas</option><option>Courier New</option>
         </datalist>
@@ -974,7 +975,7 @@ const COLORES = [
   ["advertencia", "Advertencia"], ["advertencia_fondo", "Advertencia · fondo"], ["peligro", "Peligro"], ["peligro_fondo", "Peligro · fondo"]
 ];
 const PALETA_BASE = {
-  primario: "#1F4E79", texto: "#1F2328", secundario: "#57606A", superficie: "#F6F8FA", borde: "#D0D7DE",
+  primario: "#2E74B5", texto: "#1F2328", secundario: "#57606A", superficie: "#F6F8FA", borde: "#D0D7DE",
   info: "#0969DA", info_fondo: "#DDF4FF", exito: "#1A7F37", exito_fondo: "#DAFBE1",
   advertencia: "#9A6700", advertencia_fondo: "#FFF8C5", peligro: "#CF222E", peligro_fondo: "#FFEBE9"
 };
@@ -1139,7 +1140,7 @@ function aplicarPlantilla(id, st) {
 }
 const REGLAS_TIPO = {
   manual: [
-    "Imperativo con el tratamiento elegido; los títulos de tareas en infinitivo (\"Exportar un informe\").",
+    "Instrucciones con el tratamiento elegido; los títulos de tareas en infinitivo (\"Exportar un informe\").",
     "Una acción por paso; si un paso tiene dos acciones, divídelo.",
     "Describe la pantalla antes de la acción cuando el lector la ve por primera vez.",
     "Los avisos van antes del paso al que se refieren.",
@@ -1220,8 +1221,8 @@ function esDivulgacion(st) {
 const TIPO_NOMBRE = { manual: "manual de usuario", tesis: "tesis", especificacion: "especificación de requisitos", informe: "informe técnico", arquitectura: "documento de arquitectura", diagrama: "diagrama", otro: "documento" };
 const TIPO_CON_ARTICULO = { manual: "un manual de usuario", tesis: "una tesis", especificacion: "una especificación de requisitos", informe: "un informe técnico", arquitectura: "un documento de arquitectura", diagrama: "un diagrama", otro: "un documento" };
 const ROL = { manual: "redactor técnico", tesis: "asesor de tesis y redactor académico", especificacion: "analista de requisitos", informe: "redactor técnico", arquitectura: "arquitecto de software y redactor técnico", diagrama: "diseñador de diagramas técnicos", otro: "redactor técnico" };
-const GOOGLE = ["Inter","Source Sans 3","Roboto","Open Sans","Lato","IBM Plex Sans","Noto Sans","Merriweather","Source Serif 4","Lora","JetBrains Mono","Fira Code","IBM Plex Mono","Source Code Pro"];
-const SISTEMA = ["Arial","Calibri","Georgia","Times New Roman","Cambria","Consolas","Courier New","Segoe UI","Helvetica"];
+const GOOGLE = ["Inter","Source Sans 3","Roboto","Open Sans","Lato","IBM Plex Sans","Noto Sans","Merriweather","Source Serif 4","Lora","STIX Two Text","JetBrains Mono","Fira Code","IBM Plex Mono","Source Code Pro"];
+const SISTEMA = ["Arial","Calibri","Georgia","Times New Roman","Cambria","Consolas","Courier New","Segoe UI","Helvetica","Palatino Linotype","Garamond"];
 
 function esqueleto(m) { return ESQUELETOS[m] || ESQUELETOS.ninguna; }
 /* Propósito y subsecciones por capítulo: la plantilla elegida tiene prioridad, después la metodología actual y
@@ -1400,13 +1401,13 @@ const DEF = {
   diataxis: ["tutorial", "guia", "referencia", "explicacion"],
   pasos_resultado: true, capturas_borde: true, capturas_marcadores: true,
   notaciones: ["uml-casos", "uml-actividad"], diag_herramienta: "mermaid", diag_formato: "svg", diag_direccion: "LR", diag_max: 12, diag_vista: "",
-  f_titulos: "Inter", f_cuerpo: "Inter", f_codigo: "JetBrains Mono",
+  f_titulos: "Calibri", f_cuerpo: "Calibri", f_codigo: "Consolas",
   d_cuerpo: 16, d_h1: 30, d_h2: 24, d_h3: 19, d_tabla: 14, d_codigo: 14.5, d_nota: 13, d_interlineado: 1.5, d_ancho: 720,
   p_cuerpo: 11, p_h1: 18, p_h2: 15, p_h3: 13, p_tabla: 10, p_codigo: 9.5, p_nota: 9, p_interlineado: 1.15, p_margen: 2.5, p_papel: "A4",
   peso_titulos: "600", alineacion: "izquierda", sangria: 0, plantilla: "", componentes_plantilla: [],
   colores: Object.assign({}, PALETA_BASE),
-  variante: "neutro", tratamiento: "usted", citas: "apa7", comillas: "dobles", reglamento: "",
-  decimal: "coma", miles: "espacio", fecha: "dd/mm/aaaa", pct_espacio: true, max_palabras: 25,
+  variante: "rioplatense", tratamiento: "impersonal", citas: "apa7", comillas: "dobles", reglamento: "",
+  decimal: "coma", miles: "punto", fecha: "dd/mm/aaaa", pct_espacio: true, max_palabras: 25,
   siglas: "URL\nPDF", terminos: "", restricciones: "", criterios: "",
   alcance: "agente", modo: "digital", estructura_editada: false,
   fuente_vista: "ejemplo", numerar_subido: true, aplicar_texto: false, marcar_desvios: true, seleccionando: false, ver_todo: false
@@ -1620,9 +1621,9 @@ function hoy() {
   return S.fecha === "aaaa-mm-dd" ? `${y}-${mm}-${dd}` : `${dd}/${mm}/${y}`;
 }
 const VERBOS = {
-  seleccionar: { usted: "Seleccione", "tú": "Selecciona", vos: "Seleccioná", impersonal: "Seleccionar" },
-  escribir: { usted: "Escriba", "tú": "Escribe", vos: "Escribí", impersonal: "Escribir" },
-  clic: { usted: "Haga clic", "tú": "Haz clic", vos: "Hacé clic", impersonal: "Hacer clic" },
+  seleccionar: { usted: "Seleccione", "tú": "Selecciona", vos: "Seleccioná", impersonal: "Se selecciona" },
+  escribir: { usted: "Escriba", "tú": "Escribe", vos: "Escribí", impersonal: "Se escribe" },
+  clic: { usted: "Haga clic", "tú": "Haz clic", vos: "Hacé clic", impersonal: "Se hace clic" },
   usar: { usted: "Use", "tú": "Usa", vos: "Usá", impersonal: "Se puede usar" },
   cerrar: { usted: "cierra", "tú": "cierras", vos: "cerrás", impersonal: "se cierra" }
 };
@@ -1650,7 +1651,7 @@ function pila(n, tipo) {
   const resto = tipo === "mono" ? 'Consolas, "Courier New", monospace' : tipo === "serif" ? 'Georgia, "Times New Roman", serif' : 'Arial, Helvetica, sans-serif';
   return `"${String(n).replace(/"/g, "")}", ${resto}`;
 }
-function esSerif(n) { return /serif 4|merriweather|lora|georgia|times|cambria/i.test(n) && !/sans/i.test(n); }
+function esSerif(n) { return /serif 4|merriweather|lora|georgia|times|cambria|palatino|garamond|stix/i.test(n) && !/sans/i.test(n); }
 
 /* ---------- Formulario ---------- */
 const form = document.getElementById("form");

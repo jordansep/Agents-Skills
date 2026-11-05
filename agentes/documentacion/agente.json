@@ -1,7 +1,7 @@
 {
   "nombre": "documentacion",
   "titulo": "Agente de documentación",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "descripcion": "Define el estilo de la documentación (configurador visual, prompt de estilo y memoria de decisiones) y genera documentos que lo cumplen.",
   "skills": [
     "skills/documentacion-estilo",
