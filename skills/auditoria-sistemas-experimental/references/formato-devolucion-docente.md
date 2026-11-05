@@ -1,10 +1,31 @@
 # Formato de la devolución docente (MyD 2026)
 
-Referencia para el *Entregable* de la skill. Sale del informe de completitud que la cátedra
+Variante del *Entregable* de la skill. Sale del informe de completitud que la cátedra
 envió al Grupo 3 el 29/10/2026 ("MyD 2026 · Trabajo integrador · Revisión temprana (no es
 corrección) · Grupo 3"; copia local en
 `D:\Experimentos\BonoCorreciones\Fuente\`). Es un modelo de estructura y de criterios: no
 copies sus conclusiones, que corresponden a una versión vieja del repo.
+
+## Variante docente
+
+Se aplica sobre la plantilla general de la skill cuando se audita contra la consigna o la devolución
+de una cátedra. Mantiene las cinco secciones y cambia sólo esto:
+
+- **Encabezado:** `Informe de completitud — <Grupo> — <Caso>`.
+- **Nombres de sección:** `Coherencia entre documentos`, `¿Listo para implementar?` y
+  `Lista de tareas para el grupo`.
+- **Tono:** se le habla al grupo, como en la devolución.
+- **Severidad:** la devolución no usa severidades. El orden de la lista de tareas y la columna
+  "Lo principal que falta" cumplen esa función; si algo es grave, decilo en el texto ("Sin esto no se
+  puede liberar ninguna unidad"). Los secretos y demás hallazgos de seguridad sí la llevan.
+- **Estado:** se usa la escala de la cátedra, para que se pueda comparar con su devolución:
+  **Completo** de 90 a 100 %, **Avanzado** de 50 a 89 %, **Inicial** de 1 a 49 % y **Falta** con 0 %
+  (Inicial se agregó para los puntos empezados que no llegan a la mitad).
+- **Marca obligatoria:** si un punto queda Completo con defectos abiertos, escribí
+  `Completo con defectos abiertos` en el estado y en el resumen. Lo demás de la skill sigue valiendo:
+  la escala Sí/Parcial/No, una fila por línea de la consigna y lo que cada nivel exige.
+- **Punto 8:** "¿Listo para implementar?" responde por las historias del punto 8 o las del próximo
+  sprint. Si no hay historias elegidas, usá la del primer sprint.
 
 ## Estructura, tal como la usa la cátedra
 

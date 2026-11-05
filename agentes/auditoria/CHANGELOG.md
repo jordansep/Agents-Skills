@@ -2,6 +2,19 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas-experimental`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.3.0] - 2026-11-05
+
+### Agregado
+
+- Reglas para auditar artefactos sin una herramienta fija
+
+### Cambiado
+
+- Un punto sólo queda Completo sin defectos abiertos, aunque cumpla todos los criterios
+- La escala Sí/Parcial/No y la severidad tienen criterios fijos, con una fila por línea del criterio
+- Cada nivel exige más que el anterior: el simple no certifica, el medio registra cobertura e intenta refutar, y el exhaustivo suma una segunda pasada independiente
+- El informe usa una plantilla general; la devolución docente pasa a ser una variante en references/
+
 ## [0.2.0] - 2026-11-04
 
 ### Cambiado

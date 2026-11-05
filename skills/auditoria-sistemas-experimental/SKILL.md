@@ -13,8 +13,8 @@ description: >-
   (sistema propio, pentest, CTF, investigación de seguridad, trabajo académico); si no está
   claro, pedilo antes de avanzar.
 metadata:
-  version: "1.2"
-  baseline: "formato de la devolución docente real (Grupo 3, 2026-10-29); v1.0 en versions/"
+  version: "1.3"
+  baseline: "plantilla general basada en la devolución docente, que queda como variante en references/; versiones anteriores en versions/"
 ---
 
 # Auditoría de un sistema (experimental)
@@ -64,6 +64,14 @@ el README). El tipo decide las fases y los MCP:
 Si el objetivo no es un binario (por ejemplo, una carpeta de páginas guardadas o de
 documentos), **no fuerces la ingeniería inversa**: decilo y usá las herramientas del tipo real.
 
+**Artefactos sin herramienta fija.** Usá la herramienta de ingeniería inversa que tengas disponible
+y, si no hay ninguna, lectores estáticos del formato (`strings`, descompresores, desensambladores
+del lenguaje). Seguí las fases de la *Secuencia* igual, sin importar la herramienta:
+- **No ejecutes ni cargues el objetivo** fuera de la fase 5: nada de correrlo, importarlo ni instalarlo.
+- **Declará el método** en el encabezado: qué herramienta usaste y sobre qué archivos.
+- **Decí qué no pudiste ver** (partes empaquetadas, ofuscadas o en un formato sin lector). Si eso
+  deja afuera algo del criterio, ese punto no puede quedar Completo.
+
 ## Niveles de auditoría
 
 | | Simple | Media | Exhaustiva (con investigación) |
@@ -71,23 +79,40 @@ documentos), **no fuerces la ingeniería inversa**: decilo y usá las herramient
 | **Para qué** | Un vistazo rápido: qué es y si hay algo grave a la vista | La auditoría estándar: completa sobre el objetivo y sus fuentes directas | Todo lo posible: el objetivo, todas sus fuentes, su historia y el contexto externo |
 | **Fases** | 1 y 2 completas; de la 4, sólo lo que salta a la vista | 1 a 4 completas | 1 a 4 completas, más la 5 si el usuario la autoriza |
 | **MCP** | Sólo el principal del tipo de sistema | El principal y los de las fuentes directas (board, repo remoto, Drive) | Todos los relevantes, más WebSearch y fuentes externas |
-| **Cruces** | Ninguno | Objetivo contra sus fuentes directas | Objetivo contra todas las fuentes, la versión vigente y el criterio de evaluación |
-| **Verificación** | Hallazgos marcados PROBABLE si no se confirmaron | Cada hallazgo con evidencia; CONFIRMADO o PROBABLE | Cada hallazgo verificado dos veces y contrastado contra la versión más nueva |
-| **Informe** | Las 5 secciones del *Entregable*: tabla del resumen completa y, en el detalle, sólo los criterios que no se cumplen | Las 5 secciones completas | Las 5 secciones completas, más anexos: matriz de cumplimiento y estado por versión |
+| **Versión vigente** | Se verifica | Se verifica y se audita esa | Se verifica, se audita esa y se contrasta con las anteriores |
+| **Cruces** | Sólo chequeos automáticos baratos | Scripts de cruce contra las fuentes directas | Scripts de cruce contra todas las fuentes y el criterio de evaluación |
+| **Cobertura** | Se declara qué se miró | Registro por punto | Registro por punto, con todo el entregable leído |
+| **Para dar Completo** | **Nunca se certifica**: el mejor estado es «Sin defectos a la vista» | Cobertura completa e intento de refutarlo documentado | Lo de media, más una segunda pasada independiente conciliada |
+| **Informe** | Las 5 secciones del *Entregable*: tabla del resumen completa y, en el detalle, sólo los criterios que no se cumplen | Las 5 secciones completas | Las 5 secciones completas, más anexos: matriz de cumplimiento, conciliación y estado por versión |
+
+Cada nivel exige todo lo del anterior y suma algo que el anterior no hace. Si no llegás a cumplir
+lo que tu nivel pide para un punto, ese punto no queda Completo: decí qué faltó.
 
 ### Simple
 - Identificá el sistema y su versión (fase 1) y recorré su superficie (fase 2).
+- **Verificá la versión vigente** (último commit remoto, si hay remoto). Si la copia local está
+  atrás, decilo en el encabezado y auditá la vigente.
 - Corré los chequeos automáticos baratos que apliquen: totales, IDs definidos y usados,
   strings sensibles, firma, entropía.
 - Reportá sólo lo evidente. No descompiles en masa ni cruces fuentes externas.
+- Un vistazo no certifica nada: lo que no tenga defectos visibles queda «Sin defectos a la vista»,
+  nunca Completo.
 
 ### Media
 - Las fases 1 a 4 completas, guiadas por el FOCO.
 - Usá los MCP de las fuentes directas del sistema (ver *Uso de MCP*): por ejemplo, el board de
   Azure DevOps contra el backlog, o el repo remoto contra la copia local.
-- **Verificá la versión vigente** antes de reportar: rama actual, ramas y PR abiertos más
-  nuevos, último commit remoto. Si la copia local está desactualizada, auditá la versión
-  vigente o marcá qué hallazgos ya están resueltos en ella.
+- **Auditá la versión vigente**: rama actual, ramas y PR abiertos más nuevos, último commit remoto.
+  Si la copia local está desactualizada, auditá la vigente y marcá qué hallazgos ya están
+  resueltos en ella.
+- **Scripts de cruce**: automatizá lo contable (totales, sumas, IDs definidos y usados, fuentes de
+  diagramas contra embebidos) en lugar de contarlo a ojo.
+- **Registro de cobertura**: en cada punto, qué leíste completo, qué leíste en parte y qué no
+  leíste (ver la plantilla).
+- **Intento de refutar cada Completo**: antes de dar un punto por Completo, tratá de voltearlo.
+  Por cada regla que el material dice garantizar, buscá un camino que la saltee; probá también
+  los valores límite y lo que queda fuera de los criterios. Anotá en una línea qué intentaste y
+  dónde miraste. Si algo cae, es un defecto y el punto ya no es Completo.
 
 ### Exhaustiva (con investigación)
 Todo lo de *media*, y además:
@@ -104,6 +129,10 @@ Todo lo de *media*, y además:
 - **Runtime**: proponé la fase 5 si confirmaría algo, y esperá la autorización.
 - **Doble verificación**: cada hallazgo se confirma releyendo la fuente, y se contrasta contra
   la versión más nueva.
+- **Segunda pasada independiente**: por cada punto que vaya a quedar Completo, lanzá un subagente
+  que audite ese punto con el mismo criterio y sin ver tus conclusiones. Cada diferencia se
+  resuelve releyendo la fuente y queda en un anexo de conciliación. Si no podés lanzar subagentes,
+  no hay pasada independiente: decilo y no certifiques Completo.
 - **Matriz de cumplimiento** (anexo): un renglón por requisito del criterio de evaluación con
   Cumple / Parcial / No cumple y evidencia.
 - **Lista de tareas detallada** (sección 5 del informe): con quién decide cada tarea (cambio
@@ -206,6 +235,7 @@ Revisá explícitamente, con evidencia, cada punto que aplique al tipo de sistem
 
 Para cada hallazgo guardá la **evidencia concreta**: dirección u offset, función, archivo y
 línea, o ID de work item, y el fragmento. Sin evidencia no es un hallazgo, es una sospecha.
+Si el hallazgo es un secreto, ubicalo sin copiar el valor: nunca lo reproduzcas completo.
 
 ### 5. Runtime (sólo con autorización explícita — ver *La regla del runtime*)
 Confirmá en vivo lo que viste en estático: instrumentación (Frida), depuración (gdb, rizin),
@@ -214,107 +244,132 @@ estático para cerrar el círculo. Cerrá toda sesión que abras.
 
 ## Entregable
 
-### 1. Informe de completitud: formato de la devolución docente
+### 1. Informe de completitud: plantilla general
 
-El informe copia la estructura del **informe de completitud** con el que corrige la cátedra
-(ver el ejemplo real en `references/formato-devolucion-docente.md`), para que el grupo pueda
-comparar uno con otro. Tiene **siempre cinco secciones, en este orden**, en los tres niveles.
+Tiene **siempre cinco secciones, en este orden**, en los tres niveles y para cualquier sistema.
 No las reordenes ni las fusiones. Con el nivel cambia la profundidad de cada sección, no su
 presencia: en *simple* se completa la tabla del resumen y, en el detalle, sólo los criterios
 que no se cumplen.
 
-**Tono:** se le habla al grupo en plural, con "ustedes" e imperativos directos ("Pongan",
-"Agreguen", "Corríjanlo junto con…"), como en la devolución. Frases cortas, evidencia con
-`archivo:línea` o `WI #n`, y una propuesta concreta en cada falta, con un ejemplo cuando
-ayuda ("por ejemplo, «resultado de laboratorio»").
+**Variante docente.** Si se audita contra la consigna o la devolución de una cátedra, o el usuario
+la pide, aplicá también `references/formato-devolucion-docente.md`: mantiene estas cinco secciones
+y cambia lo que ahí se indica.
+
+**Tono:** se le habla a quien tiene que corregir, en plural, con "ustedes" e imperativos directos
+("Pongan", "Agreguen", "Corríjanlo junto con…"). Frases cortas, evidencia con `archivo:línea`, una
+dirección o un ID, y una propuesta concreta en cada falta, con un ejemplo cuando ayuda.
 
 ```
-# Informe de completitud — <Grupo o equipo> — <Sistema o caso>
-Corregido: <commit corto> del <AAAA-MM-DD> · Corte: <fecha de corte o "sin corte"> · Modo: auditoría <simple|media|exhaustiva>
-(línea chica, aparte: rama o PR auditado, criterio usado —consigna, Issues— y MCP o API usados)
+# Informe de completitud — <Equipo o responsable> — <Sistema>
+Corregido: <commit corto o hash del artefacto> del <AAAA-MM-DD> · Corte: <fecha de corte o "sin corte"> · Modo: auditoría <simple|media|exhaustiva>
+(línea chica, aparte: versión auditada, criterio usado, herramientas y MCP o API usados)
 
 ## Resumen
-Un párrafo: qué parte está bien hecha y qué parte falta, la consecuencia ("nadie puede
-programar ninguna historia todavía", "no está listo para entregar") y "Lo mejor logrado: …".
+Un párrafo: qué parte está bien hecha y qué parte falta, la consecuencia ("no está listo para
+desplegar", "nadie puede programar esto todavía") y "Lo mejor logrado: …".
 Después, la tabla de todos los puntos:
 | Punto | Estado | Completitud | Lo principal que falta |
-| 1 · Backlog | Completo | 100 % | Revisar la prioridad de HU-024 frente a HU-023 |
-| 6 · Clases y patrones | Falta | 0 % | Todo (archivo vacío) |
+| 1 · Control de acceso | Avanzado | 100 % | Cumple los criterios, pero queda un defecto: el rol de baja no se controla |
+| 6 · Pruebas | Falta | 0 % | Todo (archivo vacío) |
 
 ## Detalle por punto
-Un apartado por punto, en el orden de la consigna:
+Un apartado por punto, en el orden del criterio:
 ### N · <Nombre del punto> — <Estado> (<Completitud> %)
-Archivo: <ruta del entregable> (si está vacío: "solo <!-- Pendiente -->, línea 3")
+Archivo: <ruta o artefacto> (si está vacío: "solo <!-- Pendiente -->, línea 3")
+Cobertura: leído completo <…> · en parte <…> · sin leer <…>
 | Criterio | ¿Cumple? | Evidencia |
-| ≥ 3 épicas | Sí | 5 épicas, de EP-01 a EP-05 (docs/01:49-78) |
-| INVEST | Sí | Son chicas y con criterios verificables (docs/01:121-148). Observaciones abajo |
-| Despliegue UML | Parcial | Tiene nodos y protocolos (docs/04:179-211), pero el terminal no tiene «artifact» (docs/04:183) |
-**Debajo del cuadro van, en este orden, los dos bloques con los que cierra cada punto la
-devolución docente** (el apartado nunca termina en la tabla):
+| ≥ 5 RNF cuantificados | Sí | 5 RNF con métrica (docs/04:7-11) |
+| Sin secretos en el repo | No | [Crítica] Token en texto plano (config/app.json:12), valor omitido |
+| Despliegue documentado | Parcial | Tiene nodos y protocolos (docs/04:179-211), pero no los artefactos (docs/04:183) |
+**Debajo del cuadro van, en este orden, los dos bloques con los que cierra cada punto** (el
+apartado nunca termina en la tabla):
 
-- **Observaciones de <tema>:** siempre que haya algo que observar (que es lo habitual, aun en
-  los puntos Completos): lo que se cumple pero se puede mejorar, los riesgos, las decisiones a
-  validar y lo que no se pudo verificar. Nombrá el bloque por su tema, como la cátedra
-  ("Observaciones de INVEST:", "Observaciones de diseño:"); cuando un criterio del cuadro
-  manda al bloque, cerrá su evidencia con "Observaciones abajo". Omitilo sólo si el punto no
-  deja nada para observar.
+- **Observaciones de <tema>:** siempre que haya algo que observar: mejoras que no son defectos,
+  riesgos, decisiones a validar y lo que no se pudo verificar. Nombrá el bloque por su tema
+  ("Observaciones de diseño:"); cuando un criterio del cuadro manda al bloque, cerrá su evidencia
+  con "Observaciones abajo". Omitilo sólo si el punto no deja nada para observar. Si el punto va a
+  quedar Completo, agregá acá **Intento de refutar:** qué probaste y dónde miraste.
 - **Para completarlo:** siempre. Viñetas con cada cosa concreta que hay que hacer para cerrar
   el punto, con su evidencia (`archivo:línea` —varias líneas separadas con coma, rangos con
-  guion— o `WI #n`); una sola oración si es una cosa; o "—" si no falta nada. Cada No y cada
-  Parcial del cuadro tiene su viñeta acá, y cada una se repite después como tarea en la
-  *Lista de tareas para el grupo*.
+  guion— o un ID); una sola oración si es una cosa; o "—" si no falta nada. Cada No, cada Parcial
+  y **cada defecto, aunque esté fuera de los criterios,** tiene su viñeta acá y se repite después
+  como tarea en la *Lista de tareas*.
 
-## Coherencia entre documentos
+## Coherencia entre fuentes
 Un párrafo por incoherencia, que empieza con el tema en negrita:
-**<Tema>.** El repo dice «…» (archivo:línea). El WI #n dice «…». Son dos reglas distintas.
+**<Tema>.** El repo dice «…» (archivo:línea). El ticket #n dice «…». Son dos reglas distintas.
 Decidan cuál vale y copien el mismo texto en los dos lados.
 Al final: **Lo que está bien:** los cruces que sí cierran, y lo que no se pudo verificar y
 por qué.
 
-## ¿Listo para implementar?
-Por cada historia que se va a implementar (las del punto 8, o las del próximo sprint), un
-subtítulo con su veredicto y **las preguntas que tendría que hacer quien la programe con lo
-que hay hoy**:
-### HU-XXX: <listo | no listo | listo con preguntas abiertas>
-- ¿Qué formato tiene el código de un POE? ¿Hay un largo, un prefijo o un patrón?
-- ¿Qué clase y qué método implementan el alta?
-Si una historia ya no deja preguntas abiertas, decilo y por qué. Si no hay historias
-elegidas, decilo y usá como referencia la del primer sprint.
+## ¿Listo para <implementar | usarse | desplegarse | entregarse>?
+Por cada pieza que sigue (una historia a implementar, un componente a desplegar), un subtítulo
+con su veredicto y **las preguntas que tendría que hacer quien la tome con lo que hay hoy**:
+### <Pieza>: <listo | no listo | listo con preguntas abiertas>
+- ¿Qué formato tiene el código? ¿Hay un largo, un prefijo o un patrón?
+- ¿Qué pasa si el servicio externo no responde?
+Si una pieza ya no deja preguntas abiertas, decilo y por qué. Si no hay piezas elegidas, decilo y
+usá como referencia la más cercana.
 
-## Lista de tareas para el grupo
-Una casilla por tarea, ordenadas por dependencia (primero lo que destraba otras):
-[ ] Punto 6: diagrama de clases (10 o más clases, tipos, firmas, multiplicidades) y 2 patrones GoF. Destraba los puntos 7, 8 y 9.
-[ ] Board: crear HU-027 y alinear HU-003, HU-018 y HU-019 con el repo.
+## Lista de tareas
+Una casilla por tarea, ordenadas por dependencia (primero lo que destraba otras) y, a igual
+dependencia, por severidad:
+[ ] Punto 6: escribir el plan de pruebas. Destraba los puntos 7 y 8.
+[ ] [Crítica] Punto 2: sacar y rotar el token de config/app.json.
 Cada falta del detalle y cada incoherencia tienen al menos una tarea.
 ```
 
-**Estado y completitud de cada punto.** Cada criterio vale 1 si dice **Sí**, 0,5 si dice
-**Parcial** y 0 si dice **No**. La completitud es la suma dividida por la cantidad de
-criterios, redondeada al entero (por ejemplo, Sí + Sí + Parcial + No = 2,5 / 4 = 63 %). El
-estado sale de la completitud: **Completo** de 90 a 100 %, **Avanzado** de 50 a 89 %,
-**Inicial** de 1 a 49 % y **Falta** con 0 %. La devolución docente usa Completo, Avanzado y
-Falta; Inicial se agregó para los puntos empezados que no llegan a la mitad.
+**Escala de cada criterio.** Se aplica igual en toda corrida:
+- **Sí:** se cumple por completo y hay evidencia.
+- **No:** no se cumple. En un requisito universal ("cada", "todos", "ninguno", "sin", "coherente",
+  "se respetan"), **una sola falla es No**: un sprint sobre la capacidad o una dependencia invertida
+  alcanzan, aunque el resto esté bien.
+- **Parcial:** sólo si el requisito tiene partes separables y se cumple al menos una, pero no todas.
+  Nombrá cuáles faltan. También va Parcial lo que no pudiste verificar del todo: lo no verificado
+  nunca es Sí.
 
-**Criterios de cada punto.** Si hay una consigna, los criterios salen de ella, uno por
-renglón y con la misma redacción (por ejemplo, "≥ 15 HU en formato Como/quiero/para"). Para el
-trabajo integrador de MyD 2026, usá la lista de `references/formato-devolucion-docente.md`.
-Si no hay consigna, armá los criterios a partir de lo que el sistema dice que hace (README,
-documentación, manifiesto).
+**Una fila por línea del criterio.** No partas ni fusiones líneas, porque cambia el denominador. Si
+no hay consigna, fijá la lista de criterios antes de evaluar.
 
-**Severidad.** La devolución no usa severidades; el orden de la lista de tareas y la
-columna "Lo principal que falta" cumplen esa función. Si un hallazgo es grave (bloquea la
-entrega o la implementación), decilo en el texto ("Sin esto no se puede liberar ninguna
-unidad"). En los artefactos compilados, donde importa la seguridad, agregá la severidad
-(Crítica / Alta / Media / Baja / Info) entre corchetes al principio de la evidencia.
+**Completitud y estado.** Cada criterio vale 1 si dice Sí, 0,5 si dice Parcial y 0 si dice No. La
+completitud es la suma dividida por la cantidad de criterios, redondeada al entero (por ejemplo,
+Sí + Sí + Parcial + No = 2,5 / 4 = 63 %). **La completitud mide los criterios; el estado mide si
+se puede dar por bueno:**
+
+| Estado | Cuándo |
+|---|---|
+| **Completo** | 100 %, sin defectos abiertos y con lo que el nivel exige para darlo (cobertura, refutación, segunda pasada). No existe en nivel simple |
+| **Sin defectos a la vista** | Sólo en nivel simple: 100 % sin defectos visibles. No certifica nada |
+| **Avanzado** | De 50 a 99 %, o 100 % con defectos abiertos o sin lo que el nivel exige |
+| **Inicial** | De 1 a 49 % |
+| **Falta** | 0 % |
+
+**Defecto abierto** es cualquier hallazgo CONFIRMADO que contradice algo o deja algo mal, **aunque
+ningún criterio lo pida** (un total que no cierra, un ID sin definir, un secreto), y cualquier
+PROBABLE de severidad Crítica o Alta. Una mejora opcional no es defecto: va en Observaciones. Ante
+la duda, es defecto: dar por bueno algo con defectos es el peor error de una auditoría.
+
+**Criterios de cada punto.** Si hay una consigna o norma, los criterios salen de ella, uno por
+renglón y con la misma redacción (por ejemplo, "≥ 15 HU en formato Como/quiero/para"). Si no hay,
+armá los criterios a partir de lo que el sistema dice que hace (README, documentación, manifiesto).
+
+**Severidad.** Todo hallazgo la lleva entre corchetes al principio de la evidencia:
+
+| Severidad | Cuándo |
+|---|---|
+| **Crítica** | Permite comprometer el sistema o sus datos, o bloquea todo lo demás. Toda credencial que pueda estar vigente, salvo evidencia de que es ficticia o está revocada |
+| **Alta** | Rompe un requisito obligatorio o una regla de seguridad, o bloquea una parte del trabajo |
+| **Media** | Contradicción o hueco que obliga a adivinar o puede llevar a implementar mal |
+| **Baja** | Inconsistencia de forma, sin efecto en el comportamiento |
+| **Info** | Dato útil, sin nada que corregir |
 
 **Artefactos compilados.** Los "puntos" son las fases de la secuencia (identificación,
 superficie, estructura interna, hallazgos) con sus criterios: firma válida, sin secretos,
 protecciones activas, etc. La coherencia cruza el binario con su documentación, su manifiesto
-y lo observado en runtime. "¿Listo para implementar?" pasa a ser "¿Listo para usarse o
-desplegarse?".
+y lo observado en runtime.
 
 Si hace falta, al final van los **anexos**: qué no se pudo analizar y por qué, la matriz de
-cumplimiento (nivel exhaustivo) y el estado de los hallazgos de una auditoría anterior.
+cumplimiento y la conciliación (nivel exhaustivo) y el estado de los hallazgos de una auditoría anterior.
 
 ### 2. CONFIRMADO vs PROBABLE
 Separalo siempre. CONFIRMADO = lo viste directo (string, pseudo-código, línea del documento,
@@ -328,8 +383,8 @@ completa va en archivos de trabajo.
 ### 4. PDF (siempre, y siempre un archivo nuevo)
 Al terminar **cada** auditoría, de cualquier nivel:
 1. Armá el informe como HTML (estilos inline, tokens de color, A4) en el scratchpad. Usá
-   tablas como la devolución: la del resumen con el estado coloreado (Completo en verde,
-   Avanzado en ámbar, Inicial y Falta en rojo) y una tabla Criterio / ¿Cumple? / Evidencia
+   la tabla del resumen con el estado coloreado (Completo en verde, Sin defectos a la vista en
+   gris, Avanzado en ámbar, Inicial y Falta en rojo) y una tabla Criterio / ¿Cumple? / Evidencia
    por punto, con Sí, Parcial y No coloreados. La lista de tareas va con casillas ☐.
    Nombrá el archivo `AAAA-MM-DD-Informe-completitud-<tema>-<distintivo>.pdf`, donde
    `<distintivo>` hace único el nombre: el commit corto auditado, la hora `HHMM`, o un
