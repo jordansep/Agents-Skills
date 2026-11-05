@@ -12,7 +12,7 @@ description: >-
   Drive, Chrome, Claude Docs, engram, etc.), sigue una secuencia fija —identificación,
   superficie, estructura interna, hallazgos y, solo si el usuario lo autoriza, runtime— y
   entrega un informe en español rioplatense ordenado por severidad, guardado en PDF en
-  D:\Experimentos\BonoCorreciones. Da por sentado un encuadre
+  la carpeta de informes del usuario. Da por sentado un encuadre
   autorizado (sistema propio, pentest autorizado, CTF, investigación de seguridad, trabajo
   académico) y, si no está claro, pedilo antes de avanzar. Es la capa de procedimiento e
   informe por encima de reverse-engineer-anything, que cubre la mecánica de REA.
@@ -334,7 +334,7 @@ infles un PROBABLE a CONFIRMADO.
 El informe resume. Pseudo-código, listados y volcados largos van resumidos; la evidencia
 completa va en el bundle (`export_evidence_bundle`) o en archivos de trabajo.
 
-### 4. PDF en BonoCorreciones (siempre)
+### 4. PDF en la carpeta de informes (siempre)
 Al terminar **cada** auditoría, de cualquier nivel:
 1. Armá el informe como HTML (estilos inline, tokens de color, A4) en el scratchpad. Usá
    tablas como la devolución: la del resumen con el estado coloreado (Completo en verde,
@@ -343,8 +343,8 @@ Al terminar **cada** auditoría, de cualquier nivel:
    Nombrá el archivo `AAAA-MM-DD-Informe-completitud-<tema>.pdf`.
 2. Generá el PDF con Edge headless (reportlab no está instalado):
    `& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless=new --disable-gpu --no-pdf-header-footer "--print-to-pdf=<salida>" "file:///<html>"`
-3. Guardalo en **`D:\Experimentos\BonoCorreciones\AAAA-MM-DD-Informe-completitud-<tema>.pdf`**
-   (la carpeta se escribe con una sola "c"). No lo guardes dentro del repo auditado.
+3. Guardalo en **`<carpeta de informes>\AAAA-MM-DD-Informe-completitud-<tema>.pdf`**.
+   No lo guardes dentro del repo auditado.
 4. Leé el PDF y revisá que no haya páginas casi vacías, acentos rotos ni tablas cortadas antes
    de avisar.
 5. Decile al usuario la ruta exacta.

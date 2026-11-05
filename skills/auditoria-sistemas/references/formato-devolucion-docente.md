@@ -1,10 +1,9 @@
 # Formato de la devolución docente (MyD 2026)
 
-Variante del *Entregable* de la skill. Sale del informe de completitud que la cátedra
-envió al Grupo 3 el 29/10/2026 ("MyD 2026 · Trabajo integrador · Revisión temprana (no es
-corrección) · Grupo 3"; copia local en
-`D:\Experimentos\BonoCorreciones\Fuente\`). Es un modelo de estructura y de criterios: no
-copies sus conclusiones, que corresponden a una versión vieja del repo.
+Variante del *Entregable* de la skill. Sale de un informe de completitud que envió la cátedra
+("MyD 2026 · Trabajo integrador · Revisión temprana (no es corrección)"). Es un modelo de
+estructura y de criterios: no copies conclusiones de otras devoluciones, que corresponden a otros
+trabajos o versiones.
 
 ## Variante docente
 
@@ -33,8 +32,8 @@ de una cátedra. Mantiene las cinco secciones y cambia sólo esto:
 
 ## Estructura, tal como la usa la cátedra
 
-1. **Encabezado:** `Informe de completitud — Grupo 3 — Hemocentro Municipal de Córdoba` y,
-   abajo, `Corregido: e506313 del 2026-10-29 · Corte: sin corte · Modo: devolucion`.
+1. **Encabezado:** `Informe de completitud — <Grupo> — <Caso>` y, abajo,
+   `Corregido: <commit corto> del <AAAA-MM-DD> · Corte: sin corte · Modo: devolucion`.
 2. **Resumen:** un párrafo (qué está bien hecho, qué falta, la consecuencia y "Lo mejor
    logrado: …") y una tabla `Punto | Estado | Completitud | Lo principal que falta` con los 11
    puntos.
@@ -70,9 +69,9 @@ Parcial) = 92 %; punto 11 con 6 criterios (Parcial, Sí, No, Parcial, Sí, Sí) 
 | 10 · Prototipo y evaluación heurística | `docs/10-prototipo-y-heuristicas.md` y `prototipo/` | ≥ 2 pantallas, una con error; capturas y link · ≥ 3 heurísticas con pantalla, cumple, evidencia y severidad · Argumentación desde la heurística · ≥ 1 corrección con antes y después |
 | 11 · Azure DevOps | `README.md` y el Board | Jerarquía Epic → Feature → User Story · Iterations con los sprints · HU del punto 8 completas en el work item · Estructura de repo de la consigna · README con integrantes, caso, mail, Board y tabla de los 11 puntos · Fuentes de los diagramas |
 
-El Issue #47 de Azure (transcripción de la consigna) agrega para el punto 10 que las
+La transcripción de la consigna agrega para el punto 10 que las
 heurísticas salen de las 21 reglas (Shneiderman, Nielsen, Pierotti), que son ≥ 3 **por
-pantalla** y con captura señalada; y el Issue #48, para el punto 11, que el proyecto sea
+pantalla** y con captura señalada; y, para el punto 11, que el proyecto sea
 **público** con el docente agregado. Cuando la consigna y la devolución difieran, chequeá
 los dos criterios y decí cuál se aplicó.
 

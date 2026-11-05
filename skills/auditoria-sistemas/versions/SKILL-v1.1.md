@@ -12,13 +12,13 @@ description: >-
   Drive, Chrome, Claude Docs, engram, etc.), sigue una secuencia fija —identificación,
   superficie, estructura interna, hallazgos y, solo si el usuario lo autoriza, runtime— y
   entrega un informe en español rioplatense ordenado por severidad, guardado en PDF en
-  D:\Experimentos\BonoCorreciones. Da por sentado un encuadre
+  la carpeta de informes del usuario. Da por sentado un encuadre
   autorizado (sistema propio, pentest autorizado, CTF, investigación de seguridad, trabajo
   académico) y, si no está claro, pedilo antes de avanzar. Es la capa de procedimiento e
   informe por encima de reverse-engineer-anything, que cubre la mecánica de REA.
 metadata:
   version: "1.1"
-  baseline: "formato de la devolución docente real (Grupo 3, 2026-10-29); v1.0 en versions/"
+  baseline: "formato de la devolución docente real (2026-10-29); v1.0 en versions/"
 ---
 
 # Auditoría de un sistema (experimental)
@@ -340,7 +340,7 @@ infles un PROBABLE a CONFIRMADO.
 El informe resume. Pseudo-código, listados y volcados largos van resumidos; la evidencia
 completa va en el bundle (`export_evidence_bundle`) o en archivos de trabajo.
 
-### 4. PDF en BonoCorreciones (siempre, y siempre un archivo nuevo)
+### 4. PDF en la carpeta de informes (siempre, y siempre un archivo nuevo)
 Al terminar **cada** auditoría, de cualquier nivel:
 1. Armá el informe como HTML (estilos inline, tokens de color, A4) en el scratchpad. Usá
    tablas como la devolución: la del resumen con el estado coloreado (Completo en verde,
@@ -351,10 +351,9 @@ Al terminar **cada** auditoría, de cualquier nivel:
    correlativo `v2`, `v3`.
 2. Generá el PDF con Edge headless (reportlab no está instalado):
    `& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless=new --disable-gpu --no-pdf-header-footer "--print-to-pdf=<salida>" "file:///<html>"`
-3. Guardalo en **`D:\Experimentos\BonoCorreciones\`** (la carpeta se escribe con una sola
-   "c"). No lo guardes dentro del repo auditado.
+3. Guardalo en la **carpeta de informes**. No lo guardes dentro del repo auditado.
 4. **Cada corrida deja un archivo nuevo; nunca sobrescribas un informe anterior.** Las
-   auditorías previas (las que estén en `BonoCorreciones\`, las de `engram`) son material de
+   auditorías previas (las que estén en la carpeta de informes, las de `engram`) son material de
    **referencia**: compará contra ellas, mirá qué se resolvió y qué sigue, citalas si hace
    falta — pero el resultado va siempre a un archivo distinto. Antes de generar, comprobá si
    ya hay uno con ese nombre; si lo hay, cambiá el `<distintivo>` en lugar de pisarlo. Así

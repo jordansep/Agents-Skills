@@ -14,7 +14,7 @@ description: >-
   claro, pedilo antes de avanzar.
 metadata:
   version: "1.2"
-  baseline: "formato de la devolución docente real (Grupo 3, 2026-10-29); v1.0 en versions/"
+  baseline: "formato de la devolución docente real (2026-10-29); v1.0 en versions/"
 ---
 
 # Auditoría de un sistema (experimental)

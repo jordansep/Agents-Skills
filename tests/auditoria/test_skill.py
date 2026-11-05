@@ -73,6 +73,12 @@ class Skill(unittest.TestCase):
     def test_lista_de_tareas_sin_agrupar(self):
         self.assertIn("No juntes correcciones distintas", SKILL)
 
+    def test_carpeta_sin_datos_de_un_proyecto_ni_rutas_locales(self):
+        for archivo in CARPETA.rglob("*.md"):
+            with self.subTest(archivo=archivo.name):
+                texto = archivo.read_text(encoding="utf-8")
+                self.assertNotRegex(texto, r"(?i)hemocentro|grupo \d|bonocorreciones|[A-Z]:\\?Experimentos")
+
     def test_cada_nivel_suma_una_exigencia(self):
         self.assertIn("**Intento de refutar cada Completo**", SKILL)
         self.assertIn("**Segunda pasada independiente**", SKILL)

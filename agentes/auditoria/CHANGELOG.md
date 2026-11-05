@@ -2,6 +2,12 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.6.2] - 2026-11-05
+
+### Corregido
+
+- Quita de la carpeta del skill los datos de un proyecto puntual y las rutas locales
+
 ## [0.6.1] - 2026-11-05
 
 ### Corregido
