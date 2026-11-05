@@ -2,6 +2,24 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.16.0] - 2026-11-05
+
+### Agregado
+
+- Entregas en varios archivos: campo entrega (unico o multiarchivo), con entrega_indice y entrega_patron, en la plantilla del prompt y en el configurador (DEC-008)
+- Verificador con entrega multiarchivo: lee una carpeta con el índice primero, y revisa patrón, números repetidos y saltos, enlaces del índice y H1 de cada punto (DEC-008)
+- Verificador: numeración de tablas y figuras por archivo, con prefijo y también con leyendas APA 7, citas contra toda la entrega y mención en el propio archivo (DEC-009)
+- Verificador: exactamente una tabla de control de versiones, en el índice; documentacion-generar propone sus filas desde git log y pide confirmar versión y descripción (DEC-010)
+- Configurador: subida de varios archivos, navegación en el orden de la entrega, ajustes por archivo que persisten al recargar, revisión de la estructura sobre toda la entrega y excepciones de todos los archivos en el prompt
+
+### Cambiado
+
+- Verificador: con entrega unico, Tabla 2.1 da error de numeración en lugar de leerse como Tabla 2
+
+### Corregido
+
+- Configurador: los enlaces e imágenes de Markdown con el destino entre <…> se muestran bien en la vista previa
+
 ## [0.15.0] - 2026-11-05
 
 ### Agregado

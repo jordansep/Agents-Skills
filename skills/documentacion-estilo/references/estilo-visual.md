@@ -26,6 +26,7 @@ Cada capítulo empieza en página nueva en el medio impreso. En digital, cada H1
 Reglas:
 
 - Numeración decimal en H1 a H3. Las partes no numeradas (Resumen, Referencias, Anexos, Glosario) llevan H1 sin número.
+- En una entrega `multiarchivo`, el H1 de cada punto lleva el número de su archivo: `04 - Diseño.md` empieza con `# 4 Diseño`, también si es una parte de `sin_numerar`. Con `numeracion_textual: ninguna`, va sin número (DEC-008).
 - Máximo cuatro niveles. Si necesitas un quinto, reorganiza el contenido.
 - Títulos cortos: hasta ocho palabras, sin punto final, en mayúscula solo la primera letra.
 - Un título nunca va solo al final de una página: se mantiene con el párrafo siguiente.
@@ -131,6 +132,17 @@ Se activan desde los componentes del configurador y quedan en `componentes` del 
 ### Control de versiones
 
 Primera página después de la portada. Tabla con columnas: Versión, Fecha, Autor, Descripción del cambio. Las fechas en formato dd/mm/aaaa.
+
+### Entregas en varios archivos
+
+Reglas para `entrega: multiarchivo`. Con `entrega: unico`, o sin el campo, el documento puede estar partido en varios archivos, pero es un solo documento lógico, con numeración continua (DEC-008).
+
+- **Archivos** (DEC-008): un archivo índice (`entrega_indice`, por defecto `README.md`) y un archivo por punto (`entrega_patron`, por defecto `NN - Nombre.md`), en el primer nivel de la carpeta. El índice enlaza cada punto, en el orden de los archivos.
+- **Tablas y figuras** (DEC-009): se numeran por archivo, con el número del archivo como prefijo: en `04 - Diseño.md` van `Tabla 4.1`, `Tabla 4.2` y `Figura 4.1`. Las del índice van sin prefijo y con numeración propia: `Tabla 1`. Con leyendas APA 7 se mantiene su formato y se admite ese número, como excepción explícita a APA 7.
+- **Citas** (DEC-009): desde otro archivo, una tabla o figura se cita con su número completo. La mención que la presenta va en su propio archivo.
+- **Control de versiones** (DEC-010): hay una sola tabla, en el índice. Sus filas se proponen desde el `git log` de la carpeta y el usuario confirma la versión y la descripción. Sin repositorio, o si la carpeta no tiene historial, quedan como `[PENDIENTE: versión, fecha, autor y descripción]`.
+
+`verificar_doc.py` revisa los archivos, los enlaces del índice, los números, las citas, las menciones y que haya una sola tabla de control de versiones, en el índice. No revisa las filas de esa tabla, el `git log` ni la confirmación del usuario.
 
 ### Encabezado, pie y portada
 

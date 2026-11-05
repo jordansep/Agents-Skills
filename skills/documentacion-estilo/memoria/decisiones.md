@@ -18,6 +18,9 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 | DEC-005 | Ubicación del prompt y de la documentación | confirmada | agente |
 | DEC-006 | Comillas | confirmada | agente |
 | DEC-007 | Plantillas tomadas de documentos de referencia | parcial | agente |
+| DEC-008 | Entregas en varios archivos | confirmada | agente |
+| DEC-009 | Numeración de tablas y figuras en entregas multiarchivo | confirmada | agente |
+| DEC-010 | Control de versiones desde git | confirmada | agente |
 
 ---
 
@@ -191,4 +194,72 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: cuando el prompt declara `plantilla`, su diseño manda sobre `estilo-visual.md`. El verificador acepta las leyendas APA 7 cuando la plantilla las usa o el prompt dice `leyendas: apa7`. El configurador tiene un preajuste para cada plantilla y escribe el campo `plantilla` en el prompt.
 **Aplicada en**: `references/plantillas/`, `SKILL.md`, `references/estilo-visual.md`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `../documentacion-generar/SKILL.md`.
+**PR**: —
+
+---
+
+## DEC-008 · Entregas en varios archivos
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: issue #15, historia 3 del Sprint 1
+- **Contexto**: `documentacion-generar` ya admite un archivo por capítulo con numeración continua, y el issue pide un campo `entrega: unico | multiarchivo` sin aclarar cómo conviven.
+
+**Preguntas**
+
+1. ¿Cómo conviven `multiarchivo` y «un archivo por capítulo»? Opciones: a) `unico` es un documento lógico, aunque esté partido por capítulos y con numeración continua; `multiarchivo` es una entrega con puntos independientes y numeración con prefijo; si el campo falta, vale `unico` (recomendada: los prompts existentes siguen funcionando); b) otra distinción.
+
+**Respuestas**
+
+1. Opción a.
+
+**Regla resultante**: `entrega: unico` es un documento lógico, en uno o varios archivos, con numeración continua. `entrega: multiarchivo` es una entrega con un archivo índice y un archivo por punto. Si el campo falta, vale `unico`.
+**Aplicada en**: `SKILL.md`, `../documentacion-generar/SKILL.md`, `../documentacion-generar/scripts/verificar_doc.py`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `references/estilo-visual.md`.
+**PR**: —
+
+---
+
+## DEC-009 · Numeración de tablas y figuras en entregas multiarchivo
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: issue #15, historia 3 del Sprint 1
+- **Contexto**: el issue pide `Tabla 4.1`, pero el estilo y el verificador exigen numeración continua, y las leyendas APA 7 usan un entero.
+
+**Preguntas**
+
+1. ¿De dónde sale el prefijo? Opciones: a) del número del archivo, y las tablas del índice van sin prefijo (recomendada: el nombre del archivo ya fija el orden); b) otra fuente.
+2. ¿Qué pasa con APA 7? Opciones: a) admitir `Tabla 4.1` con APA cuando la entrega es `multiarchivo`, como excepción explícita (recomendada: una sola regla para toda entrega multiarchivo); b) mantener la numeración continua con APA 7.
+
+**Respuestas**
+
+1. Opción a.
+2. Opción a.
+
+**Regla resultante**: en una entrega `multiarchivo`, tablas y figuras se numeran por archivo con el número del archivo como prefijo (`04 - …` da `Tabla 4.1`), y las del índice van sin prefijo (`Tabla 1`). Con leyendas APA 7 se mantiene su formato y se admite ese número, como excepción explícita a APA 7. Con `entrega: unico`, la numeración sigue siendo continua.
+**Aplicada en**: `../documentacion-generar/SKILL.md`, `../documentacion-generar/scripts/verificar_doc.py`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `references/estilo-visual.md`.
+**PR**: —
+
+---
+
+## DEC-010 · Control de versiones desde git
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: issue #15, historia 3 del Sprint 1
+- **Contexto**: el issue pide un control de versiones «alimentado por git», pero git da fechas, autores y mensajes, no versiones del documento.
+
+**Preguntas**
+
+1. ¿Qué significa «alimentado por git»? Opciones: a) el agente propone las filas desde el `git log` de la carpeta, el usuario confirma versión y descripción, y el verificador solo controla que haya una única tabla en el índice; sin repositorio queda `[PENDIENTE]` (recomendada: la versión y la descripción no salen de git); b) generar las filas sin confirmación.
+
+**Respuestas**
+
+1. Opción a.
+
+**Regla resultante**: una entrega `multiarchivo` tiene un solo control de versiones, en el índice. El agente propone las filas desde el `git log` de la carpeta de la entrega y el usuario confirma la versión y la descripción. Sin repositorio, las filas quedan como `[PENDIENTE]`.
+**Aplicada en**: `../documentacion-generar/SKILL.md`, `../documentacion-generar/scripts/verificar_doc.py`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `references/estilo-visual.md`.
 **PR**: —
