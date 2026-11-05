@@ -287,7 +287,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: la traducción de un diagrama siempre produce Mermaid como fuente editable. La traducción no busca reproducir el estilo de lámina: eso se resuelve en #18. Responde la parte de Mermaid de la pregunta 3 de DEC-007.
 **Aplicada en**: `references/imagenes.md` §4; `references/plantillas/diagramas.md` §6; `../documentacion-generar/SKILL.md`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/41
 
 
 ## DEC-012 · Diagramas sin tipo propio en Mermaid
@@ -308,7 +308,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: lo que no tenga tipo propio en Mermaid se traduce con `flowchart` y se marca como «aproximación» en `figuras/inventario.md`.
 **Aplicada en**: `references/imagenes.md` §4 y §6; `../documentacion-generar/SKILL.md`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/41
 
 
 ## DEC-013 · Alcance de la extracción de imágenes
@@ -329,7 +329,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: la extracción descarta las imágenes mínimas y repetidas antes de la lectura visual, convierte a PNG las páginas de PDF con dibujo vectorial y lista las formas de Word como «no extraídas».
 **Aplicada en**: `scripts/extraer_imagenes.py`; `references/imagenes.md` §1.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/41
 
 
 ## DEC-014 · Umbral de imagen mínima
@@ -350,4 +350,4 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: una imagen es mínima si su lado menor mide menos de 32 px. Una imagen de exactamente 32 px de lado menor se conserva. El umbral se puede cambiar por ejecución con `--lado-minimo`.
 **Aplicada en**: `scripts/extraer_imagenes.py`; `references/imagenes.md` §1.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/41
