@@ -21,6 +21,9 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 | DEC-008 | Entregas en varios archivos | confirmada | agente |
 | DEC-009 | Numeración de tablas y figuras en entregas multiarchivo | confirmada | agente |
 | DEC-010 | Control de versiones desde git | confirmada | agente |
+| DEC-011 | Mermaid como fuente editable de los diagramas | confirmada | agente |
+| DEC-012 | Diagramas sin tipo propio en Mermaid | confirmada | agente |
+| DEC-013 | Alcance de la extracción de imágenes | confirmada | agente |
 
 ---
 
@@ -263,3 +266,66 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 **Regla resultante**: una entrega `multiarchivo` tiene un solo control de versiones, en el índice. El agente propone las filas desde el `git log` de la carpeta de la entrega y el usuario confirma la versión y la descripción. Sin repositorio, las filas quedan como `[PENDIENTE]`.
 **Aplicada en**: `../documentacion-generar/SKILL.md`, `../documentacion-generar/scripts/verificar_doc.py`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `references/estilo-visual.md`.
 **PR**: https://github.com/jordansep/Agents-Skills/pull/40
+
+
+## DEC-011 · Mermaid como fuente editable de los diagramas
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: análisis previo de la historia 4 (#16)
+- **Contexto**: el issue #16 traduce los diagramas a Mermaid, pero `references/plantillas/diagramas.md` dice que se dibujan como SVG o HTML, y la pregunta 3 de DEC-007 seguía abierta.
+
+**Preguntas**
+
+1. ¿Qué papel cumple Mermaid? Opciones: a) fuente editable en todos los casos, con el estilo de lámina resuelto en #18 (recomendada: #16 no depende de cerrar el diseño visual); b) solo para la documentación web.
+
+**Respuestas**
+
+1. Opción a, la recomendada.
+
+**Regla resultante**: la traducción de un diagrama siempre produce Mermaid como fuente editable. La traducción no busca reproducir el estilo de lámina: eso se resuelve en #18. Responde la parte de Mermaid de la pregunta 3 de DEC-007.
+**Aplicada en**: pendiente de implementar en #16 (`references/imagenes.md`).
+**PR**: —
+
+
+## DEC-012 · Diagramas sin tipo propio en Mermaid
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: análisis previo de la historia 4 (#16)
+- **Contexto**: el issue pide Mermaid «en la notación del prompt», pero Mermaid no tiene un tipo propio para casos de uso ni para BPMN.
+
+**Preguntas**
+
+1. ¿Qué se hace con esos diagramas? Opciones: a) aproximarlos con `flowchart` y marcarlos como aproximación (recomendada: cumple el criterio de casos de uso sin inventar notación); b) dejarlos como imagen.
+
+**Respuestas**
+
+1. Opción a, la recomendada.
+
+**Regla resultante**: lo que no tenga tipo propio en Mermaid se traduce con `flowchart` y se marca como «aproximación» en `figuras/inventario.md`.
+**Aplicada en**: pendiente de implementar en #16 (`references/imagenes.md`).
+**PR**: —
+
+
+## DEC-013 · Alcance de la extracción de imágenes
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: análisis previo de la historia 4 (#16)
+- **Contexto**: *Trabajo de Campo v3.6* trae 133 archivos en `word/media`, 135 referencias a imágenes y 3 formas de dibujo, y una de las imágenes pesa 70 bytes. Además, un diagrama vectorial de un PDF no es una imagen incrustada.
+
+**Preguntas**
+
+1. ¿Qué entra en el alcance? Opciones: a) filtrar imágenes mínimas y repetidas, convertir a PNG las páginas de PDF con dibujo vectorial y listar las formas de Word como «no extraídas» (recomendada); b) dejar lo vectorial para otra historia.
+
+**Respuestas**
+
+1. Opción a, la recomendada.
+
+**Regla resultante**: la extracción descarta las imágenes mínimas y repetidas antes de la lectura visual, convierte a PNG las páginas de PDF con dibujo vectorial y lista las formas de Word como «no extraídas».
+**Aplicada en**: pendiente de implementar en #16 (`references/imagenes.md`).
+**PR**: —
