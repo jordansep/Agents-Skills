@@ -12,13 +12,12 @@ description: >-
   Drive, Chrome, Claude Docs, engram, etc.), sigue una secuencia fija —identificación,
   superficie, estructura interna, hallazgos y, solo si el usuario lo autoriza, runtime— y
   entrega un informe en español rioplatense ordenado por severidad, guardado en PDF en
-  D:\Experimentos\BonoCorreciones. Da por sentado un encuadre
+  la carpeta de informes del usuario. Da por sentado un encuadre
   autorizado (sistema propio, pentest autorizado, CTF, investigación de seguridad, trabajo
   académico) y, si no está claro, pedilo antes de avanzar. Es la capa de procedimiento e
   informe por encima de reverse-engineer-anything, que cubre la mecánica de REA.
 metadata:
-  version: "1.1"
-  baseline: "formato de la devolución docente real (Grupo 3, 2026-10-29); v1.0 en versions/"
+  version: "2-experimental"
 ---
 
 # Auditoría de un sistema (experimental)
@@ -262,22 +261,17 @@ Un apartado por punto, en el orden de la consigna:
 Archivo: <ruta del entregable> (si está vacío: "solo <!-- Pendiente -->, línea 3")
 | Criterio | ¿Cumple? | Evidencia |
 | ≥ 3 épicas | Sí | 5 épicas, de EP-01 a EP-05 (docs/01:49-78) |
-| INVEST | Sí | Son chicas y con criterios verificables (docs/01:121-148). Observaciones abajo |
 | Despliegue UML | Parcial | Tiene nodos y protocolos (docs/04:179-211), pero el terminal no tiene «artifact» (docs/04:183) |
-**Debajo del cuadro van, en este orden, los dos bloques con los que cierra cada punto la
-devolución docente** (el apartado nunca termina en la tabla):
+**Debajo del cuadro de cada punto van siempre, en este orden, dos bloques** (no son
+opcionales: aunque el punto esté Completo, el apartado no termina en la tabla):
 
-- **Observaciones de <tema>:** siempre que haya algo que observar (que es lo habitual, aun en
-  los puntos Completos): lo que se cumple pero se puede mejorar, los riesgos, las decisiones a
-  validar y lo que no se pudo verificar. Nombrá el bloque por su tema, como la cátedra
-  ("Observaciones de INVEST:", "Observaciones de diseño:"); cuando un criterio del cuadro
-  manda al bloque, cerrá su evidencia con "Observaciones abajo". Omitilo sólo si el punto no
-  deja nada para observar.
-- **Para completarlo:** siempre. Viñetas con cada cosa concreta que hay que hacer para cerrar
-  el punto, con su evidencia (`archivo:línea` —varias líneas separadas con coma, rangos con
-  guion— o `WI #n`); una sola oración si es una cosa; o "—" si no falta nada. Cada No y cada
-  Parcial del cuadro tiene su viñeta acá, y cada una se repite después como tarea en la
-  *Lista de tareas para el grupo*.
+- **Observaciones:** viñetas con lo que se cumple pero se puede mejorar, los riesgos, las
+  decisiones a validar y lo que no se pudo verificar. Si no hay nada que observar, poné una
+  viñeta que lo diga ("Sin observaciones: el punto cumple todos los criterios").
+- **Correcciones por hacer:** viñetas con cada cosa concreta que hay que hacer para cerrar el
+  punto, con su evidencia (`archivo:línea` o `WI #n`); una sola oración si es una cosa; o "—"
+  si no falta nada. Cada No y cada Parcial del cuadro tiene su correspondiente corrección acá,
+  y cada corrección se repite después como tarea en la *Lista de tareas para el grupo*.
 
 ## Coherencia entre documentos
 Un párrafo por incoherencia, que empieza con el tema en negrita:
@@ -312,7 +306,7 @@ Falta; Inicial se agregó para los puntos empezados que no llegan a la mitad.
 
 **Criterios de cada punto.** Si hay una consigna, los criterios salen de ella, uno por
 renglón y con la misma redacción (por ejemplo, "≥ 15 HU en formato Como/quiero/para"). Para el
-trabajo integrador de MyD 2026, usá la lista de `references/formato-devolucion-docente.md`.
+trabajo de la consigna, usá la lista de `references/formato-devolucion-docente.md`.
 Si no hay consigna, armá los criterios a partir de lo que el sistema dice que hace (README,
 documentación, manifiesto).
 
@@ -340,28 +334,20 @@ infles un PROBABLE a CONFIRMADO.
 El informe resume. Pseudo-código, listados y volcados largos van resumidos; la evidencia
 completa va en el bundle (`export_evidence_bundle`) o en archivos de trabajo.
 
-### 4. PDF en BonoCorreciones (siempre, y siempre un archivo nuevo)
+### 4. PDF en la carpeta de informes (siempre)
 Al terminar **cada** auditoría, de cualquier nivel:
 1. Armá el informe como HTML (estilos inline, tokens de color, A4) en el scratchpad. Usá
    tablas como la devolución: la del resumen con el estado coloreado (Completo en verde,
    Avanzado en ámbar, Inicial y Falta en rojo) y una tabla Criterio / ¿Cumple? / Evidencia
    por punto, con Sí, Parcial y No coloreados. La lista de tareas va con casillas ☐.
-   Nombrá el archivo `AAAA-MM-DD-Informe-completitud-<tema>-<distintivo>.pdf`, donde
-   `<distintivo>` hace único el nombre: el commit corto auditado, la hora `HHMM`, o un
-   correlativo `v2`, `v3`.
+   Nombrá el archivo `AAAA-MM-DD-Informe-completitud-<tema>.pdf`.
 2. Generá el PDF con Edge headless (reportlab no está instalado):
    `& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless=new --disable-gpu --no-pdf-header-footer "--print-to-pdf=<salida>" "file:///<html>"`
-3. Guardalo en **`D:\Experimentos\BonoCorreciones\`** (la carpeta se escribe con una sola
-   "c"). No lo guardes dentro del repo auditado.
-4. **Cada corrida deja un archivo nuevo; nunca sobrescribas un informe anterior.** Las
-   auditorías previas (las que estén en `BonoCorreciones\`, las de `engram`) son material de
-   **referencia**: compará contra ellas, mirá qué se resolvió y qué sigue, citalas si hace
-   falta — pero el resultado va siempre a un archivo distinto. Antes de generar, comprobá si
-   ya hay uno con ese nombre; si lo hay, cambiá el `<distintivo>` en lugar de pisarlo. Así
-   queda el historial de cómo evolucionó el sistema entre auditorías.
-5. Leé el PDF y revisá que no haya páginas casi vacías, acentos rotos ni tablas cortadas antes
+3. Guardalo en **`<carpeta de informes>\AAAA-MM-DD-Informe-completitud-<tema>.pdf`**.
+   No lo guardes dentro del repo auditado.
+4. Leé el PDF y revisá que no haya páginas casi vacías, acentos rotos ni tablas cortadas antes
    de avisar.
-6. Decile al usuario la ruta exacta.
+5. Decile al usuario la ruta exacta.
 
 Si el usuario también quiere compartirlo, ofrecé publicarlo como artifact.
 

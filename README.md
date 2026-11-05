@@ -4,7 +4,7 @@ Agentes Experimentales
 | Agente | Versión | Skills |
 |---|---|---|
 | [Documentación](agentes/documentacion/CHANGELOG.md) | ver [`agente.json`](agentes/documentacion/agente.json) | `documentacion-estilo`, `documentacion-generar` |
-| [Auditoría](agentes/auditoria/CHANGELOG.md) | ver [`agente.json`](agentes/auditoria/agente.json) | `auditoria-sistemas-experimental` |
+| [Auditoría](agentes/auditoria/CHANGELOG.md) | ver [`agente.json`](agentes/auditoria/agente.json) | `auditoria-sistemas` |
 
 Cada agente tiene su propia versión SemVer, su changelog y etiquetas `<agente>/vX.Y.Z`. Las reglas y el flujo están en [`VERSIONADO.md`](VERSIONADO.md). Para ver las versiones actuales:
 
