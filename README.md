@@ -37,6 +37,8 @@ Configurador visual: [`assets/configurador.html`](skills/documentacion-estilo/as
 
 Plantillas: [`references/plantillas/`](skills/documentacion-estilo/references/plantillas/README.md) guarda los diseños tomados de documentos del usuario (trabajo de campo, informe técnico, auditoría, proforma, ficha, láminas de arquitectura y diagramas). Cada una tiene un preajuste en el configurador, y [`scripts/extraer_estilo_docx.py`](skills/documentacion-estilo/scripts/extraer_estilo_docx.py) extrae el diseño de un .docx nuevo.
 
+Imágenes: [`references/imagenes.md`](skills/documentacion-estilo/references/imagenes.md) guía al agente para ver, clasificar y traducir las imágenes de un documento a Mermaid o a tablas, y deja `figuras/inventario.md` con el original y la traducción lado a lado. [`scripts/extraer_imagenes.py`](skills/documentacion-estilo/scripts/extraer_imagenes.py) las extrae de un .docx o de un PDF (este último requiere PyMuPDF).
+
 Memoria del agente: el agente trabaja siempre con el mismo estilo y no decide nada por su cuenta. Lo que no está definido se lo pregunta al usuario y lo registra en una de dos memorias ([procedimiento](skills/documentacion-estilo/references/memoria.md)):
 
 - **Memoria del agente**, [`memoria/decisiones.md`](skills/documentacion-estilo/memoria/decisiones.md): reglas que valen para todos los documentos. El agente incorpora la regla al skill y la envía a este repositorio con un PR que explica qué cambió, por qué y cómo.

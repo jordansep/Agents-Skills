@@ -2,6 +2,18 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.17.0] - 2026-11-05
+
+### Agregado
+
+- Extracción de imágenes de .docx, PDF o carpetas con inventario JSON: scripts/extraer_imagenes.py descarta las mínimas y las repetidas, convierte a PNG las páginas de PDF con dibujo vectorial y lista lo no extraído (DEC-013)
+- Procedimiento references/imagenes.md: lectura visual, clasificación, traducción a Mermaid o tablas, escala de confianza e inventario figuras/inventario.md lado a lado (DEC-011, DEC-012)
+- DEC-014: una imagen es mínima si su lado menor mide menos de 32 px
+
+### Cambiado
+
+- Verificador: figuras/inventario.md no se lee al recorrer una carpeta
+
 ## [0.16.0] - 2026-11-05
 
 ### Agregado

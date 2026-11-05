@@ -21,6 +21,10 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 | DEC-008 | Entregas en varios archivos | confirmada | agente |
 | DEC-009 | Numeración de tablas y figuras en entregas multiarchivo | confirmada | agente |
 | DEC-010 | Control de versiones desde git | confirmada | agente |
+| DEC-011 | Mermaid como fuente editable de los diagramas | confirmada | agente |
+| DEC-012 | Diagramas sin tipo propio en Mermaid | confirmada | agente |
+| DEC-013 | Alcance de la extracción de imágenes | confirmada | agente |
+| DEC-014 | Umbral de imagen mínima | confirmada | agente |
 
 ---
 
@@ -186,7 +190,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 1. Trabajo de campo: numeración y mayúsculas de los títulos, cuerpo de 11 o 12 pt, color de las notas, alineación del H2, interlineado de las actas, y si la v3.6 (Calibri, A4) reemplaza a la v2.2 (Times, Carta).
 2. Informe técnico: papel Carta o A4, tablas sin leyenda o con APA 7, y si se unifican sus colores con los del Trabajo de campo.
-3. Diagramas: si el de casos de uso estilo Mermaid se redibuja con el estilo de lámina, si se nombra a las personas o solo su rol, y si Mermaid queda solo para la documentación web.
+3. Diagramas: si el de casos de uso estilo Mermaid se redibuja con el estilo de lámina y si se nombra a las personas o solo su rol. La parte de Mermaid (si queda solo para la documentación web) la responde DEC-011.
 4. Proforma: dónde va el código del formulario y cuántas líneas de respuesta por pregunta.
 5. Ficha 1-pager: Arial o la familia del documento principal.
 6. Arquitectura en láminas: número de página y pie, y si el formato sirve para otros entregables.
@@ -263,3 +267,87 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 **Regla resultante**: una entrega `multiarchivo` tiene un solo control de versiones, en el índice. El agente propone las filas desde el `git log` de la carpeta de la entrega y el usuario confirma la versión y la descripción. Sin repositorio, las filas quedan como `[PENDIENTE]`.
 **Aplicada en**: `../documentacion-generar/SKILL.md`, `../documentacion-generar/scripts/verificar_doc.py`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `references/estilo-visual.md`.
 **PR**: https://github.com/jordansep/Agents-Skills/pull/40
+
+
+## DEC-011 · Mermaid como fuente editable de los diagramas
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: análisis previo de la historia 4 (#16)
+- **Contexto**: el issue #16 traduce los diagramas a Mermaid, pero `references/plantillas/diagramas.md` dice que se dibujan como SVG o HTML, y la pregunta 3 de DEC-007 seguía abierta.
+
+**Preguntas**
+
+1. ¿Qué papel cumple Mermaid? Opciones: a) fuente editable en todos los casos, con el estilo de lámina resuelto en #18 (recomendada: #16 no depende de cerrar el diseño visual); b) solo para la documentación web.
+
+**Respuestas**
+
+1. Opción a, la recomendada.
+
+**Regla resultante**: la traducción de un diagrama siempre produce Mermaid como fuente editable. La traducción no busca reproducir el estilo de lámina: eso se resuelve en #18. Responde la parte de Mermaid de la pregunta 3 de DEC-007.
+**Aplicada en**: `references/imagenes.md` §4; `references/plantillas/diagramas.md` §6; `../documentacion-generar/SKILL.md`.
+**PR**: https://github.com/jordansep/Agents-Skills/pull/41
+
+
+## DEC-012 · Diagramas sin tipo propio en Mermaid
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: análisis previo de la historia 4 (#16)
+- **Contexto**: el issue pide Mermaid «en la notación del prompt», pero Mermaid no tiene un tipo propio para casos de uso ni para BPMN.
+
+**Preguntas**
+
+1. ¿Qué se hace con esos diagramas? Opciones: a) aproximarlos con `flowchart` y marcarlos como aproximación (recomendada: cumple el criterio de casos de uso sin inventar notación); b) dejarlos como imagen.
+
+**Respuestas**
+
+1. Opción a, la recomendada.
+
+**Regla resultante**: lo que no tenga tipo propio en Mermaid se traduce con `flowchart` y se marca como «aproximación» en `figuras/inventario.md`.
+**Aplicada en**: `references/imagenes.md` §4 y §6; `../documentacion-generar/SKILL.md`.
+**PR**: https://github.com/jordansep/Agents-Skills/pull/41
+
+
+## DEC-013 · Alcance de la extracción de imágenes
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: análisis previo de la historia 4 (#16)
+- **Contexto**: un documento de Word puede traer muchas imágenes, algunas mínimas o repetidas, y formas de dibujo que no son archivos de imagen. Además, un diagrama vectorial de un PDF no es una imagen incrustada.
+
+**Preguntas**
+
+1. ¿Qué entra en el alcance? Opciones: a) filtrar imágenes mínimas y repetidas, convertir a PNG las páginas de PDF con dibujo vectorial y listar las formas de Word como «no extraídas» (recomendada); b) dejar lo vectorial para otra historia.
+
+**Respuestas**
+
+1. Opción a, la recomendada.
+
+**Regla resultante**: la extracción descarta las imágenes mínimas y repetidas antes de la lectura visual, convierte a PNG las páginas de PDF con dibujo vectorial y lista las formas de Word como «no extraídas».
+**Aplicada en**: `scripts/extraer_imagenes.py`; `references/imagenes.md` §1.
+**PR**: https://github.com/jordansep/Agents-Skills/pull/41
+
+
+## DEC-014 · Umbral de imagen mínima
+
+- **Estado**: confirmada
+- **Alcance**: agente
+- **Preguntado**: 05/11/2026 · **Respondido**: 05/11/2026
+- **Origen**: historia 4 (#16)
+- **Contexto**: DEC-013 descarta las imágenes mínimas, pero no dice cuándo una imagen lo es.
+
+**Preguntas**
+
+1. ¿Cuándo una imagen es mínima?
+
+**Respuestas**
+
+1. Cuando su lado menor mide menos de 32 px.
+
+**Regla resultante**: una imagen es mínima si su lado menor mide menos de 32 px. Una imagen de exactamente 32 px de lado menor se conserva. El umbral se puede cambiar por ejecución con `--lado-minimo`.
+**Aplicada en**: `scripts/extraer_imagenes.py`; `references/imagenes.md` §1.
+**PR**: https://github.com/jordansep/Agents-Skills/pull/41
