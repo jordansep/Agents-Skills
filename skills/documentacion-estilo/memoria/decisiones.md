@@ -216,7 +216,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: `entrega: unico` es un documento lógico, en uno o varios archivos, con numeración continua. `entrega: multiarchivo` es una entrega con un archivo índice y un archivo por punto. Si el campo falta, vale `unico`.
 **Aplicada en**: `SKILL.md`, `../documentacion-generar/SKILL.md`, `../documentacion-generar/scripts/verificar_doc.py`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `references/estilo-visual.md`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/40
 
 ---
 
@@ -240,7 +240,7 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: en una entrega `multiarchivo`, tablas y figuras se numeran por archivo con el número del archivo como prefijo (`04 - …` da `Tabla 4.1`), y las del índice van sin prefijo (`Tabla 1`). Con leyendas APA 7 se mantiene su formato y se admite ese número, como excepción explícita a APA 7. Con `entrega: unico`, la numeración sigue siendo continua.
 **Aplicada en**: `../documentacion-generar/SKILL.md`, `../documentacion-generar/scripts/verificar_doc.py`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `references/estilo-visual.md`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/40
 
 ---
 
@@ -262,4 +262,4 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 **Regla resultante**: una entrega `multiarchivo` tiene un solo control de versiones, en el índice. El agente propone las filas desde el `git log` de la carpeta de la entrega y el usuario confirma la versión y la descripción. Sin repositorio, las filas quedan como `[PENDIENTE]`.
 **Aplicada en**: `../documentacion-generar/SKILL.md`, `../documentacion-generar/scripts/verificar_doc.py`, `assets/configurador.html`, `assets/plantilla-prompt-estilo.md`, `references/estilo-visual.md`.
-**PR**: —
+**PR**: https://github.com/jordansep/Agents-Skills/pull/40
