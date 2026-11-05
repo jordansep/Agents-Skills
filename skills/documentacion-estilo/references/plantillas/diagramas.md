@@ -55,4 +55,4 @@ Tomada de *mermaid.html* («Diagramas de Arquitectura — Pasarela de Pagos»), 
 - Debajo de la tarjeta, un párrafo de 14 px en gris `#475569` que explica qué muestra el diagrama y qué debe notar el lector.
 - Diagramas en Mermaid (flowchart, stateDiagram-v2, classDiagram), con el tema de Mermaid por defecto y la fuente Inter.
 
-Punto abierto: ¿para los diagramas de los entregables se usa el estilo de lámina (secciones 1 a 5) y Mermaid solo para la documentación web?
+Punto resuelto (DEC-011): Mermaid no queda solo para la documentación web. Es la fuente editable de todo diagrama traducido desde una imagen (`../imagenes.md`). La traducción no reproduce el estilo de lámina de las secciones 1 a 5: cómo se aplica ese estilo a los entregables se resuelve en #18.

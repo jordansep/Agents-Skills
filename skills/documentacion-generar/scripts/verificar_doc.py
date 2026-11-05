@@ -1043,6 +1043,11 @@ def verificar(prompt, archivos, inf, memorias=None, entrega=None):
         inf.aviso(donde, f"oración de {palabras} palabras (máximo {max_palabras})")
 
 
+def es_inventario_figuras(ruta):
+    """`figuras/inventario.md` es una hoja de trabajo de la traducción de imágenes, no parte del documento."""
+    return ruta.name.lower() == "inventario.md" and ruta.resolve().parent.name.lower() == "figuras"
+
+
 def main():
     p = argparse.ArgumentParser(description="Verifica documentación Markdown contra un prompt de estilo.")
     p.add_argument("--prompt", required=True, help="ruta al prompt-estilo.md")
@@ -1074,7 +1079,7 @@ def main():
     archivos = list(entrega.archivos) if entrega else []
     for r in map(Path, [] if entrega else a.rutas):
         if r.is_dir():
-            archivos += sorted(f for f in r.rglob("*.md") if f.resolve() != prompt_ruta.resolve())
+            archivos += sorted(f for f in r.rglob("*.md") if f.resolve() != prompt_ruta.resolve() and not es_inventario_figuras(f))
         elif r.is_file():
             archivos.append(r)
         else:

@@ -16,6 +16,8 @@ Carga solo la referencia que necesites:
 - `assets/configurador.html`: configurador visual para que el usuario elija los parámetros, con vista previa en vivo. Genera el prompt de estilo y las respuestas para la memoria.
 - `references/plantillas/`: diseños tomados de documentos que el usuario entregó como modelo (Trabajo de campo UNC, informe técnico, informe de auditoría, proforma de entrevista, ficha 1-pager, arquitectura en láminas y diagramas). Mandan sobre `estilo-visual.md` cuando el prompt los declara en `plantilla`. El `README.md` de la carpeta dice cuál usar.
 - `scripts/extraer_estilo_docx.py`: extrae el diseño de un .docx de referencia (página, fuentes, títulos, tablas, leyendas, pie) para crear o revisar una plantilla.
+- `references/imagenes.md`: cómo ver, clasificar y traducir las imágenes de un documento a un formato editable, con `figuras/inventario.md` como resultado. Se usa cuando el documento trae diagramas, cuadros o gráficos como figuras.
+- `scripts/extraer_imagenes.py`: extrae las imágenes de un .docx, un PDF o una carpeta, con un inventario JSON. Lo usa `references/imagenes.md`.
 - `references/memoria.md`: qué hacer cuando algo no está definido y cómo se guarda la memoria.
 - `memoria/decisiones.md`: memoria del agente, con las decisiones que valen para todos los documentos. Se lee en el Paso 4 y en los casos no definidos.
 - `assets/plantilla-decisiones-proyecto.md`: plantilla de la memoria de un proyecto (`decisiones-estilo.md`).

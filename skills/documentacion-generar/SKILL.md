@@ -37,6 +37,7 @@ Si el prompt pegado no tiene encabezado YAML, conviértelo al formato de `../doc
 2. En documentación de software, toma los nombres reales del código y de la interfaz: pantallas, menús, campos, endpoints, parámetros, comandos y mensajes de error. No los traduzcas ni los inventes.
 3. Asigna cada capítulo de `estructura` a sus fuentes. Si un capítulo no tiene fuente, se escribe con `[PENDIENTE: qué falta y quién puede darlo]`.
 4. No inventes datos, cifras, nombres de personas, resultados, citas ni referencias bibliográficas.
+5. Si una fuente trae imágenes (diagramas, cuadros, gráficos), sigue `../documentacion-estilo/references/imagenes.md`: extráelas con `../documentacion-estilo/scripts/extraer_imagenes.py`, léelas, clasifícalas y tradúcelas. El resultado queda en `salida/figuras/inventario.md`, y lo traducido se usa al redactar.
 
 ## Paso 3: planificar
 
@@ -65,7 +66,7 @@ Sigue el prompt al pie de la letra: estructura, componentes, tratamiento y norma
   - **Puntos** (DEC-008): el H1 lleva el número del archivo: `04 - Diseño.md` empieza con `# 4 Diseño`, y sus secciones son `## 4.1`, `## 4.2`… También lleva número una parte de `sin_numerar` que va en un punto: `05 - Glosario.md` empieza con `# 5 Glosario`. Con `numeracion_textual: ninguna`, el H1 no lleva número.
   - **Numeración** (DEC-009): reemplaza a la numeración continua. Tablas y figuras se numeran por archivo con el número del archivo como prefijo: en `04 - Diseño.md`, `**Tabla 4.1.**` y `**Figura 4.1.**`. Las del índice van sin prefijo: `**Tabla 1.**`. Con leyendas APA 7 se mantiene su formato y se admite ese número, como excepción explícita a APA 7: `**Tabla 4.1**`. Cada una se menciona en su propio archivo; desde otro archivo se cita con su número completo.
 - **Avisos**: `> **Nota.**`, `> **Consejo.**`, `> **Advertencia.**` o `> **Peligro.**`.
-- **Diagramas**: en Mermaid dentro del documento, con la notación que fija el prompt (UML, BPMN, C4 o ER). Si el diagrama no se puede expresar en Mermaid, usa PlantUML en `figuras/` y enlaza la imagen exportada.
+- **Diagramas**: en Mermaid dentro del documento, con la notación que fija el prompt (UML, BPMN, C4 o ER). Si el diagrama no se puede expresar en Mermaid, usa PlantUML en `figuras/` y enlaza la imagen exportada. Un diagrama que viene de una imagen se traduce con `../documentacion-estilo/references/imagenes.md`: siempre a Mermaid (DEC-011), y lo que no tiene tipo propio usa `flowchart`, marcado «aproximación» (DEC-012). Lo que en `figuras/inventario.md` tiene confianza baja o algún `[PENDIENTE: ilegible]` no se usa en el documento sin confirmación del usuario, y un diagrama que supera el máximo de elementos de `../documentacion-estilo/references/estilo-visual.md` se pregunta antes de usarlo.
 - **Pendientes**: `[PENDIENTE: descripción]`, nunca texto inventado.
 - **Glosario y siglas**: anota cada término técnico y cada sigla mientras escribes. Al final, completa el glosario y la lista de siglas.
 
@@ -127,6 +128,7 @@ Con `entrega: unico`, `Tabla 2.1` da error: ya no se lee como `Tabla 2`.
 - **Errores**: corrígelos todos y vuelve a ejecutar el script hasta que no quede ninguno.
 - **Advertencias**: corrígelas. Si alguna es un falso positivo (por ejemplo, un número de versión con punto), déjala y menciónala en el informe final.
 - **Pendientes**: el script los lista. Se informan al usuario y no se rellenan inventando.
+- **Inventario de figuras**: `figuras/inventario.md` no se verifica al recorrer una carpeta, porque es una hoja de trabajo y no parte del documento. Sus `[PENDIENTE: ilegible]` se informan aparte.
 
 Luego revisa a mano lo que el script no ve, con la lista de verificación de `documentacion-estilo`: voz activa, tratamiento coherente, un término por concepto, cautela en las conclusiones y criterios de aceptación propios del prompt.
 
