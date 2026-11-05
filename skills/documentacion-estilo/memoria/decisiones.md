@@ -11,21 +11,21 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 | ID | Tema | Estado | Alcance |
 |---|---|---|---|
-| DEC-001 | Tratamiento y variante del español | pendiente | agente |
-| DEC-002 | Convención de números | pendiente | agente |
-| DEC-003 | Tipografía y paleta de color | pendiente | agente |
-| DEC-004 | Estilo de citas | pendiente | agente |
-| DEC-005 | Ubicación del prompt y de la documentación | pendiente | agente |
-| DEC-006 | Comillas | pendiente | agente |
+| DEC-001 | Tratamiento y variante del español | confirmada | agente |
+| DEC-002 | Convención de números | confirmada | agente |
+| DEC-003 | Tipografía y paleta de color | confirmada | agente |
+| DEC-004 | Estilo de citas | confirmada | agente |
+| DEC-005 | Ubicación del prompt y de la documentación | confirmada | agente |
+| DEC-006 | Comillas | confirmada | agente |
 | DEC-007 | Plantillas tomadas de documentos de referencia | parcial | agente |
 
 ---
 
 ## DEC-001 · Tratamiento y variante del español
 
-- **Estado**: pendiente
+- **Estado**: confirmada
 - **Alcance**: agente
-- **Preguntado**: 02/11/2026 · **Respondido**: —
+- **Preguntado**: 02/11/2026 · **Respondido**: 05/11/2026
 - **Origen**: creación inicial de los skills
 - **Contexto**: el agente propuso por su cuenta español neutro, "usted" en manuales e impersonal en tesis y especificaciones. El usuario no lo confirmó. Los valores están en `escritura.md` §3 y §4 y en la tabla del Paso 1 de `SKILL.md`.
 
@@ -35,19 +35,23 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 2. ¿Qué tratamiento se usa en manuales? Opciones: a) usted ("Seleccione el archivo"); b) tú ("Selecciona el archivo"); c) vos ("Seleccioná el archivo").
 3. ¿Qué tratamiento se usa en tesis y especificaciones? Opciones: a) impersonal ("Se propone un modelo"; recomendada: es lo habitual en textos académicos); b) primera persona del plural ("Proponemos un modelo").
 
-**Respuestas**: —
+**Respuestas**
 
-**Regla resultante**: —
-**Aplicada en**: —
+1. Rioplatense con voseo.
+2. Impersonal.
+3. Impersonal. En informes técnicos, también impersonal.
+
+**Regla resultante**: español rioplatense con voseo y tratamiento impersonal en manuales, tesis, especificaciones e informes técnicos.
+**Aplicada en**: `references/escritura.md` §3, §4 y §6; `references/estilo-visual.md` (Pasos de manual); `SKILL.md`; `assets/configurador.html`.
 **PR**: —
 
 ---
 
 ## DEC-002 · Convención de números
 
-- **Estado**: pendiente
+- **Estado**: confirmada
 - **Alcance**: agente
-- **Preguntado**: 02/11/2026 · **Respondido**: —
+- **Preguntado**: 02/11/2026 · **Respondido**: 05/11/2026
 - **Origen**: creación inicial de los skills
 - **Contexto**: el agente propuso coma decimal, espacio para miles, espacio antes de % y fechas dd/mm/aaaa (`escritura.md` §3). El verificador lo controla con el campo `decimal: coma`.
 
@@ -57,19 +61,23 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 2. ¿Cómo se separan los miles? Opciones: a) espacio, `12 500`; b) punto, `12.500`; c) sin separación.
 3. ¿El símbolo % va con espacio? Opciones: a) sí, `15 %` (norma RAE); b) no, `15%`.
 
-**Respuestas**: —
+**Respuestas**
 
-**Regla resultante**: —
-**Aplicada en**: —
+1. Coma (`3,5`).
+2. Punto (`12.500`).
+3. Con espacio (`15 %`). Fechas en tablas: dd/mm/aaaa.
+
+**Regla resultante**: coma decimal, punto para miles, espacio antes de % y fechas dd/mm/aaaa en tablas.
+**Aplicada en**: `references/escritura.md` §3; `assets/plantilla-prompt-estilo.md`; `assets/configurador.html`; `verificar_doc.py`.
 **PR**: —
 
 ---
 
 ## DEC-003 · Tipografía y paleta de color
 
-- **Estado**: pendiente
+- **Estado**: confirmada
 - **Alcance**: agente
-- **Preguntado**: 02/11/2026 · **Respondido**: —
+- **Preguntado**: 02/11/2026 · **Respondido**: 05/11/2026
 - **Origen**: creación inicial de los skills
 - **Contexto**: el agente propuso Inter o Source Sans 3 para documentos digitales, Times New Roman 12 o Arial 11 para impresos y una paleta de tokens con contraste AA verificado (`estilo-visual.md` §4 y §5). No hay guía de marca confirmada.
 
@@ -79,19 +87,23 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 2. ¿Qué familia se usa en documentos digitales? Opciones: a) Inter; b) Source Sans 3; c) otra.
 3. ¿Qué color primario se usa? Opciones: a) azul `#1F4E79` (actual); b) color institucional (indicar el código).
 
-**Respuestas**: —
+**Respuestas**
 
-**Regla resultante**: —
-**Aplicada en**: —
+1. No hay guía de marca ni reglamento.
+2. Calibri en títulos y cuerpo, Consolas en código. Pedido textual sobre el catálogo: «Suma Calibri, Sans, Arial y algunas mas, que respeten la integridad formal / academica / cientifica»; «Sans» es la categoría Sans Serif.
+3. `#2E74B5`. Los tamaños impresos 12/16/13/12 pt y los márgenes de 1,27 cm quedan solo en la plantilla Trabajo de campo.
+
+**Regla resultante**: Calibri en títulos y cuerpo, Consolas en código y `#2E74B5` como primario. Catálogo formal: Calibri, Arial, Helvetica, Source Sans 3, Times New Roman, Cambria, Georgia, Palatino Linotype, Garamond y STIX Two Text. El usuario nombró Calibri, Arial y la categoría Sans Serif; el resto lo propuso el agente porque el usuario pidió sumar «algunas más». Los tamaños y márgenes generales no cambian.
+**Aplicada en**: `references/estilo-visual.md` §4 y §5; `assets/plantilla-prompt-estilo.md`; `assets/configurador.html`.
 **PR**: —
 
 ---
 
 ## DEC-004 · Estilo de citas
 
-- **Estado**: pendiente
+- **Estado**: confirmada
 - **Alcance**: agente
-- **Preguntado**: 02/11/2026 · **Respondido**: —
+- **Preguntado**: 02/11/2026 · **Respondido**: 05/11/2026
 - **Origen**: creación inicial de los skills
 - **Contexto**: el agente propuso APA 7 como estilo por defecto cuando un documento tiene citas.
 
@@ -100,19 +112,22 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 1. ¿Qué estilo de citas se usa? Opciones: a) APA 7; b) IEEE (habitual en ingeniería y computación); c) el que fije el reglamento de la institución (indicar cuál).
 2. ¿Se usa un gestor de referencias con archivo exportado? Opciones: a) sí, BibTeX (`.bib`); b) sí, otro formato; c) no, las referencias se escriben a mano.
 
-**Respuestas**: —
+**Respuestas**
 
-**Regla resultante**: —
-**Aplicada en**: —
+1. APA 7.
+2. BibTeX (`.bib`).
+
+**Regla resultante**: citas en APA 7, con las referencias en un archivo BibTeX (`.bib`).
+**Aplicada en**: `references/escritura.md` §3; `SKILL.md`; `assets/configurador.html`.
 **PR**: —
 
 ---
 
 ## DEC-005 · Ubicación del prompt y de la documentación
 
-- **Estado**: pendiente
+- **Estado**: confirmada
 - **Alcance**: agente
-- **Preguntado**: 02/11/2026 · **Respondido**: —
+- **Preguntado**: 02/11/2026 · **Respondido**: 05/11/2026
 - **Origen**: creación inicial de los skills
 - **Contexto**: el agente propuso guardar el prompt en `docs/prompt-estilo.md` y cada documento en una carpeta bajo `docs/`.
 
@@ -121,19 +136,22 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 1. ¿Dónde se guarda el prompt de estilo? Opciones: a) `docs/prompt-estilo.md`, uno por proyecto; b) uno por documento, dentro de su carpeta (`docs/<documento>/prompt-estilo.md`).
 2. ¿Dónde se guardan los documentos? Opciones: a) `docs/<documento>/`; b) otra ruta (indicarla).
 
-**Respuestas**: —
+**Respuestas**
 
-**Regla resultante**: —
-**Aplicada en**: —
+1. `docs/prompt-estilo.md`, uno por proyecto.
+2. `docs/<documento>/`.
+
+**Regla resultante**: un prompt por proyecto en `docs/prompt-estilo.md` y cada documento en `docs/<documento>/`.
+**Aplicada en**: `SKILL.md`; `assets/configurador.html`.
 **PR**: —
 
 ---
 
 ## DEC-006 · Comillas
 
-- **Estado**: pendiente
+- **Estado**: confirmada
 - **Alcance**: agente
-- **Preguntado**: 02/11/2026 · **Respondido**: —
+- **Preguntado**: 02/11/2026 · **Respondido**: 05/11/2026
 - **Origen**: creación inicial de los skills
 - **Contexto**: `escritura.md` §3 recomienda comillas dobles (“ ”) y admite las angulares (« ») si la institución las pide. No hay una elección confirmada.
 
@@ -141,10 +159,12 @@ Aquí solo van decisiones con alcance de **agente**. Las de un solo proyecto se 
 
 1. ¿Qué comillas se usan? Opciones: a) dobles inglesas “así”; b) angulares «así» (recomendación de la RAE); c) rectas "así" (más simples de escribir en Markdown).
 
-**Respuestas**: —
+**Respuestas**
 
-**Regla resultante**: —
-**Aplicada en**: —
+1. Dobles “así”.
+
+**Regla resultante**: se usan comillas dobles (“así”).
+**Aplicada en**: `references/escritura.md` §3; `assets/plantilla-prompt-estilo.md`; `assets/configurador.html`.
 **PR**: —
 
 ---

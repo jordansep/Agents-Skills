@@ -2,6 +2,21 @@
 
 Cambios relevantes del agente (`skills/documentacion-estilo` y `skills/documentacion-generar`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.15.0] - 2026-11-05
+
+### Agregado
+
+- DEC-001: español rioplatense con voseo y tratamiento impersonal
+- DEC-002: coma decimal, punto para miles y espacio antes de %
+- DEC-003: Calibri, Consolas, primario #2E74B5 y catálogo de fuentes formales
+- DEC-004: citas APA 7 con referencias en BibTeX
+- DEC-005: prompt en docs/prompt-estilo.md y documentos en docs/<documento>/
+- DEC-006: comillas dobles
+
+### Cambiado
+
+- verificar_doc.py acepta el punto de miles cuando el prompt declara miles: punto
+
 ## [0.14.0] - 2026-11-03
 
 ### Agregado
