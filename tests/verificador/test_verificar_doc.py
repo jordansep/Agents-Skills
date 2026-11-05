@@ -1482,3 +1482,714 @@ class PlantillasDelConfigurador(Base):
         inf = vd.Informe()
         vd.verificar(prompt, [self.escribir("doc.md", self.LAMINAS.replace("**C4 · Nivel 2**\n\n", ""))], inf)
         self.assertSinProblemas(inf)
+
+
+MUESTRA_ENTREGA = RAIZ / "tests" / "verificador" / "muestras" / "entrega"
+
+
+class EntregaBase(Base):
+    """Copia la muestra de entrega (índice y tres puntos) y la revisa con los cambios de cada prueba."""
+
+    def setUp(self):
+        super().setUp()
+        self.carpeta = self.dir / "entrega"
+        shutil.copytree(MUESTRA_ENTREGA, self.carpeta)
+        self.prompt_ruta = self.carpeta / "prompt-estilo.md"
+
+    def ruta(self, nombre):
+        return self.carpeta / nombre
+
+    def cambiar(self, nombre, viejo, nuevo):
+        texto = self.ruta(nombre).read_text(encoding="utf-8")
+        self.assertIn(viejo, texto)
+        self.ruta(nombre).write_text(texto.replace(viejo, nuevo), encoding="utf-8")
+
+    def escribir_en(self, nombre, texto):
+        self.ruta(nombre).write_text(textwrap.dedent(texto), encoding="utf-8")
+
+    def campo(self, viejo, nuevo):
+        self.cambiar("prompt-estilo.md", viejo, nuevo)
+
+    def renombrar(self, viejo, nuevo):
+        self.ruta(viejo).rename(self.ruta(nuevo))
+
+    def revisar(self):
+        datos, _, _ = vd.leer_frontmatter(self.prompt_ruta.read_text(encoding="utf-8"))
+        inf = vd.Informe()
+        entrega = vd.preparar_entrega(datos, [self.carpeta], self.prompt_ruta, inf)
+        vd.verificar(datos, entrega.archivos if entrega else [], inf, None, entrega)
+        return inf
+
+    def correr(self, *rutas):
+        return subprocess.run([sys.executable, str(SCRIPT), "--prompt", str(self.prompt_ruta), *map(str, rutas)],
+                              capture_output=True, text=True, encoding="utf-8")
+
+    def assertUno(self, lista, patron):
+        """El caso da un mensaje que lo nombra, y no una cascada de errores derivados."""
+        self.assertMensaje(lista, patron)
+        self.assertEqual(len(lista), 1, lista)
+
+
+class FormaDeLaEntrega(EntregaBase):
+    def test_muestra_valida_sin_errores_ni_advertencias(self):
+        self.assertSinProblemas(self.revisar())
+
+    def test_linea_de_comandos_sale_con_0(self):
+        r = self.correr(self.carpeta)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("ERRORES (0)", r.stdout)
+        self.assertIn("ADVERTENCIAS (0)", r.stdout)
+        self.assertIn("archivos: 4", r.stdout)
+
+    def test_indice_primero_y_puntos_por_numero(self):
+        self.renombrar("02 - Requisitos.md", "2 - Requisitos.md")  # el orden alfabético lo dejaría último
+        self.cambiar("README.md", "<02 - Requisitos.md>", "<2 - Requisitos.md>")
+        datos, _, _ = vd.leer_frontmatter(self.prompt_ruta.read_text(encoding="utf-8"))
+        entrega = vd.preparar_entrega(datos, [self.carpeta], self.prompt_ruta, vd.Informe())
+        self.assertEqual([r.name for r in entrega.archivos],
+                         ["README.md", "01 - Alcance.md", "2 - Requisitos.md", "03 - Cierre.md"])
+
+    def test_solo_el_primer_nivel_y_sin_el_prompt_ni_la_memoria(self):
+        self.escribir_en("decisiones-estilo.md", MEMORIA_PROYECTO)
+        (self.carpeta / "figuras").mkdir()
+        self.escribir_en("figuras/notas.md", "# Notas sueltas\n")
+        self.assertSinProblemas(self.revisar())
+
+    def test_valor_desconocido_sale_con_2(self):
+        self.campo("entrega: multiarchivo  # unico | multiarchivo", "entrega: varios")
+        r = self.correr(self.carpeta)
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("varios", r.stderr)
+
+    def test_entrega_se_lee_sin_comentario_final_con_comillas(self):
+        self.campo("entrega: multiarchivo  # unico | multiarchivo", 'entrega: "multiarchivo"  # comentario')
+        self.assertEqual(self.correr(self.carpeta).returncode, 0)
+
+    def test_multiarchivo_con_un_archivo_sale_con_2(self):
+        r = self.correr(self.ruta("README.md"))
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("carpeta", r.stderr)
+
+    def test_multiarchivo_con_varias_rutas_sale_con_2(self):
+        r = self.correr(self.carpeta, self.carpeta)
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("carpeta", r.stderr)
+
+    def test_patron_sin_nn_sale_con_2(self):
+        self.campo('"NN - Nombre.md"', '"Nombre.md"')
+        r = self.correr(self.carpeta)
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("NN", r.stderr)
+
+    def test_patron_o_indice_que_no_terminan_en_md_salen_con_2(self):
+        for viejo, nuevo in (('"NN - Nombre.md"', '"NN - Nombre.txt"'), ('"NN - Nombre.md"', '"NN - Nombre.bin"'),
+                             ("entrega_indice: README.md", "entrega_indice: LEEME.txt")):
+            with self.subTest(nuevo):
+                self.campo(viejo, nuevo)
+                r = self.correr(self.carpeta)
+                self.assertEqual(r.returncode, 2, r.stdout)
+                self.assertIn(".md", r.stderr)
+                self.campo(nuevo, viejo)
+
+    def test_patron_o_indice_con_barra_salen_con_2(self):
+        for viejo, nuevo in (('"NN - Nombre.md"', '"sub/NN - Nombre.md"'), ('"NN - Nombre.md"', '"sub\\\\NN - Nombre.md"'),
+                             ("entrega_indice: README.md", "entrega_indice: sub/README.md")):
+            with self.subTest(nuevo):
+                self.campo(viejo, nuevo)
+                r = self.correr(self.carpeta)
+                self.assertEqual(r.returncode, 2, r.stdout)
+                self.assertIn("ERROR", r.stderr)
+                self.campo(nuevo, viejo)
+
+    def test_archivos_que_no_son_md_no_se_leen(self):
+        self.ruta("04 - Binario.bin").write_bytes(b"\xff\xfe\x00")
+        self.escribir_en("05 - Notas.txt", "# 9 Notas\n")
+        self.assertSinProblemas(self.revisar())
+
+    def test_carpeta_sin_archivos_sale_con_2(self):
+        for f in self.carpeta.glob("*.md"):
+            if f != self.prompt_ruta:
+                f.unlink()
+        r = self.correr(self.carpeta)
+        self.assertEqual(r.returncode, 2, r.stdout)
+        self.assertIn("no se encontraron", r.stderr)
+
+    def test_salto_inicial_avisa_que_falta_el_punto_1(self):
+        self.ruta("01 - Alcance.md").unlink()
+        self.cambiar("README.md", "- [Alcance](01%20-%20Alcance.md)\n", "")
+        self.campo("  - Alcance\n", "")
+        self.assertUno(self.revisar().advertencias, r"falta el punto 1")
+
+    def test_indice_sin_el_titulo_del_documento_es_error(self):
+        self.cambiar("README.md", "# Entrega de muestra\n\n", "")
+        self.assertUno(self.revisar().errores, r"README\.md:\d+: .*primer H1 del índice debe ser el título")
+
+    def test_indice_sin_ningun_h1_es_error(self):
+        self.escribir_en("README.md", "Sin títulos.\n")
+        self.campo("  - Control de versiones\n  - Alcance", "  - Alcance")
+        self.assertMensaje(self.revisar().errores, r"README\.md: el índice no tiene el H1")
+
+    def test_falta_el_indice_es_error_y_sigue_revisando(self):
+        self.ruta("README.md").unlink()
+        self.cambiar("01 - Alcance.md", "# 1 Alcance", "# 7 Alcance")
+        inf = self.revisar()
+        self.assertMensaje(inf.errores, r"falta el índice «README\.md»")
+        self.assertMensaje(inf.errores, r"se esperaba 1")
+
+    def test_archivo_fuera_del_patron_es_error_y_sigue_revisando(self):
+        self.escribir_en("notas.md", "# Notas\n")
+        self.cambiar("01 - Alcance.md", "# 1 Alcance", "# 7 Alcance")
+        inf = self.revisar()
+        self.assertMensaje(inf.errores, r"notas\.md.*no cumple el patrón «NN - Nombre\.md»")
+        self.assertMensaje(inf.errores, r"se esperaba 1")
+
+    def test_carpeta_con_un_solo_archivo_fuera_del_patron_informa_los_errores(self):
+        for f in self.carpeta.glob("*.md"):
+            if f != self.prompt_ruta:
+                f.unlink()
+        self.escribir_en("notas.md", "# Notas\n")
+        r = self.correr(self.carpeta)
+        self.assertEqual(r.returncode, 1, r.stderr)
+        self.assertIn("falta el índice", r.stdout)
+        self.assertIn("no cumple el patrón", r.stdout)
+
+    def test_indice_y_patron_propios(self):
+        self.campo("entrega_indice: README.md", "entrega_indice: LEEME.md  # el índice")
+        self.campo('"NN - Nombre.md"', '"punto-NN_Nombre.md"')
+        self.renombrar("README.md", "LEEME.md")
+        for viejo, nuevo in (("01 - Alcance.md", "punto-01_Alcance.md"), ("02 - Requisitos.md", "punto-02_Requisitos.md"),
+                             ("03 - Cierre.md", "punto-03_Cierre.md")):
+            self.renombrar(viejo, nuevo)
+        self.cambiar("LEEME.md", "(01%20-%20Alcance.md)", "(punto-01_Alcance.md)")
+        self.cambiar("LEEME.md", "(<02 - Requisitos.md>)", "(punto-02_Requisitos.md)")
+        self.cambiar("LEEME.md", "(03%20-%20Cierre.md)", "(punto-03_Cierre.md)")
+        self.assertSinProblemas(self.revisar())
+
+    def test_numero_repetido_es_error_y_sigue_revisando(self):
+        self.escribir_en("02 - Otro.md", "# 2 Otro\n\nTexto.\n")
+        self.cambiar("README.md", "- [Cierre]", "- [Otro](02%20-%20Otro.md)\n- [Cierre]")
+        self.cambiar("01 - Alcance.md", "# 1 Alcance", "# 7 Alcance")
+        inf = self.revisar()
+        self.assertMensaje(inf.errores, r"número 2 repetido")
+        self.assertMensaje(inf.errores, r"se esperaba 1")
+
+    def test_salto_es_advertencia_y_el_h1_del_archivo_vale(self):
+        self.renombrar("03 - Cierre.md", "04 - Cierre.md")
+        self.cambiar("04 - Cierre.md", "# 3 Cierre", "# 4 Cierre")
+        self.cambiar("04 - Cierre.md", "La Tabla 3.1", "La Tabla 4.1")
+        self.cambiar("04 - Cierre.md", "**Tabla 3.1.**", "**Tabla 4.1.**")
+        self.cambiar("README.md", "(03%20-%20Cierre.md)", "(04%20-%20Cierre.md)")
+        inf = self.revisar()
+        self.assertEqual(inf.errores, [])
+        self.assertUno(inf.advertencias, r"salto.*falta el punto 3")
+
+    def test_estructura_se_comprueba_sobre_toda_la_entrega(self):
+        self.ruta("03 - Cierre.md").unlink()
+        self.cambiar("README.md", "- [Cierre](03%20-%20Cierre.md)\n", "")
+        self.assertUno(self.revisar().errores, r"falta el capítulo «cierre»")
+
+
+class EnlacesDelIndice(EntregaBase):
+    def test_falta_un_enlace(self):
+        self.cambiar("README.md", "- [Cierre](03%20-%20Cierre.md)\n", "")
+        self.assertUno(self.revisar().errores, r"no enlaza «03 - Cierre\.md»")
+
+    def test_enlace_roto(self):
+        self.cambiar("README.md", "- [Cierre]", "- [Falta](09%20-%20Falta.md)\n- [Cierre]")
+        self.assertUno(self.revisar().errores, r"enlaza «09 - Falta\.md», que no existe")
+
+    def test_enlaces_desordenados(self):
+        self.cambiar("README.md", "- [Alcance](01%20-%20Alcance.md)\n- [Requisitos](<02 - Requisitos.md>)\n",
+                     "- [Requisitos](<02 - Requisitos.md>)\n- [Alcance](01%20-%20Alcance.md)\n")
+        self.assertUno(self.revisar().errores, r"no siguen el orden de los archivos")
+
+    def test_cada_caso_da_su_error(self):
+        self.cambiar("README.md", "- [Alcance](01%20-%20Alcance.md)\n", "- [Falta](09.md)\n")
+        self.cambiar("README.md", "- [Requisitos](<02 - Requisitos.md>)\n- [Cierre](03%20-%20Cierre.md)\n",
+                     "- [Cierre](03%20-%20Cierre.md)\n- [Requisitos](<02 - Requisitos.md>)\n")
+        errores = self.revisar().errores
+        self.assertMensaje(errores, r"no enlaza «01 - Alcance\.md»")
+        self.assertMensaje(errores, r"enlaza «09\.md», que no existe")
+        self.assertMensaje(errores, r"no siguen el orden")
+
+    def test_otras_formas_de_enlace_validas(self):
+        self.cambiar("README.md", "(01%20-%20Alcance.md)", "(./01%20-%20Alcance.md#limites)")
+        self.cambiar("README.md", "(03%20-%20Cierre.md)", '(<03 - Cierre.md> "Último punto")')
+        (self.carpeta / "figuras").mkdir()
+        self.escribir_en("figuras/a.png", "x")
+        self.cambiar("README.md", "- [Alcance]", "[Sitio](https://example.com/x.md) y [ancla](#contenido) y [imagen](figuras/a.png).\n\n- [Alcance]")
+        self.assertSinProblemas(self.revisar())
+
+    def test_enlace_roto_que_no_es_md_es_error(self):
+        self.cambiar("README.md", "- [Alcance]", "[Imagen](figuras/a.png) y [nota](notas.txt).\n\n- [Alcance]")
+        errores = self.revisar().errores
+        self.assertMensaje(errores, r"enlaza «figuras/a\.png», que no existe")
+        self.assertMensaje(errores, r"enlaza «notas\.txt», que no existe")
+        self.assertEqual(len(errores), 2, errores)
+
+    def test_enlace_existente_que_no_es_md_no_cuenta_como_punto(self):
+        self.escribir_en("notas.txt", "x")
+        self.cambiar("README.md", "- [Cierre](03%20-%20Cierre.md)", "- [Nota](notas.txt)")
+        self.assertUno(self.revisar().errores, r"no enlaza «03 - Cierre\.md»")
+
+    def test_enlace_en_codigo_no_cuenta(self):
+        self.cambiar("README.md", "- [Cierre](03%20-%20Cierre.md)", "- `[Cierre](03%20-%20Cierre.md)`")
+        self.assertUno(self.revisar().errores, r"no enlaza «03 - Cierre\.md»")
+
+    def test_enlace_repetido_no_desordena(self):
+        self.cambiar("README.md", "- [Cierre](03%20-%20Cierre.md)", "- [Cierre](03%20-%20Cierre.md)\n- [Alcance otra vez](01%20-%20Alcance.md)")
+        self.assertSinProblemas(self.revisar())
+
+
+class TitulosDeLaEntrega(EntregaBase):
+    def test_h1_con_otro_numero_es_error_con_el_numero_del_archivo(self):
+        self.cambiar("02 - Requisitos.md", "# 2 Requisitos", "# 3 Requisitos")
+        self.assertUno(self.revisar().errores, r"02 - Requisitos\.md:\d+: .*H1.*3.*se esperaba 2")
+
+    def test_h1_sin_numero_es_error(self):
+        self.cambiar("02 - Requisitos.md", "# 2 Requisitos", "# Requisitos")
+        self.assertUno(self.revisar().errores, r"H1.*debe llevar el número 2")
+
+    def test_parte_sin_numerar_en_un_punto_tambien_lleva_el_numero(self):
+        self.campo("  - Cierre\n", "  - Cierre\n  - Glosario\n")
+        self.escribir_en("04 - Glosario.md", "# 4 Glosario\n\n## 4.1 Términos\n\nTexto.\n")
+        self.cambiar("README.md", "- [Cierre](03%20-%20Cierre.md)", "- [Cierre](03%20-%20Cierre.md)\n- [Glosario](04%20-%20Glosario.md)")
+        self.assertSinProblemas(self.revisar())
+
+    def test_punto_sin_h1_es_error(self):
+        self.escribir_en("03 - Cierre.md", "Solo texto.\n")
+        self.assertMensaje(self.revisar().errores, r"03 - Cierre\.md.*no tiene H1")
+
+    def test_segundo_h1_en_un_punto_es_error(self):
+        self.cambiar("01 - Alcance.md", "## 1.1 Límites", "# 2 Límites")
+        self.assertMensaje(self.revisar().errores, r"01 - Alcance\.md:\d+: .*H1.*se esperaba 1")
+
+    def test_subtitulo_con_el_numero_del_archivo(self):
+        self.cambiar("02 - Requisitos.md", "## 2.1 Numeración", "## 1.1 Numeración")
+        self.assertUno(self.revisar().errores, r"numeración 1\.1; se esperaba 2\.1")
+
+    def test_sin_numero_si_numeracion_textual_es_ninguna(self):
+        self.campo("entrega_indice: README.md", "entrega_indice: README.md\nnumeracion_textual: ninguna  # decimal | ninguna")
+        self.cambiar("01 - Alcance.md", "# 1 Alcance", "# Alcance")
+        self.cambiar("01 - Alcance.md", "## 1.1 Límites", "## Límites")
+        self.cambiar("02 - Requisitos.md", "# 2 Requisitos", "# Requisitos")
+        self.cambiar("02 - Requisitos.md", "## 2.1 Numeración", "## Numeración")
+        self.cambiar("03 - Cierre.md", "# 3 Cierre", "# Cierre")
+        self.assertSinProblemas(self.revisar())
+
+    def test_h1_numerado_con_numeracion_ninguna_es_advertencia(self):
+        self.campo("entrega_indice: README.md", "entrega_indice: README.md\nnumeracion_textual: ninguna")
+        self.cambiar("01 - Alcance.md", "# 1 Alcance", "# Alcance")
+        self.cambiar("01 - Alcance.md", "## 1.1 Límites", "## Límites")
+        self.cambiar("02 - Requisitos.md", "# 2 Requisitos", "# Requisitos")
+        self.cambiar("02 - Requisitos.md", "## 2.1 Numeración", "## Numeración")
+        inf = self.revisar()
+        self.assertEqual(inf.errores, [])
+        self.assertUno(inf.advertencias, r"«Cierre» lleva número, pero numeracion_textual es ninguna")
+
+
+class NumeracionDeLaEntrega(EntregaBase):
+    def test_prefijo_de_otro_archivo_es_error_con_el_esperado(self):
+        self.cambiar("03 - Cierre.md", "**Tabla 3.1.**", "**Tabla 2.1.**")
+        self.assertMensaje(self.revisar().errores, r"Tabla 2\.1: .*se esperaba Tabla 3\.1")
+
+    def test_salto_dentro_del_archivo_es_error_con_el_esperado(self):
+        self.cambiar("02 - Requisitos.md", "**Tabla 2.2.**", "**Tabla 2.3.**")
+        self.cambiar("02 - Requisitos.md", "La Tabla 2.2", "La Tabla 2.3")
+        self.assertUno(self.revisar().errores, r"Tabla 2\.3: .*se esperaba Tabla 2\.2")
+
+    def test_figura_con_otro_prefijo_es_error(self):
+        self.cambiar("02 - Requisitos.md", "**Figura 2.1.**", "**Figura 3.1.**")
+        self.assertMensaje(self.revisar().errores, r"Figura 3\.1: .*se esperaba Figura 2\.1")
+
+    def test_indice_con_prefijo_es_error_y_se_espera_sin_prefijo(self):
+        self.cambiar("README.md", "**Tabla 1.**", "**Tabla 1.1.**")
+        self.cambiar("README.md", "La Tabla 1 ", "La Tabla 1.1 ")
+        self.assertMensaje(self.revisar().errores, r"Tabla 1\.1: .*se esperaba Tabla 1$")
+
+    def test_entero_en_un_punto_es_error(self):
+        self.cambiar("03 - Cierre.md", "**Tabla 3.1.**", "**Tabla 1.**")
+        self.assertMensaje(self.revisar().errores, r"Tabla 1: .*se esperaba Tabla 3\.1")
+
+    def test_cita_a_una_tabla_de_otro_archivo_vale(self):
+        self.assertEqual(self.revisar().errores, [])
+
+    def test_cita_a_una_tabla_que_no_existe_es_error(self):
+        self.cambiar("03 - Cierre.md", "las condiciones de la Tabla 2.1", "las condiciones de la Tabla 2.9")
+        self.assertUno(self.revisar().errores, r"se cita la Tabla 2\.9, que no existe")
+
+    def test_cita_a_una_figura_que_no_existe_es_error(self):
+        self.cambiar("03 - Cierre.md", "de la Figura 2.1", "de la Figura 2.2")
+        self.assertUno(self.revisar().errores, r"se cita la Figura 2\.2, que no existe")
+
+    def test_mencion_solo_en_otro_archivo_es_advertencia(self):
+        self.cambiar("02 - Requisitos.md", "La Tabla 2.1 enumera las condiciones, y la", "La")
+        inf = self.revisar()
+        self.assertEqual(inf.errores, [])
+        self.assertUno(inf.advertencias, r"02 - Requisitos\.md:\d+: Tabla 2\.1 no se menciona")
+
+    def test_la_mencion_de_otra_tabla_con_prefijo_no_cuenta(self):
+        self.cambiar("03 - Cierre.md", "La Tabla 3.1 resume el resultado.", "La Tabla 3.15 resume.")
+        self.assertMensaje(self.revisar().advertencias, r"Tabla 3\.1 no se menciona")
+
+    def test_leyendas_apa7(self):
+        self.campo("entrega_indice: README.md", "entrega_indice: README.md\nleyendas: apa7")
+        self.cambiar("README.md", "**Tabla 1.** Cambios de la entrega", "**Tabla 1**\n\n*Cambios de la entrega*")
+        self.cambiar("01 - Alcance.md", "**Tabla 1.1.** Contenido de los puntos", "**Tabla 1.1**\n\n*Contenido de los puntos*")
+        self.cambiar("02 - Requisitos.md", "**Tabla 2.1.** Condiciones de la entrega", "**Tabla 2.1**\n\n*Condiciones de la entrega*")
+        self.cambiar("02 - Requisitos.md", "```mermaid", "**Figura 2.1**\n\n*Recorrido de lectura*\n\n```mermaid")
+        self.cambiar("02 - Requisitos.md", "**Figura 2.1.** Recorrido de lectura\n\n", "")
+        self.cambiar("02 - Requisitos.md", "**Tabla 2.2.** Ejemplo de prefijos", "**Tabla 2.2**\n\n*Ejemplo de prefijos*")
+        self.cambiar("03 - Cierre.md", "**Tabla 3.1.** Resultado de la revisión", "**Tabla 3.1**\n\n*Resultado de la revisión*")
+        self.assertSinProblemas(self.revisar())
+
+    def test_apa7_con_prefijo_equivocado_es_error(self):
+        self.campo("entrega_indice: README.md", "entrega_indice: README.md\nleyendas: apa7")
+        self.cambiar("03 - Cierre.md", "**Tabla 3.1.** Resultado de la revisión", "**Tabla 4.1**\n\n*Resultado de la revisión*")
+        self.assertMensaje(self.revisar().errores, r"Tabla 4\.1: .*se esperaba Tabla 3\.1")
+
+
+class ControlDeVersionesDeLaEntrega(EntregaBase):
+    TABLA = ("La Tabla {n} registra los cambios.\n\n**Tabla {n}.** Otros cambios\n\n"
+             "| Versión | Fecha |\n|---|---|\n| 0.2 | 06/11/2026 |\n")
+
+    def test_indice_sin_tabla_es_error(self):
+        self.cambiar("README.md", "| Versión | Fecha | Autor | Descripción del cambio |", "| Edición | Día | Autor | Descripción del cambio |")
+        self.assertUno(self.revisar().errores, r"README\.md.*una tabla de control de versiones.*tiene 0")
+
+    def test_dos_tablas_en_el_indice_es_error(self):
+        self.cambiar("README.md", "## Contenido", self.TABLA.format(n=2) + "\n## Contenido")
+        self.assertUno(self.revisar().errores, r"README\.md.*una tabla de control de versiones.*tiene 2")
+
+    def test_otra_tabla_con_version_y_fecha_al_comienzo_no_cuenta(self):
+        tabla = ("La Tabla 1.2 lista las interfaces.\n\n**Tabla 1.2.** Interfaces\n\n"
+                 "| Versión del servicio | Fecha de retiro |\n|---|---|\n| 2 | 06/11/2026 |\n")
+        self.cambiar("01 - Alcance.md", "## 1.1 Límites", tabla + "\n## 1.1 Límites")
+        self.assertSinProblemas(self.revisar())
+
+    def test_tabla_en_un_punto_es_error(self):
+        self.cambiar("01 - Alcance.md", "## 1.1 Límites", self.TABLA.format(n="1.2") + "\n## 1.1 Límites")
+        self.assertUno(self.revisar().errores, r"01 - Alcance\.md:\d+: .*control de versiones.*solo en el índice")
+
+
+class EntregaUnica(Base):
+    def test_tabla_con_prefijo_es_error_de_numeracion(self):
+        doc = DOC_VALIDO.replace("**Tabla 1.**", "**Tabla 2.1.**").replace("La Tabla 1", "La Tabla 2.1")
+        for extra in ({}, {"entrega": "unico"}):
+            self.assertMensaje(self.verificar(doc, **extra).errores, r"Tabla 2\.1: la numeración no es continua; se esperaba Tabla 1")
+
+    def test_tabla_con_prefijo_apa7_es_error_de_numeracion(self):
+        doc = DOC_VALIDO.replace("**Tabla 1.** Opciones del sistema", "**Tabla 2.1**\n\n*Opciones del sistema*").replace("La Tabla 1", "La Tabla 2.1")
+        doc = doc.replace("La Figura 1 muestra la pantalla principal.\n\n![", "La Figura 1 muestra la pantalla principal.\n\n**Figura 1**\n\n*Pantalla principal*\n\n![")
+        doc = doc.replace("\n**Figura 1.** Pantalla principal\n", "")
+        self.assertMensaje(self.verificar(doc, leyendas="apa7").errores, r"Tabla 2\.1: la numeración no es continua")
+
+    def test_cita_con_prefijo_no_se_lee_como_entero(self):
+        inf = self.verificar(DOC_VALIDO + "\nVer la Tabla 1.5 y la Figura 1.2.\n")
+        self.assertMensaje(inf.errores, r"se cita la Tabla 1\.5, que no existe")
+        self.assertMensaje(inf.errores, r"se cita la Figura 1\.2, que no existe")
+
+    def test_punto_final_tras_la_cita_sigue_valiendo(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO + "\nEl resumen está en la Tabla 1.\n"))
+
+    def test_sin_entrega_o_unico_el_resultado_no_cambia(self):
+        self.assertSinProblemas(self.verificar(DOC_VALIDO))
+        self.assertSinProblemas(self.verificar(DOC_VALIDO, entrega="unico"))
+        self.assertSinProblemas(self.verificar(DOC_VALIDO, entrega="unico  # unico | multiarchivo"))
+
+    def test_numeracion_continua_entre_archivos_sigue_valiendo(self):
+        prompt = self.escribir("docs/prompt-estilo.md", PROMPT)
+        cap1, cap2 = DOC_VALIDO.split("# 2 Uso")
+        self.escribir("docs/manual/00-a.md", cap1)
+        self.escribir("docs/manual/01-b.md", "# 2 Uso" + cap2)
+        self.escribir("docs/manual/sub/02-c.md", "## 2.1 Detalle\n\nLa Tabla 1 sigue vigente.\n")
+        r = subprocess.run([sys.executable, str(SCRIPT), "--prompt", str(prompt), str(self.dir / "docs" / "manual")],
+                           capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("ERRORES (0)", r.stdout)
+        self.assertIn("ADVERTENCIAS (0)", r.stdout)
+
+
+@unittest.skipUnless(shutil.which("node"), "node no está instalado")
+class EntregaDelConfigurador(Base):
+    """Campos de la entrega, orden, guardado y revisión de la estructura, sin navegador."""
+
+    A = {"nombre": "README.md", "html": "<h1>Entrega de muestra</h1><h1>Control de versiones</h1><p>Índice.</p>"}
+    B = {"nombre": "01 - Alcance.md", "html": "<h1>1 Alcance</h1><p>Texto.</p>"}
+    C = {"nombre": "02 - Requisitos.md", "html": "<h1>2 Requisitos</h1><p>Texto.</p>"}
+    D = {"nombre": "10 - Cierre.md", "html": "<h1>10 Cierre</h1><p>Texto.</p>"}
+    VIEJO = {"nombre": "manual.md", "html": "<h1>Manual</h1><p>Texto.</p>",
+             "ajustes": [{"id": "a1", "bloques": [1], "valores": {"f_cuerpo": "Arial"}, "colores": {}}]}
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        desorden = [cls.D, {"nombre": "notas.md", "html": "<p>Notas.</p>"}, cls.C, cls.A, cls.B]
+        entrega = [cls.A, cls.B, cls.C]
+        cambio = {"f_cuerpo": "Arial"}
+        zonas = {"estructura": "Control de versiones\nAlcance\nRequisitos\nCierre", "sin_numerar": "Control de versiones"}
+        estados = {
+            "defecto": None,
+            "multi": {"entrega": "multiarchivo"},
+            "muestra": dict(zonas, documento="Entrega de muestra", entrega="multiarchivo"),
+            "multi_ninguna": {"entrega": "multiarchivo", "__acciones": [["formato", "textual", "numeracion", "ninguna"]]},
+            "cargar": {"__acciones": [["cargar", [
+                {"name": "02 - B.md", "texto": "# 2 B"}, {"name": "foto.png"}, {"name": "roto.md", "falla": "ilegible"},
+                {"name": "01 - W.docx"}, {"name": "README.md", "texto": "# T"}]]]},
+            "cargar_ilegible": {"__acciones": [["cargar", [{"name": "a.md", "falla": "ilegible"}]]]},
+            "cargar_no_admitido": {"__acciones": [["cargar", [{"name": "a.png"}]]]},
+            "cargar_uno": {"__acciones": [["cargar", [{"name": "a.md", "texto": "# A"}]]]},
+            "cargar_carpeta": {"__acciones": [["cargar", [
+                {"name": "README.md", "texto": "# T"}, {"name": "prompt-estilo.md", "texto": "# P"}, {"name": "decisiones-estilo.md", "texto": "# D"}]]]},
+            "cargar_solo_prompt": {"__acciones": [["cargar", [{"name": "prompt-estilo.md", "texto": "# P"}]]]},
+            "cargar_solo_apoyo": {"__acciones": [["cargar", [{"name": "prompt-estilo.md"}, {"name": "decisiones-estilo.md"}]]]},
+            "cargar_grande": {"__acciones": [["cargar", [{"name": "g.md", "repetir": 2600000}]]]},
+            "subir_rechazado": {"__acciones": [["entrega", [cls.B]], ["ajuste", 0, cambio], ["confirmar", False], ["cargar", [{"name": "a.md", "texto": "# A"}]]]},
+            "subir_aceptado": {"__acciones": [["entrega", [cls.B]], ["ajuste", 0, cambio], ["cargar", [{"name": "a.md", "texto": "# A"}]]]},
+            "grande": {"__acciones": [["entrega", [cls.B]], ["entrega_grande", 2600000], ["recargar"]]},
+            "almacen_falla": {"__acciones": [["entrega", [cls.B]], ["almacen_falla"], ["ajuste", 0, cambio], ["recargar"]]},
+            "aviso_falla": {"__acciones": [["entrega", [cls.B]], ["almacen_falla"], ["ajuste", 0, cambio]]},
+            "leyendas": {"__acciones": [["entrega", [
+                dict(cls.B, html="<p><strong>Tabla 1.</strong> A</p><p>La Tabla 1 no es leyenda porque sigue.</p><p>Figura 1. F</p>"),
+                dict(cls.C, html="<p>Tabla 2. B</p>"), cls.D]], ["ir", 2], ["llamar", "leyendasPrevias", "Tabla"], ["llamar", "leyendasPrevias", "Figura"]]},
+            "leyendas_multi": {"entrega": "multiarchivo", "__acciones": [["entrega", [dict(cls.B, html="<p>Tabla 1.1. A</p>"), cls.C]], ["ir", 1], ["llamar", "leyendasPrevias", "Tabla"]]},
+            "puras": {"__acciones": [
+                ["llamar", "esperadoLeyenda", None, 3], ["llamar", "esperadoLeyenda", 4, 2], ["llamar", "esperadoLeyenda", 0, 1],
+                ["llamar", "inlineMd", "[a](<01 - a (v2).md>)"], ["llamar", "inlineMd", "![a](<foto c.png>)"], ["llamar", "inlineMd", "[a](01%20-%20a.md)"],
+                ["llamar", "numeroVisible", [0, 0, 0], 1, 0], ["llamar", "numeroVisible", [0, 2, 0], 2, 0], ["llamar", "numeroVisible", [0, 0, 0], 1, None],
+                ["llamar", "numeroVisible", [3, 0, 0], 2, 3], ["llamar", "numeroVisible", [-1, 1, 0], 2, 0], ["llamar", "numeroVisible", [4, 1, 0], 2, 4],
+                ["llamar", "h1LlevaNumero", "glosario", ["glosario"], 5], ["llamar", "h1LlevaNumero", "glosario", ["glosario"], None], ["llamar", "h1LlevaNumero", "uso", [], None]]},
+            "h1_ninguna": {"__acciones": [["formato", "textual", "numeracion", "ninguna"], ["llamar", "h1LlevaNumero", "uso", ["uso"], 5]]},
+            "enlaces": {"__acciones": [["entrega", entrega],
+                ["llamar", "archivoDeEnlace", "01%20-%20Alcance.md"], ["llamar", "archivoDeEnlace", "./02%20-%20Requisitos.md#x"],
+                ["llamar", "archivoDeEnlace", "09.md"], ["llamar", "archivoDeEnlace", "%E0%A4%A"]]},
+            "restablecer": {"__acciones": [["entrega", entrega], ["ajuste", 1, cambio], ["ajuste", 2, cambio], ["restablecer"], ["recargar"]]},
+            "titulo": {"__acciones": [["entrega", entrega], ["llamar", "separarTitulo"]]},
+            "sin_titulo": dict(zonas, __acciones=[["entrega", [cls.B, cls.C]], ["llamar", "separarTitulo"]]),
+            "propio": {"entrega": "multiarchivo", "entrega_indice": "LEEME.md", "entrega_patron": "NN_Nombre.md"},
+            "invalido": {"entrega": "varios", "entrega_indice": "", "entrega_patron": "sin-numero.md"},
+            "patron_vacio": {"entrega": "multiarchivo", "entrega_patron": "  ", "entrega_indice": "  "},
+            "orden": {"__acciones": [["entrega", desorden]]},
+            "orden_propio": {"entrega": "multiarchivo", "entrega_indice": "LEEME.md", "entrega_patron": "p-NN.md", "__acciones": [
+                ["entrega", [{"nombre": "p-02.md", "html": ""}, {"nombre": "README.md", "html": ""}, {"nombre": "p-1.md", "html": ""}, {"nombre": "LEEME.md", "html": ""}]]]},
+            "simple": {"__acciones": [["entrega", [cls.B]], ["ajuste", 0, cambio]]},
+            "dos_ajustes": {"__acciones": [["entrega", entrega], ["ajuste", 1, cambio], ["ajuste", 2, {"d_h1": 40}], ["ir", 2], ["recargar"]]},
+            "vieja": {"__acciones": [["guardado", cls.VIEJO], ["recargar"]]},
+            "ir_fuera": {"__acciones": [["entrega", entrega], ["ir", 9]]},
+            "reordenar": {"entrega": "multiarchivo", "__acciones": [["entrega", [cls.A, {"nombre": "LEEME.md", "html": ""}]], ["ir", 1], ["indice", "LEEME.md"]]},
+            "revision": dict(zonas, __acciones=[["entrega", [cls.A, cls.B, cls.C, cls.D]], ["ir", 1], ["revision"]]),
+            "revision_falta": dict(zonas, __acciones=[["entrega", entrega], ["ir", 1], ["revision"]]),
+            "revision_orden": dict(zonas, __acciones=[["entrega", [cls.A, dict(cls.C, nombre="01 - Requisitos.md"), dict(cls.B, nombre="02 - Alcance.md"), cls.D]], ["revision"]]),
+            "revision_simple": dict(zonas, __acciones=[["entrega", [cls.B]], ["revision"]]),
+            "inicio_multi": {"entrega": "multiarchivo", "__acciones": [["entrega", [cls.A, cls.B, cls.D]], ["ir", 2], ["inicio"]]},
+            "inicio_unico": {"__acciones": [["entrega", [cls.A, cls.B, cls.D]], ["ir", 2], ["inicio"]]},
+            "capitulos": {"__acciones": [["entrega", entrega], ["capitulos_entrega"]]},
+        }
+        r = subprocess.run(
+            ["node", str(Path(__file__).with_name("configurador_node.js")), str(CONFIGURADOR), json.dumps(estados)],
+            capture_output=True, text=True, encoding="utf-8")
+        if r.returncode:
+            raise AssertionError(r.stderr)
+        cls.salida = json.loads(r.stdout)
+
+    def fm(self, nombre, clave="prompt"):
+        return vd.leer_frontmatter(self.salida[nombre][clave])[0]
+
+    def test_por_defecto_es_unico_y_sin_los_otros_campos(self):
+        d = self.fm("defecto")
+        self.assertEqual(d["entrega"], "unico")
+        self.assertNotIn("entrega_indice", d)
+        self.assertNotIn("entrega_patron", d)
+        self.assertNotIn("(DEC-009)", self.salida["defecto"]["prompt"])
+        self.assertIn("numeración continua", self.salida["defecto"]["prompt"])
+
+    def test_multiarchivo_escribe_los_campos_con_sus_valores_por_defecto(self):
+        d = self.fm("multi")
+        self.assertEqual((d["entrega"], d["entrega_indice"], d["entrega_patron"]), ("multiarchivo", "README.md", "NN - Nombre.md"))
+
+    def test_las_reglas_del_prompt_van_marcadas(self):
+        cuerpo = self.salida["propio"]["prompt"].split("<!--")[0]
+        for dec in ("(DEC-008)", "(DEC-009)", "(DEC-010)"):
+            self.assertIn(dec, cuerpo)
+        self.assertIn("«LEEME.md»", cuerpo)
+        self.assertNotIn("numeración continua", cuerpo)
+        self.assertIn("El H1 de cada punto lleva el número de su archivo", cuerpo)
+        self.assertIn("[PENDIENTE: versión, fecha, autor y descripción]", cuerpo)
+        self.assertIn("si la carpeta no tiene historial", cuerpo)
+
+    def test_con_numeracion_ninguna_el_h1_del_punto_va_sin_numero(self):
+        cuerpo = self.salida["multi_ninguna"]["prompt"].split("<!--")[0]
+        self.assertIn("El H1 de cada punto va sin número", cuerpo)
+        self.assertNotIn("El H1 de cada punto lleva el número", cuerpo)
+
+    def test_importar_y_exportar_conserva_los_campos(self):
+        for nombre in ("multi", "propio"):
+            for clave in ("entrega", "entrega_indice", "entrega_patron"):
+                self.assertEqual(self.fm(nombre, "reexportado")[clave], self.fm(nombre)[clave], f"{nombre}: {clave}")
+
+    def test_valores_invalidos_vuelven_al_valor_por_defecto(self):
+        self.assertEqual(self.fm("invalido")["entrega"], "unico")
+        d = self.fm("patron_vacio")
+        self.assertEqual((d["entrega_indice"], d["entrega_patron"]), ("README.md", "NN - Nombre.md"))
+
+    def test_el_prompt_generado_lo_acepta_el_verificador(self):
+        carpeta = self.dir / "e"
+        shutil.copytree(MUESTRA_ENTREGA, carpeta)
+        datos, inf = self.fm("muestra"), vd.Informe()
+        entrega = vd.preparar_entrega(datos, [carpeta], carpeta / "prompt-estilo.md", inf)
+        self.assertEqual(entrega.archivos[0].name, "README.md")
+        vd.verificar(datos, entrega.archivos, inf, None, entrega)
+        self.assertSinProblemas(inf)
+
+    def test_cargar_ordena_omite_y_avisa(self):
+        s = self.salida["cargar"]
+        self.assertEqual(s["documento"]["nombres"], ["README.md", "01 - W.docx", "02 - B.md"])
+        texto, falla, ms = s["avisos"][-1]
+        self.assertIn("Entrega cargada: 3 archivos", texto)
+        self.assertIn("foto.png (formato no admitido)", texto)
+        self.assertIn("roto.md (no se pudo leer)", texto)
+        self.assertTrue(falla)
+        self.assertEqual(ms, 8000)
+
+    def test_cargar_usa_el_lector_de_cada_formato(self):
+        self.assertIn("Desde Word", self.salida["cargar"]["documento"]["inicios"][1])
+        self.assertIn("<h1", self.salida["cargar"]["documento"]["inicios"][2])
+        self.assertEqual(self.salida["cargar_uno"]["documento"]["nombres"], ["a.md"])
+        self.assertEqual(self.salida["cargar_uno"]["avisos"][-1], ["Documento cargado: a.md", False, None])
+        self.assertFalse(self.salida["cargar_uno"]["documento"]["navegacion"])
+
+    def test_cargar_sin_nada_valido_no_cambia_el_documento(self):
+        self.assertIsNone(self.salida["cargar_ilegible"]["documento"])
+        self.assertIn("No se pudo leer el documento: ilegible", self.salida["cargar_ilegible"]["avisos"][-1][0])
+        self.assertIsNone(self.salida["cargar_no_admitido"]["documento"])
+        self.assertIn("Formato no soportado", self.salida["cargar_no_admitido"]["avisos"][-1][0])
+
+    def test_cargar_omite_el_prompt_y_la_memoria_y_los_nombra(self):
+        s = self.salida["cargar_carpeta"]
+        self.assertEqual(s["documento"]["nombres"], ["README.md"])
+        self.assertIn("prompt-estilo.md", s["avisos"][-1][0])
+        self.assertIn("decisiones-estilo.md", s["avisos"][-1][0])
+
+    def test_el_prompt_elegido_solo_se_carga(self):
+        self.assertEqual(self.salida["cargar_solo_prompt"]["documento"]["nombres"], ["prompt-estilo.md"])
+
+    def test_elegir_solo_el_prompt_y_la_memoria_no_carga_nada(self):
+        s = self.salida["cargar_solo_apoyo"]
+        self.assertIsNone(s["documento"])
+        self.assertIn("no son parte del documento", s["avisos"][-1][0])
+
+    def test_el_aviso_de_carga_incluye_que_no_se_guardo(self):
+        texto, falla, ms = self.salida["cargar_grande"]["avisos"][-1]
+        self.assertIn("Documento cargado: g.md", texto)
+        self.assertIn("al recargar se pierde todo", texto)
+        self.assertTrue(falla)
+        self.assertEqual(ms, 8000)
+
+    def test_subir_de_nuevo_pide_confirmacion_si_hay_ajustes(self):
+        self.assertEqual(self.salida["subir_rechazado"]["documento"]["nombres"], ["01 - Alcance.md"])
+        self.assertEqual(self.salida["subir_rechazado"]["documento"]["ajustes"], [1])
+        self.assertEqual(self.salida["subir_aceptado"]["documento"]["nombres"], ["a.md"])
+
+    def test_entrega_sobre_el_limite_y_recarga_da_documento_nulo(self):
+        self.assertIsNone(self.salida["grande"]["documento"])
+
+    def test_si_falla_el_almacen_no_queda_una_version_vieja(self):
+        self.assertIsNone(self.salida["almacen_falla"]["documento"])
+        texto, falla, _ = self.salida["aviso_falla"]["avisos"][-1]
+        self.assertIn("No se pudo guardar", texto)
+        self.assertTrue(falla)
+
+    def test_aviso_admite_duracion_larga(self):
+        html = CONFIGURADOR.read_text(encoding="utf-8")
+        self.assertIn("function aviso(msg, falla, ms = 1800)", html)
+        self.assertIn("aviso = function (msg, falla, ms = 3500)", html)
+
+    def test_leyendas_previas(self):
+        self.assertEqual(self.salida["leyendas"]["resultados"][-2:], [2, 1])
+        self.assertEqual(self.salida["leyendas_multi"]["resultados"][-1], 0)
+
+    def test_funciones_puras_de_la_vista_previa(self):
+        r = self.salida["puras"]["resultados"]
+        self.assertEqual(r[:3], ["3", "4.2", "0.1"])
+        self.assertIn('<a href="01%20-%20a%20(v2).md">a</a>', r[3])
+        self.assertIn('src="foto%20c.png"', r[4])
+        self.assertIn('<a href="01%20-%20a.md">a</a>', r[5])
+        self.assertEqual(r[6:12], ["0", "0.2", None, None, None, "4.1"])
+        self.assertEqual(r[12:15], [True, False, True])
+        self.assertFalse(self.salida["h1_ninguna"]["resultados"][-1])
+
+    def test_archivo_de_enlace(self):
+        self.assertEqual(self.salida["enlaces"]["resultados"][1:], [1, 2, -1, -1])
+
+    def test_restablecer_quita_los_ajustes_de_todos_los_archivos(self):
+        self.assertEqual(self.salida["restablecer"]["documento"]["ajustes"], [0, 0, 0])
+
+    def test_separar_titulo(self):
+        self.assertEqual(self.salida["titulo"]["resultados"][-1],
+                         {"titulo": "Entrega de muestra", "caps": ["Control de versiones", "Alcance", "Requisitos"]})
+        self.assertEqual(self.salida["sin_titulo"]["resultados"][-1], {"titulo": None, "caps": ["Alcance", "Requisitos"]})
+
+    def test_orden_indice_puntos_por_numero_y_lo_demas_al_final(self):
+        d = self.salida["orden"]["documento"]
+        self.assertEqual(d["nombres"], ["README.md", "01 - Alcance.md", "02 - Requisitos.md", "10 - Cierre.md", "notas.md"])
+        self.assertTrue(d["navegacion"])
+
+    def test_orden_con_indice_y_patron_propios(self):
+        self.assertEqual(self.salida["orden_propio"]["documento"]["nombres"], ["LEEME.md", "p-1.md", "p-02.md", "README.md"])
+
+    def test_un_archivo_no_tiene_navegacion_y_el_prompt_no_cambia(self):
+        s = self.salida["simple"]
+        self.assertFalse(s["documento"]["navegacion"])
+        self.assertIn("El usuario pidió estas excepciones sobre partes concretas de «01 - Alcance.md». Aplícalas solo en esas partes;", s["prompt"])
+        self.assertRegex(s["prompt"], r"\n- «[^»]*» \(bloque 1\): fuente del cuerpo: Arial\.")
+
+    def test_ajustes_de_dos_archivos_persisten_y_salen_en_el_prompt(self):
+        s = self.salida["dos_ajustes"]
+        self.assertEqual(s["documento"]["ajustes"], [0, 1, 1])
+        self.assertEqual(s["documento"]["activo"], 2)
+        for salida in (s["prompt"], s["memoria"]):
+            self.assertRegex(salida, r"«01 - Alcance\.md»[^\n]*fuente del cuerpo: Arial")
+            self.assertRegex(salida, r"«02 - Requisitos\.md»[^\n]*H1 digital \(px\): 40")
+
+    def test_documento_guardado_con_el_formato_anterior(self):
+        s = self.salida["vieja"]
+        self.assertEqual(s["documento"]["nombres"], ["manual.md"])
+        self.assertEqual(s["documento"]["ajustes"], [1])
+        self.assertFalse(s["documento"]["navegacion"])
+        self.assertIn("«manual.md»", s["prompt"])
+        self.assertIn("fuente del cuerpo: Arial", s["prompt"])
+
+    def test_ir_a_un_archivo_que_no_existe_no_cambia_el_activo(self):
+        self.assertEqual(self.salida["ir_fuera"]["documento"]["activo"], 0)
+
+    def test_cambiar_el_indice_reordena_y_conserva_el_archivo_activo(self):
+        d = self.salida["reordenar"]["documento"]
+        self.assertEqual(d["nombres"], ["LEEME.md", "README.md"])
+        self.assertEqual(d["nombres"][d["activo"]], "LEEME.md")
+
+    def test_revision_no_marca_como_faltante_lo_que_esta_en_otro_archivo(self):
+        self.assertEqual(self.salida["revision"]["resultados"][-1], {"faltan": [], "desordenada": False})
+
+    def test_revision_marca_lo_que_falta_en_toda_la_entrega(self):
+        self.assertEqual(self.salida["revision_falta"]["resultados"][-1]["faltan"], ["Cierre"])
+
+    def test_revision_marca_el_orden_de_toda_la_entrega(self):
+        self.assertTrue(self.salida["revision_orden"]["resultados"][-1]["desordenada"])
+
+    def test_revision_con_un_archivo_sigue_marcando_lo_que_falta(self):
+        self.assertEqual(self.salida["revision_simple"]["resultados"][-1]["faltan"], ["Control de versiones", "Requisitos", "Cierre"])
+
+    def test_numeracion_de_la_vista_sigue_el_numero_del_archivo(self):
+        self.assertEqual(self.salida["inicio_multi"]["resultados"][-1], {"capitulo": 9, "prefijo": 10})
+
+    def test_numeracion_de_la_vista_continua_con_entrega_unica(self):
+        self.assertEqual(self.salida["inicio_unico"]["resultados"][-1], {"capitulo": 1, "prefijo": None})
+
+    def test_capitulos_de_toda_la_entrega(self):
+        self.assertEqual(self.salida["capitulos"]["resultados"][-1], ["Entrega de muestra", "Control de versiones", "Alcance", "Requisitos"])
+
+    def test_el_html_tiene_control_de_entrega_subida_multiple_y_navegacion(self):
+        html = CONFIGURADOR.read_text(encoding="utf-8")
+        self.assertRegex(html, r'<input id="subir-doc"[^>]*\bmultiple\b')
+        self.assertIn('data-k="entrega"', html)
+        self.assertIn('id="nav-entrega"', html)

@@ -136,6 +136,7 @@ Si un paso necesita algo que no está en la memoria ni en las referencias (una m
 | Tratamiento | usted, tú, vos, impersonal | impersonal (DEC-001) |
 | Citas | APA 7, IEEE, institucional, ninguna | APA 7 si hay citas (DEC-004) |
 | Formato de salida | Markdown, docx, pdf | Markdown |
+| Entrega | unico, multiarchivo | unico (DEC-008) |
 
 Pregunta siempre si hay un reglamento institucional o una guía de marca. Si existe, manda sobre las recomendaciones y hay que pedir el documento.
 

@@ -4,11 +4,15 @@
 Uso:
     python3 verificar_doc.py --prompt docs/prompt-estilo.md docs/manual/
     python3 verificar_doc.py --prompt docs/prompt-estilo.md docs/manual/01-intro.md docs/manual/02-uso.md
+    python3 verificar_doc.py --prompt docs/prompt-estilo.md docs/entrega/    # entrega: multiarchivo
 
 Revisa estructura, numeración de títulos, tablas, figuras, avisos, siglas,
 números, largo de oraciones y que el prólogo no esté redactado. Si el prompt declara tablas estadísticas
 (`tablas:`), también revisa las reglas de APA 7 (cero inicial, separador
-decimal y nota de los asteriscos). Termina con código 1 si encuentra errores.
+decimal y nota de los asteriscos). Con `entrega: multiarchivo` recibe una carpeta con
+un índice y un archivo por punto (DEC-008): numera por archivo (DEC-009) y revisa
+los enlaces del índice y el control de versiones (DEC-010). Termina con código 1 si
+encuentra errores, y con código 2 si el prompt o las rutas no sirven.
 Solo usa la biblioteca estándar.
 """
 import argparse
@@ -17,6 +21,7 @@ import re
 import sys
 import unicodedata
 from pathlib import Path
+from urllib.parse import unquote
 
 SIN_NUMERAR_BASE = {
     "control de versiones", "portada", "resumen", "abstract", "agradecimientos",
@@ -139,22 +144,31 @@ def estilo_leyendas(prompt):
     return "apa7" if any(p in plantilla for p in PLANTILLAS_APA7) else "clasica"
 
 
+# Número de una leyenda o de una cita: entero («Tabla 4») o con prefijo («Tabla 4.1», DEC-009).
+NUMERO_ELEMENTO = r"\d+(?:\.\d+)*"
+
+
+def numero_elemento(texto):
+    """«04.1» se compara como «4.1»."""
+    return ".".join(str(int(p)) for p in texto.split("."))
+
+
 def leyenda_clasica(linea, clase):
-    """«**Tabla N.** Título» en una sola línea. Devuelve N o None."""
-    m = re.match(rf"^\*{{0,2}}{clase} (\d+)\.", linea[1].strip()) if linea else None
-    return int(m.group(1)) if m else None
+    """«**Tabla N.** Título» en una sola línea, con N entero o con prefijo. Devuelve N como texto, o None."""
+    m = re.match(rf"^\*{{0,2}}{clase} ({NUMERO_ELEMENTO})\.(?!\d)", linea[1].strip()) if linea else None
+    return numero_elemento(m.group(1)) if m else None
 
 
 def leyenda_apa(lineas, i, clase):
-    """APA 7: «**Tabla N**» y en la línea siguiente «*Título*», justo antes del elemento i. Devuelve N o None."""
+    """APA 7: «**Tabla N**» y en la línea siguiente «*Título*», justo antes del elemento i. Devuelve N como texto, o None."""
     j = i - 1
     while j >= 0 and not lineas[j][1].strip():
         j -= 1
     if j < 0 or not re.match(r"^(\*|_)[^*_].*(\*|_)$", lineas[j][1].strip()):
         return None
     numero = siguiente_no_vacia(lineas, j, -1)
-    m = re.match(rf"^\*\*{clase} (\d+)\*\*$", numero[1].strip()) if numero else None
-    return int(m.group(1)) if m else None
+    m = re.match(rf"^\*\*{clase} ({NUMERO_ELEMENTO})\*\*$", numero[1].strip()) if numero else None
+    return numero_elemento(m.group(1)) if m else None
 
 
 # Tipos de tabla del configurador que siguen las reglas estadísticas de APA 7 (ESTADISTICAS en configurador.html).
@@ -400,8 +414,8 @@ def verificar_referencias(lineas, numeros, inf):
         if tipo != "texto":
             continue
         sin_codigo = re.sub(r"`[^`]*`", "", linea)
-        for m in re.finditer(r"(?<!\*\*)(?<!\w)(Tabla|Figura) (\d+)(?![\d.]*\*\*)(?![\d\w])", sin_codigo, re.I):
-            clase, n = m.group(1).capitalize(), int(m.group(2))
+        for m in re.finditer(rf"(?<!\*\*)(?<!\w)(Tabla|Figura) ({NUMERO_ELEMENTO})(?![\d.]*\*\*)(?![\d\w])(?!\.\d)", sin_codigo, re.I):
+            clase, n = m.group(1).capitalize(), numero_elemento(m.group(2))
             if n not in existentes[clase]:
                 inf.error(donde, f"se cita la {clase} {n}, que no existe en el documento")
 
@@ -634,9 +648,165 @@ def verificar_plantilla(lineas, propios, prompt, inf):
                     inf.aviso(d, f"la bajada de «{nombre}» tiene {len(oraciones(' '.join(bajada)))} oraciones; deben ser de una a tres")
 
 
-def verificar(prompt, archivos, inf, memorias=None):
+ENTREGAS = ("multiarchivo", "unico")
+INDICE_POR_DEFECTO = "README.md"
+PATRON_POR_DEFECTO = "NN - Nombre.md"
+ENLACE = re.compile(r"(?<!!)\[[^\]]*\]\(\s*(<[^>]*>|(?:[^()\s]|\([^()\s]*\))+)[^)]*\)")
+
+
+class Entrega:
+    """Entrega `multiarchivo` (DEC-008): índice y puntos [(número, ruta)] en orden de lectura."""
+
+    def __init__(self, carpeta, indice, puntos):
+        self.carpeta, self.indice, self.puntos = carpeta, indice, puntos
+        self.archivos = ([indice] if indice else []) + [r for _, r in puntos]
+        self.numeros = {str(r): n for n, r in puntos}
+
+
+def ruta_de(donde):
+    """La ruta de una ubicación «ruta:línea»; la ruta puede tener «:» (C:\\docs)."""
+    return donde.rsplit(":", 1)[0]
+
+
+def campo_sin_comentario(prompt, clave, defecto=""):
+    """Escalar del prompt sin su comentario final: la plantilla usa «valor  # opciones»."""
+    valor = prompt.get(clave)
+    if valor in (None, [], ""):
+        return defecto
+    return valor_yaml(re.sub(r"(?:^|\s+)#.*$", "", str(valor))) or defecto
+
+
+def regex_patron(patron):
+    """`NN` es el número, `Nombre` el texto y lo demás es literal. Un `NN` repetido debe valer lo mismo."""
+    partes, con_numero = [], False
+    for parte in re.split(r"(NN|Nombre)", patron):
+        if parte == "NN":
+            partes.append("(?P=numero)" if con_numero else r"(?P<numero>\d+)")
+            con_numero = True
+        else:
+            partes.append(".+" if parte == "Nombre" else re.escape(parte))
+    if not con_numero:
+        raise ValueError(f"entrega_patron «{patron}» no tiene NN: el número del punto es obligatorio")
+    return re.compile("".join(partes))
+
+
+def preparar_entrega(prompt, rutas, prompt_ruta, inf):
+    """Lee `entrega`, `entrega_indice` y `entrega_patron`. Con `unico` devuelve None; con `multiarchivo`,
+    la Entrega en orden de lectura. Lo que impide empezar lanza ValueError (código 2); lo demás va al informe."""
+    modo = campo_sin_comentario(prompt, "entrega", "unico")
+    if modo not in ENTREGAS:
+        raise ValueError(f"valor de entrega desconocido: {modo} (válidos: {', '.join(ENTREGAS)})")
+    if modo == "unico":
+        return None
+    if len(rutas) != 1 or not rutas[0].is_dir():
+        raise ValueError("con `entrega: multiarchivo` hay que indicar una sola carpeta")
+    carpeta = rutas[0]
+    indice = campo_sin_comentario(prompt, "entrega_indice", INDICE_POR_DEFECTO)
+    patron = campo_sin_comentario(prompt, "entrega_patron", PATRON_POR_DEFECTO)
+    if re.search(r"[/\\]", indice) or not indice.lower().endswith(".md"):
+        raise ValueError(f"entrega_indice «{indice}» debe ser un nombre de archivo .md de la carpeta")
+    if re.search(r"[/\\]", patron) or not patron.lower().endswith(".md"):
+        raise ValueError(f"entrega_patron «{patron}» debe terminar en .md y no puede tener barras")
+    regex = regex_patron(patron)
+
+    prompt_real = prompt_ruta.resolve()
+    archivos = sorted(
+        f for f in carpeta.iterdir()
+        if f.is_file() and f.suffix.lower() == ".md" and f.resolve() != prompt_real and f.name != "decisiones-estilo.md")
+    if not archivos:
+        raise ValueError(f"no se encontraron archivos .md en {carpeta}")
+
+    ruta_indice, puntos = None, []
+    for f in archivos:
+        coincide = regex.fullmatch(f.name)
+        if f.name == indice:
+            ruta_indice = f
+        elif coincide:
+            puntos.append((int(coincide.group("numero")), f))
+        else:
+            inf.error(str(f), f"el archivo no cumple el patrón «{patron}» ni es el índice")
+    if ruta_indice is None:
+        inf.error(str(carpeta), f"falta el índice «{indice}»")
+    puntos.sort(key=lambda p: (p[0], p[1].name))
+
+    vistos = set()
+    for n, f in puntos:
+        if n in vistos:
+            inf.error(str(f), f"número {n} repetido en la entrega")
+        vistos.add(n)
+    if puntos:
+        for n in range(min(1, puntos[0][0]), puntos[-1][0]):
+            if n not in vistos:
+                inf.aviso(str(carpeta), f"salto en la numeración de los archivos: falta el punto {n}")
+    return Entrega(carpeta, ruta_indice, puntos)
+
+
+def destino_enlace(crudo):
+    """Destino relativo de un enlace, sin `<…>`, `%20`, `./` ni ancla. None si es externo, absoluto o solo un ancla."""
+    crudo = crudo[1:-1] if crudo.startswith("<") else crudo
+    if re.match(r"^[a-z][a-z0-9+.-]*:", crudo, re.I) or crudo.startswith(("/", "\\")):
+        return None
+    destino = re.sub(r"^(?:\./)+", "", unquote(re.split(r"[#?]", crudo, maxsplit=1)[0]).replace("\\", "/"))
+    return destino or None
+
+
+def verificar_titulo_indice(entrega, lineas, documento, inf):
+    """El primer H1 del índice es el título del documento (DEC-008)."""
+    indice = str(entrega.indice)
+    for donde, linea, tipo, _ in lineas:
+        m = re.match(r"^#\s+(.*?)\s*#*\s*$", linea) if tipo == "texto" and ruta_de(donde) == indice else None
+        if m:
+            if normalizar(m.group(1)) != documento:
+                inf.error(donde, f"el primer H1 del índice debe ser el título del documento: «{m.group(1)}»")
+            return
+    inf.error(indice, "el índice no tiene el H1 con el título del documento")
+
+
+def verificar_enlaces_indice(entrega, lineas, inf):
+    """El índice enlaza cada punto, en el orden de los archivos, y no enlaza archivos que no existen."""
+    indice = str(entrega.indice)
+    en_carpeta = {f.name for f in entrega.carpeta.iterdir()}
+    puntos = [r.name for _, r in entrega.puntos]
+    enlazados = []
+    for donde, linea, tipo, _ in lineas:
+        if tipo != "texto" or ruta_de(donde) != indice:
+            continue
+        for m in ENLACE.finditer(re.sub(r"`[^`]*`", "", linea)):
+            destino = destino_enlace(m.group(1))
+            if destino is None:
+                continue
+            existe = destino in en_carpeta if "/" not in destino else (entrega.carpeta / destino).exists()
+            if not existe:
+                inf.error(donde, f"el índice enlaza «{destino}», que no existe")
+            elif destino in puntos and destino not in enlazados:
+                enlazados.append(destino)
+    for nombre in puntos:
+        if nombre not in enlazados:
+            inf.error(indice, f"el índice no enlaza «{nombre}»")
+    if enlazados != [n for n in puntos if n in enlazados]:
+        inf.error(indice, "los enlaces del índice no siguen el orden de los archivos")
+
+
+def verificar_control_versiones_entrega(entrega, lineas, inf):
+    """Una sola tabla de control de versiones, en el índice (DEC-010). Se reconoce por sus columnas."""
+    indice = str(entrega.indice) if entrega.indice else None
+    en_indice = 0
+    for donde, cabecera, _ in tablas_markdown(lineas):
+        if "version" not in cabecera or "fecha" not in cabecera:
+            continue
+        if ruta_de(donde) == indice:
+            en_indice += 1
+        else:
+            inf.error(donde, "tabla de control de versiones en un punto: va solo en el índice")
+    if indice and en_indice != 1:
+        inf.error(indice, f"el índice debe tener exactamente una tabla de control de versiones, y tiene {en_indice}")
+
+
+def verificar(prompt, archivos, inf, memorias=None, entrega=None):
     verificar_ejes(prompt, inf)
     lineas = bloques(archivos)
+    numeros_archivo = entrega.numeros if entrega else {}
+    sin_exigir_numero = normalizar(campo_sin_comentario(prompt, "numeracion_textual")) == "ninguna"
     documento = normalizar(prompt.get("documento", ""))
     sin_numerar = SIN_NUMERAR_BASE | {normalizar(s) for s in prompt.get("sin_numerar", []) or []}
     siglas_ok = SIGLAS_BASE | set(prompt.get("siglas_conocidas", []) or [])
@@ -655,7 +825,14 @@ def verificar(prompt, archivos, inf, memorias=None):
 
     # Títulos y numeración
     contadores, capitulos, en_numerado, primer_h1 = [0, 0, 0], [], False, True
+    ruta_actual, con_h1 = None, set()
     for donde, linea, tipo, _ in lineas:
+        ruta = ruta_de(donde)
+        punto = numeros_archivo.get(ruta)
+        if ruta != ruta_actual:
+            ruta_actual = ruta
+            if punto is not None:  # Así los saltos entre archivos no generan errores.
+                contadores, en_numerado = [punto - 1, 0, 0], False
         m = re.match(r"^(#{1,6})\s+(.*?)\s*#*\s*$", linea) if tipo == "texto" else None
         if not m:
             continue
@@ -674,12 +851,27 @@ def verificar(prompt, archivos, inf, memorias=None):
         primer_h1 = False
         if nivel == 1:
             capitulos.append((donde, normalizar(nombre)))
-            if normalizar(nombre) in sin_numerar:
+            if punto is not None:
+                con_h1.add(ruta)
+                en_numerado = bool(num)
+                if not num:
+                    contadores = [punto, 0, 0]
+                    if not sin_exigir_numero:
+                        inf.error(donde, f"el H1 debe llevar el número {punto} de su archivo: «{titulo}»")
+                    continue
+                if sin_exigir_numero:
+                    inf.aviso(donde, f"«{nombre}» lleva número, pero numeracion_textual es ninguna")
+                if [int(p) for p in num.group(1).split(".")] != [punto]:
+                    inf.error(donde, f"el H1 lleva el número {num.group(1)}; se esperaba {punto}, el número de su archivo")
+                    contadores = [punto, 0, 0]
+                    continue
+            elif normalizar(nombre) in sin_numerar:
                 en_numerado = False
                 if num:
                     inf.aviso(donde, f"«{nombre}» suele ir sin número")
                 continue
-            en_numerado = True
+            else:
+                en_numerado = True
         if nivel == 4 or nivel > niveles:
             continue
         if not num:
@@ -694,6 +886,10 @@ def verificar(prompt, archivos, inf, memorias=None):
         if partes != esperado:
             inf.error(donde, f"numeración {num.group(1)}; se esperaba {'.'.join(map(str, esperado))}")
         contadores = partes + [0] * (3 - nivel)
+    if entrega:
+        for _, f in entrega.puntos:
+            if str(f) not in con_h1:
+                inf.error(str(f), "el punto no tiene H1")
 
     # Estructura exigida por el prompt
     estructura = [normalizar(s) for s in prompt.get("estructura", []) or []]
@@ -745,14 +941,31 @@ def verificar(prompt, archivos, inf, memorias=None):
         elif tipo == "texto" and re.match(r"^>\s*(Nota|Consejo|Advertencia|Peligro|Importante)\s*:", linea, re.I):
             inf.aviso(donde, "el aviso debe escribirse como «> **Nota.** texto»")
 
+    # Con `multiarchivo`, cada archivo numera por su cuenta y con su prefijo, y la mención se busca en él (DEC-009).
+    textos = {}
+    if entrega:
+        for donde, l, t, _ in lineas:
+            if t == "texto":
+                textos.setdefault(ruta_de(donde), []).append(l)
     for clase, lista in numeros.items():
-        for k, (donde, n) in enumerate(lista, start=1):
-            if n != k:
-                inf.error(donde, f"{clase} {n}: la numeración no es continua; se esperaba {clase} {k}")
-            menciones = re.findall(rf"(?<!\*\*){clase} {n}(?![\d.]*\*\*)(?!\d)", texto_plano, re.I)
+        cuenta = {}
+        for donde, n in lista:
+            ruta = ruta_de(donde) if entrega else ""
+            cuenta[ruta] = cuenta.get(ruta, 0) + 1
+            punto = numeros_archivo.get(ruta)
+            esperado = f"{punto}.{cuenta[ruta]}" if punto is not None else str(cuenta[ruta])
+            if n != esperado:
+                inf.error(donde, f"{clase} {n}: la numeración no es continua; se esperaba {clase} {esperado}")
+            texto = "\n".join(textos.get(ruta, [])) if entrega else texto_plano
+            menciones = re.findall(rf"(?<!\*\*){clase} {re.escape(n)}(?![\d.]*\*\*)(?!\d)(?!\.\d)", texto, re.I)
             if not menciones:
                 inf.aviso(donde, f"{clase} {n} no se menciona en el texto")
     verificar_referencias(lineas, numeros, inf)
+    if entrega:
+        if entrega.indice:
+            verificar_titulo_indice(entrega, lineas, documento, inf)
+            verificar_enlaces_indice(entrega, lineas, inf)
+        verificar_control_versiones_entrega(entrega, lineas, inf)
     if usa_tablas_estadisticas(prompt):
         verificar_estadistica(lineas, decimal_coma, inf)
     tipos_tabla = {normalizar(str(t)) for t in prompt.get("tablas", []) or []}
@@ -833,7 +1046,7 @@ def verificar(prompt, archivos, inf, memorias=None):
 def main():
     p = argparse.ArgumentParser(description="Verifica documentación Markdown contra un prompt de estilo.")
     p.add_argument("--prompt", required=True, help="ruta al prompt-estilo.md")
-    p.add_argument("rutas", nargs="+", help="archivos .md o carpetas con el documento")
+    p.add_argument("rutas", nargs="+", help="archivos .md o carpetas con el documento; con entrega: multiarchivo, una sola carpeta")
     p.add_argument("--memoria-agente", help="memoria del agente (por defecto, memoria/decisiones.md de documentacion-estilo)")
     p.add_argument("--memoria-proyecto", help="memoria del proyecto (por defecto, decisiones-estilo.md junto al prompt)")
     a = p.parse_args()
@@ -851,8 +1064,15 @@ def main():
         print(f"ERROR: al prompt le faltan los campos: {', '.join(faltan)}", file=sys.stderr)
         return 2
 
-    archivos = []
-    for r in map(Path, a.rutas):
+    inf = Informe()
+    try:
+        entrega = preparar_entrega(prompt, [Path(r) for r in a.rutas], prompt_ruta, inf)
+    except ValueError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 2
+
+    archivos = list(entrega.archivos) if entrega else []
+    for r in map(Path, [] if entrega else a.rutas):
         if r.is_dir():
             archivos += sorted(f for f in r.rglob("*.md") if f.resolve() != prompt_ruta.resolve())
         elif r.is_file():
@@ -860,7 +1080,7 @@ def main():
         else:
             print(f"ERROR: no existe {r}", file=sys.stderr)
             return 2
-    if not archivos:
+    if not archivos and not entrega:
         print("ERROR: no se encontraron archivos .md", file=sys.stderr)
         return 2
 
@@ -868,8 +1088,7 @@ def main():
     proyecto = Path(a.memoria_proyecto) if a.memoria_proyecto else prompt_ruta.parent / "decisiones-estilo.md"
     memorias = {"DEC": leer_memoria(agente), "DP": leer_memoria(proyecto)}
 
-    inf = Informe()
-    verificar(prompt, archivos, inf, memorias)
+    verificar(prompt, archivos, inf, memorias, entrega)
     print(f"Documento: {prompt.get('documento')} | archivos: {len(archivos)}")
     for titulo, lista in (("ERRORES", inf.errores), ("ADVERTENCIAS", inf.advertencias), ("PENDIENTES", inf.info)):
         print(f"\n{titulo} ({len(lista)})")

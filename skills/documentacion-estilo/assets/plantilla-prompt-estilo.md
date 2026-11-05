@@ -18,6 +18,9 @@ comillas: dobles
 max_palabras_oracion: 25
 formato: <markdown | docx | pdf>
 salida: <docs/nombre-del-documento/>
+entrega: unico  # unico | multiarchivo (DEC-008); si falta, vale unico
+entrega_indice: README.md  # solo con multiarchivo
+entrega_patron: NN - Nombre.md  # solo con multiarchivo: NN es el número, Nombre el texto y lo demás es literal
 plantilla: <references/plantillas/<nombre>.md | omitir si no hay>
 leyendas: <clasica | apa7>  # opcional; la plantilla Trabajo de campo UNC ya implica apa7
 pretextuales:  # en orden; catálogo y reglas en references/escritura.md, §4 ter
@@ -77,6 +80,12 @@ Actúas como <redactor técnico | asesor de tesis | analista de requisitos> y va
 
 El documento tiene tres zonas, en este orden: pretextual, textual y postextual. Solo los capítulos de la zona textual llevan numeración decimal (1, 1.1, 1.1.1). Las partes pretextuales y postextuales (las de `sin_numerar`) llevan título sin número, salvo Portada, Dedicatoria y Epígrafe, que no llevan título. Cada parte sigue su regla de contenido.
 
+<Solo con `entrega: multiarchivo`:>
+
+**Entrega en varios archivos** (DEC-008): un archivo índice, «<entrega_indice>», y un archivo por punto, con el patrón «<entrega_patron>». El índice lleva el H1 con el título del documento y enlaza cada punto, en el orden de los archivos. El H1 de cada punto lleva el número de su archivo, también si es una parte de `sin_numerar`; con `numeracion_textual: ninguna`, va sin número.
+
+**Control de versiones** (DEC-010): hay una sola tabla, en el índice. Propón las filas desde el `git log` de la carpeta de la entrega y pide al usuario que confirme la versión y la descripción. Sin repositorio, o si la carpeta no tiene historial, las filas quedan como `[PENDIENTE: versión, fecha, autor y descripción]`.
+
 ### Pretextuales (sin número, <paginación romana | arábiga | sin paginación>, <cada elemento en página nueva | sin salto de página entre uno y otro>)
 
 | Elemento | Regla |
@@ -113,6 +122,7 @@ Usa exactamente estos formatos en Markdown:
 - **Elementos académicos** (solo los que figuren en `componentes`): resumen y palabras clave, notas al pie, citas en bloque, hipótesis, índices de tablas y figuras y anexos, cada uno con la regla que copia el configurador (ver `references/estilo-visual.md`, «Elementos académicos»).
 - **Componentes propios de la plantilla** (solo si hay `componentes_plantilla`): una línea por componente con su regla, copiada del configurador (`references/plantillas/<nombre>.md`, «En el configurador»).
 - **Numeración**: figuras y tablas se numeran de forma continua en todo el documento, y cada una se menciona en el texto antes de aparecer.
+- **Numeración con `entrega: multiarchivo`** (DEC-009), en lugar de la anterior: tablas y figuras se numeran por archivo, con el número del archivo como prefijo: en `04 - …` van `Tabla 4.1`, `Tabla 4.2`. Las del índice van sin prefijo: `Tabla 1`. Con leyendas APA 7 se mantiene su formato y se admite ese número, como excepción explícita a APA 7. Cada una se menciona en su propio archivo antes de aparecer; desde otro archivo se cita con su número completo.
 
 Tipografía y color de la versión final (si se exporta): Calibri en títulos y cuerpo, Consolas en código y color primario `#2E74B5` (DEC-003), salvo que `plantilla` o un reglamento indiquen otra cosa.
 

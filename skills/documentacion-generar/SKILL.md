@@ -43,9 +43,11 @@ Si el prompt pegado no tiene encabezado YAML, conviértelo al formato de `../doc
 1. Arma el índice. Para cada capítulo de `estructura`, define sus secciones (H2 y H3), sus fuentes y los componentes que llevará (tablas, figuras, pasos, avisos).
 2. Elige la organización de los archivos en la carpeta `salida` del prompt:
    - **Un archivo** (`documento.md`) si el documento es corto, hasta unas 15 páginas.
-   - **Un archivo por capítulo** (`00-control-de-versiones.md`, `01-introduccion.md`, ...) si es más largo. El prefijo numérico mantiene el orden.
+   - **Un archivo por capítulo** (`00-control-de-versiones.md`, `01-introduccion.md`, ...) si es más largo. El prefijo numérico mantiene el orden. Sigue siendo un documento lógico (`entrega: unico`, o sin el campo), con numeración continua (DEC-008).
+   - **Entrega en varios archivos**, solo si el prompt dice `entrega: multiarchivo` (DEC-008): un archivo índice (`entrega_indice`, por defecto `README.md`) y un archivo por punto, en el primer nivel de la carpeta, con el patrón `entrega_patron` (por defecto `NN - Nombre.md`). Asigna a cada capítulo de `estructura` su archivo: el índice o un punto.
    - Diagramas e imágenes en `salida/figuras/`.
 3. Si la carpeta `salida` ya tiene documentación, léela antes de escribir. Actualiza lo existente en lugar de reemplazarlo y agrega una fila nueva en el control de versiones.
+4. Con `entrega: multiarchivo`, propón las filas del control de versiones desde el historial de la carpeta (DEC-010): `git log --date=format:%d/%m/%Y --format="%ad | %an | %s" -- <carpeta>`. Git da la fecha, el autor y el mensaje, pero no la versión ni la descripción del cambio: muestra la propuesta y pide al usuario que confirme la versión y la descripción de cada fila. Nunca escribas filas sin esa confirmación. Sin repositorio, o si la carpeta no tiene historial, las filas quedan como `[PENDIENTE: versión, fecha, autor y descripción]`.
 
 ## Paso 4: redactar
 
@@ -54,10 +56,14 @@ Sigue el prompt al pie de la letra: estructura, componentes, tratamiento y norma
 - **Título del documento**: un H1 inicial con el texto exacto de `documento`, o ningún título.
 - **Capítulos**: `# 1 Introducción`, `## 1.1 Alcance`, `### 1.1.1 Limitaciones`. Las partes de `sin_numerar` van sin número: `# Glosario`. Con `numeracion_textual: ninguna`, los capítulos de la zona textual también van sin número (están en `sin_numerar`); con `niveles_numerados: 2`, los `###` van sin número. Los nombres de capítulo coinciden exactamente con `estructura`. Las partes pretextuales y postextuales (`pretextuales` y `postextuales`, si el prompt las trae) siguen la regla de su fila en la sección 3.
 - **Prólogo**: lo escribe otra persona. No lo redactes: `# Prólogo` lleva solo `[PENDIENTE: texto del prologuista]`. El verificador da una advertencia si tiene otro texto.
-- **Control de versiones**: va primero por defecto, salvo que el prompt lo ubique en otro lugar de `pretextuales`. Tabla con columnas Versión, Fecha, Autor y Descripción del cambio. La primera versión es la 0.1 (borrador), con la fecha de hoy. Como autor, usa el que indicó el usuario o el de `git config user.name`.
+- **Control de versiones**: va primero por defecto, salvo que el prompt lo ubique en otro lugar de `pretextuales`. Tabla con columnas Versión, Fecha, Autor y Descripción del cambio. La primera versión es la 0.1 (borrador), con la fecha de hoy. Como autor, usa el que indicó el usuario o el de `git config user.name`. Con `entrega: multiarchivo`, hay una sola tabla, en el índice, con las filas confirmadas en el Paso 3 (DEC-010).
 - **Tablas**: `**Tabla N.** Título` antes de la tabla y `Fuente: ...` después.
 - **Figuras**: después de la imagen o del bloque `mermaid`, va `**Figura N.** Título` y luego `Fuente: ...`. Las imágenes llevan texto alternativo: `![Pantalla de inicio de sesión](figuras/login.png)`.
 - **Numeración continua** de tablas y figuras en todo el documento, también entre archivos. Cada una se menciona en el texto antes de aparecer ("En la Figura 2 se muestra...").
+- **Con `entrega: multiarchivo`**:
+  - **Índice** (DEC-008): lleva el H1 con el texto exacto de `documento`, y enlaza cada punto en el orden de los archivos, con enlaces en línea: el verificador no reconoce los enlaces por referencia. Si el nombre tiene espacios, el enlace usa `%20` o `<…>`: `[Alcance](<01 - Alcance.md>)`.
+  - **Puntos** (DEC-008): el H1 lleva el número del archivo: `04 - Diseño.md` empieza con `# 4 Diseño`, y sus secciones son `## 4.1`, `## 4.2`… También lleva número una parte de `sin_numerar` que va en un punto: `05 - Glosario.md` empieza con `# 5 Glosario`. Con `numeracion_textual: ninguna`, el H1 no lleva número.
+  - **Numeración** (DEC-009): reemplaza a la numeración continua. Tablas y figuras se numeran por archivo con el número del archivo como prefijo: en `04 - Diseño.md`, `**Tabla 4.1.**` y `**Figura 4.1.**`. Las del índice van sin prefijo: `**Tabla 1.**`. Con leyendas APA 7 se mantiene su formato y se admite ese número, como excepción explícita a APA 7: `**Tabla 4.1**`. Cada una se menciona en su propio archivo; desde otro archivo se cita con su número completo.
 - **Avisos**: `> **Nota.**`, `> **Consejo.**`, `> **Advertencia.**` o `> **Peligro.**`.
 - **Diagramas**: en Mermaid dentro del documento, con la notación que fija el prompt (UML, BPMN, C4 o ER). Si el diagrama no se puede expresar en Mermaid, usa PlantUML en `figuras/` y enlaza la imagen exportada.
 - **Pendientes**: `[PENDIENTE: descripción]`, nunca texto inventado.
@@ -101,10 +107,22 @@ Ejecuta el verificador, que está en la carpeta `scripts/` de este skill:
 python3 <carpeta-de-este-skill>/scripts/verificar_doc.py --prompt docs/prompt-estilo.md <carpeta-salida>/
 ```
 
+Con `entrega: multiarchivo`, la ruta debe ser una sola carpeta: si recibe otra cosa, o un valor de `entrega` desconocido, el script termina con código 2.
+
 Además de títulos, estructura, leyendas, avisos y normas de escritura, comprueba que:
 
 - cada «Tabla N» o «Figura N» citada en el texto exista en el documento;
 - cada `DEC-NNN` citado exista en la memoria del agente y cada `DP-NNN`, en la memoria del proyecto (`decisiones-estilo.md` junto al prompt). Las rutas se pueden cambiar con `--memoria-agente` y `--memoria-proyecto`.
+
+Con `entrega: multiarchivo`, lee el índice primero y luego los puntos por número, solo del primer nivel de la carpeta y sin el prompt ni `decisiones-estilo.md`. Además comprueba que:
+
+- exista el índice, cada archivo cumpla el patrón y no se repita un número; un salto en los números da advertencia (DEC-008);
+- el índice enlace cada punto, sin enlaces rotos y en el orden de los archivos (DEC-008);
+- el H1 de cada punto lleve el número de su archivo, y `estructura` esté completa en el conjunto de la entrega (DEC-008);
+- tablas y figuras tengan el prefijo de su archivo y no salten números; las citas se resuelven contra toda la entrega, y la mención se busca en el archivo de cada tabla o figura (DEC-009);
+- haya exactamente una tabla de control de versiones, en el índice, reconocida por sus columnas Versión y Fecha (DEC-010).
+
+Con `entrega: unico`, `Tabla 2.1` da error: ya no se lee como `Tabla 2`.
 
 - **Errores**: corrígelos todos y vuelve a ejecutar el script hasta que no quede ninguno.
 - **Advertencias**: corrígelas. Si alguna es un falso positivo (por ejemplo, un número de versión con punto), déjala y menciónala en el informe final.

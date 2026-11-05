@@ -413,6 +413,8 @@ pre.texto-salida {
 .banner-local .nota-ui { color: rgba(255,255,255,.85); }
 .banner-local button.primario { background: #fff; color: var(--accent); }
 .banner-local[hidden] { display: none; }
+.nav-entrega[hidden], #campos-entrega[hidden], #nota-entrega[hidden] { display: none; }
+.nav-entrega label { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; }
 .editando-local .sin-local { opacity: .45; }
 
 @media (max-width: 900px) {
@@ -568,6 +570,18 @@ pre.texto-salida {
               <option value="documento">Dentro de la carpeta del documento</option>
             </select></label>
         </div>
+        <div class="fila">
+          <label class="campo"><span>Entrega</span>
+            <select data-k="entrega">
+              <option value="unico">Un documento</option>
+              <option value="multiarchivo">Varios archivos</option>
+            </select></label>
+        </div>
+        <div class="fila" id="campos-entrega" hidden>
+          <label class="campo"><span>Archivo índice</span><input type="text" data-k="entrega_indice"></label>
+          <label class="campo"><span>Patrón de los puntos</span><input type="text" data-k="entrega_patron"></label>
+        </div>
+        <p class="nota-ui" id="nota-entrega" hidden>En el patrón, NN es el número del punto y Nombre es el texto; lo demás es literal. Sin NN se usa el patrón por defecto.</p>
       </div>
     </section>
 
@@ -828,8 +842,8 @@ pre.texto-salida {
           <button type="button" data-fuente="documento" aria-pressed="false" disabled>Mi documento</button>
         </span>
         <button type="button" id="ver-todo" class="alternar" aria-pressed="false" title="Agrega al final del ejemplo un apéndice con todos los elementos del configurador. No cambia lo que marcaste ni el prompt.">Ver todo</button>
-        <label class="boton" for="subir-doc" title="Markdown, Word (.docx), HTML o texto. También puedes arrastrarlo sobre la vista previa.">Subir documento…</label>
-        <input id="subir-doc" type="file" accept=".md,.markdown,.txt,.html,.htm,.docx" hidden>
+        <label class="boton" for="subir-doc" title="Markdown, Word (.docx), HTML o texto. Puedes elegir varios archivos a la vez o arrastrarlos sobre la vista previa.">Subir documento…</label>
+        <input id="subir-doc" type="file" accept=".md,.markdown,.txt,.html,.htm,.docx" multiple hidden>
         <span class="archivo" id="archivo-doc" hidden><span id="nombre-doc"></span><button type="button" id="quitar-doc" aria-label="Quitar documento">✕</button></span>
         <span class="espacio"></span>
         <button type="button" id="imprimir">Imprimir / PDF</button>
@@ -847,6 +861,11 @@ pre.texto-salida {
         <button type="button" id="ajustar-seleccion" class="primario" hidden>Ajustar estilo de la selección</button>
         <button type="button" id="cancelar-seleccion" hidden>Cancelar</button>
         <div class="ajustes" id="ajustes"></div>
+      </div>
+      <div class="barra-vista nav-entrega" id="nav-entrega" role="navigation" aria-label="Archivos de la entrega" hidden>
+        <button type="button" id="archivo-anterior">‹ Anterior</button>
+        <label>Archivo <select id="archivo-activo"></select></label>
+        <button type="button" id="archivo-siguiente">Siguiente ›</button>
       </div>
       <details class="revision" id="revision" hidden open><summary id="resumen-revision"></summary><ol id="lista-revision"></ol></details>
       <div class="lienzo" id="lienzo"><div class="marco-hoja" id="marco"><article class="doc digital" id="doc"></article></div></div>
@@ -1388,9 +1407,15 @@ function quitarPropio(z, nombre) {
 }
 const ZONAS_DEF = zonasDesdeCapitulos(esqueleto("diataxis").map(e => e[0]));
 
+/* Entrega (DEC-008): un índice y un archivo por punto. Lo mismo que lee verificar_doc.py. */
+const ENTREGAS = ["unico", "multiarchivo"];
+function indiceEntrega(st) { const v = String(st.entrega_indice == null ? "" : st.entrega_indice).trim(); return v && !/[\\/]/.test(v) ? v : "README.md"; }
+function patronEntrega(st) { const v = String(st.entrega_patron == null ? "" : st.entrega_patron).trim(); return v.includes("NN") ? v : "NN - Nombre.md"; }
+
 const DEF = {
   documento: "Manual de usuario del Sistema de Gestión", version: "1.0", tipo: "manual", metodologia: "diataxis",
   proposito: "instructivo", ambito: "tecnico", lector: "publico_general", medio: "digital", formato: "markdown", salida: "docs/manual/", ubicacion_prompt: "proyecto",
+  entrega: "unico", entrega_indice: "README.md", entrega_patron: "NN - Nombre.md",
   pretextuales: ZONAS_DEF.pretextuales, textual: ZONAS_DEF.textual, postextuales: ZONAS_DEF.postextuales, propios: ZONAS_DEF.propios,
   formato_zonas: JSON.parse(JSON.stringify(FORMATO_ZONAS_BASE)),
   /* Derivados de las zonas: los calcula derivarEstructura(DEF) más abajo */
@@ -1476,12 +1501,14 @@ function combinar(o) {
     // Plantilla y componentes propios: solo valores conocidos (una configuración sin ellos queda sin plantilla).
     if (typeof r.plantilla !== "string" || !tiene(PLANTILLAS, r.plantilla)) r.plantilla = "";
     r.componentes_plantilla = (Array.isArray(r.componentes_plantilla) ? r.componentes_plantilla : []).filter((k, i, l) => tiene(COMPONENTES_PLANTILLA, k) && l.indexOf(k) === i);
+    if (!ENTREGAS.includes(r.entrega)) r.entrega = DEF.entrega;
+    r.entrega_indice = indiceEntrega(r); r.entrega_patron = patronEntrega(r);
     derivarEstructura(r);
   }
   return r;
 }
 function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch (e) { /* sin almacenamiento */ } }
-function aviso(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("ver"); clearTimeout(aviso.t); aviso.t = setTimeout(() => t.classList.remove("ver"), 1800); }
+function aviso(msg, falla, ms = 1800) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.toggle("fail", !!falla); t.classList.add("ver"); clearTimeout(aviso.t); aviso.t = setTimeout(() => t.classList.remove("ver"), ms); }
 
 function lum(hex) {
   const h = hex.replace("#", ""); const c = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255)
@@ -1759,6 +1786,7 @@ form.addEventListener("input", e => {
     if (k === "textual") { S.estructura_editada = true; derivarEstructura(); }
     if (k === "metodologia") cambiarMetodologia();
     if (k === "medio" && S.medio !== "ambos") S.modo = S.medio;
+    if (k === "entrega_indice" || k === "entrega_patron") { reordenarEntrega(); pintarBarraDoc(); }
   } else if (el.closest("[data-grupo]")) {
     const g = el.closest("[data-grupo]");
     S[g.dataset.grupo] = [...g.querySelectorAll("input:checked")].map(c => c.value);
@@ -1813,7 +1841,7 @@ document.getElementById("paleta-base").addEventListener("click", () => {
   S.colores = Object.assign({}, PALETA_BASE); pintarFormulario(); actualizar(); });
 document.getElementById("restablecer").addEventListener("click", () => {
   if (!confirm("¿Restablecer todos los valores a la configuración inicial?")) return;
-  S = combinar(null); EDIT = null; SEL = new Set(); if (SUBIDO) SUBIDO.ajustes = []; guardarSubido(); pintarBarraDoc(); pintarFormulario(); actualizar();
+  S = combinar(null); EDIT = null; SEL = new Set(); restablecerEntrega(); guardarSubido(); pintarBarraDoc(); pintarFormulario(); actualizar();
 });
 document.querySelectorAll("#modo button").forEach(b => b.addEventListener("click", () => { S.modo = b.dataset.modo; actualizar(); }));
 
@@ -2249,6 +2277,7 @@ function generarPrompt() {
   const tiposTabla = comp.has("tablas") ? TABLAS_ACAD.filter(x => S.tablas_tipos.includes(x.k)) : [];
   const datos = datosCapitulos();
   const medios = S.medio === "ambos" ? ["digital", "impreso"] : [S.medio];
+  const multiarchivo = S.entrega === "multiarchivo";
   const rutaPrompt = S.ubicacion_prompt === "documento" ? S.salida.replace(/\/?$/, "/") + "prompt-estilo.md" : "docs/prompt-estilo.md";
   const fm = [
     "---",
@@ -2257,7 +2286,7 @@ function generarPrompt() {
     `proposito: ${S.proposito}`, `ambito: ${S.ambito}`, `lector: ${S.lector}`, `medio: ${S.medio}`, `variante: ${S.variante}`, `tratamiento: ${S.tratamiento}`,
     `citas: ${S.citas}`, `comillas: ${S.comillas}`, `decimal: ${S.decimal}`, `miles: ${S.miles}`,
     `porcentaje_con_espacio: ${S.pct_espacio ? "si" : "no"}`, `formato_fecha: ${y(S.fecha)}`, `max_palabras_oracion: ${S.max_palabras}`,
-    `formato: ${S.formato}`, `salida: ${y(S.salida)}`, `prompt: ${y(rutaPrompt)}`, `alcance_decisiones: ${S.alcance}`, ...(S.plantilla ? [`plantilla: ${y("references/plantillas/" + S.plantilla + ".md")}`] : []),
+    `formato: ${S.formato}`, `salida: ${y(S.salida)}`, `entrega: ${S.entrega}`, ...(multiarchivo ? [`entrega_indice: ${y(indiceEntrega(S))}`, `entrega_patron: ${y(patronEntrega(S))}`] : []), `prompt: ${y(rutaPrompt)}`, `alcance_decisiones: ${S.alcance}`, ...(S.plantilla ? [`plantilla: ${y("references/plantillas/" + S.plantilla + ".md")}`] : []),
     `fuente_titulos: ${y(S.f_titulos)}`, `fuente_cuerpo: ${y(S.f_cuerpo)}`, `fuente_codigo: ${y(S.f_codigo)}`,
     ...(medios.includes("digital") ? [`tamanos_digital_px: ${y(`cuerpo ${S.d_cuerpo}, h1 ${S.d_h1}, h2 ${S.d_h2}, h3 ${S.d_h3}, tablas ${S.d_tabla}, codigo ${S.d_codigo}, notas ${S.d_nota}, interlineado ${S.d_interlineado}, ancho ${S.d_ancho}`)}`] : []),
     ...(medios.includes("impreso") ? [`tamanos_impreso_pt: ${y(`cuerpo ${S.p_cuerpo}, h1 ${S.p_h1}, h2 ${S.p_h2}, h3 ${S.p_h3}, tablas ${S.p_tabla}, codigo ${S.p_codigo}, notas ${S.p_nota}, interlineado ${S.p_interlineado}`)}`, `papel: ${S.p_papel}`, `margenes_cm: ${S.p_margen}`, `sangria_cm: ${S.sangria}`] : []),
@@ -2328,8 +2357,10 @@ function generarPrompt() {
   if (comp.has("cita_bloque")) componentes.push(`- **Citas en bloque**: las citas textuales de 40 palabras o más van en párrafo aparte, con sangría izquierda de 1,27 cm, sin comillas y con la cita bibliográfica después del punto final; en Markdown, con \`>\` y sin rótulo de aviso. Las de menos de 40 palabras van en el texto, entre comillas ${comillas}.`);
   if (comp.has("hipotesis")) componentes.push("- **Hipótesis**: un párrafo por hipótesis que empieza con `**H1.**`, `**H2.**`…, con numeración continua y enunciado afirmativo y verificable; la hipótesis nula, si se explicita, va debajo de su alternativa como `**H0.**`.");
   if (comp.has("indices")) componentes.push("- **Índices de tablas y figuras**: después del índice general, una lista por clase con el número y el título exacto de cada leyenda, en el orden en que aparecen; en impreso, con el número de página; en digital, con enlace.");
-  if (comp.has("anexos")) componentes.push("- **Anexos**: cada anexo empieza con `## Anexo A. Título` (letras en orden: A, B, C…) y se menciona en el texto antes de aparecer («ver Anexo A»); sus tablas y figuras siguen la numeración continua del documento.");
-  componentes.push("- **Numeración**: figuras y tablas con numeración continua en todo el documento; cada una se menciona en el texto antes de aparecer.");
+  if (comp.has("anexos")) componentes.push("- **Anexos**: cada anexo empieza con `## Anexo A. Título` (letras en orden: A, B, C…) y se menciona en el texto antes de aparecer («ver Anexo A»); sus tablas y figuras siguen " + (multiarchivo ? "la numeración de su archivo." : "la numeración continua del documento."));
+  componentes.push(multiarchivo
+    ? "- **Numeración** (DEC-009): tablas y figuras se numeran por archivo, con el número del archivo como prefijo: en `04 - …` van `Tabla 4.1`, `Tabla 4.2`. Las del índice van sin prefijo: `Tabla 1`. Con leyendas APA 7 se mantiene su formato y se admite ese número, como excepción explícita a APA 7. Cada una se menciona en su propio archivo antes de aparecer; desde otro archivo se cita con su número completo."
+    : "- **Numeración**: figuras y tablas con numeración continua en todo el documento; cada una se menciona en el texto antes de aparecer.");
   if (S.notaciones.length) componentes.push(`- **Diagramas**: notaciones permitidas ${S.notaciones.map(x => NOTACIONES[x]).join(", ")}; fuente en ${{ mermaid: "Mermaid", plantuml: "PlantUML", imagen: "imagen editable" }[S.diag_herramienta]}, exportados a ${S.diag_formato === "svg" ? "SVG" : "PNG a 2×"}; flujo ${S.diag_direccion === "LR" ? "de izquierda a derecha" : "de arriba hacia abajo"}; máximo ${S.diag_max} elementos; título, número, leyenda y fuente.`);
   if (S.tipo === "manual" && S.metodologia === "diataxis") componentes.push(`- **Diátaxis**: el manual incluye ${S.diataxis.map(d => ({ tutorial: "tutoriales", guia: "guías prácticas", referencia: "referencia", explicacion: "explicación" }[d])).join(", ") || "[PENDIENTE: tipos]"}, sin mezclar tipos en una misma página.`);
 
@@ -2365,7 +2396,11 @@ Actúas como ${ROL[S.tipo]} y vas a escribir «${S.documento}», ${TIPO_CON_ARTI
 
 El documento tiene tres zonas, en este orden: pretextual, textual y postextual. ${sinNumero ? "Ningún capítulo lleva número: los de la zona textual, como las partes pretextuales y postextuales (las de \`sin_numerar\`), llevan título sin número" : `Solo los capítulos de la zona textual llevan numeración decimal (${niveles === 1 ? "1" : niveles === 2 ? "1, 1.1" : "1, 1.1, 1.1.1"}${niveles < 3 ? `; desde el nivel ${niveles + 1}, los títulos van sin número` : ""}). Las partes pretextuales y postextuales (las de \`sin_numerar\`) llevan título sin número`}, salvo Portada, Dedicatoria y Epígrafe, que no llevan título. Cada parte sigue su regla de contenido.
 
-### Pretextuales (sin número, ${formatoZona("pre", "elemento")})
+${multiarchivo ? `**Entrega en varios archivos** (DEC-008): un archivo índice, «${indiceEntrega(S)}», y un archivo por punto, con el patrón «${patronEntrega(S)}». El índice lleva el H1 con el título del documento y enlaza cada punto, en el orden de los archivos. ${sinNumero ? "El H1 de cada punto va sin número, porque los capítulos no llevan número." : "El H1 de cada punto lleva el número de su archivo, también si es una parte de \`sin_numerar\`."}
+
+**Control de versiones** (DEC-010): hay una sola tabla, en el índice. Propón las filas desde el \`git log\` de la carpeta de la entrega y pide al usuario que confirme la versión y la descripción. Sin repositorio, o si la carpeta no tiene historial, las filas quedan como \`[PENDIENTE: versión, fecha, autor y descripción]\`.
+
+` : ""}### Pretextuales (sin número, ${formatoZona("pre", "elemento")})
 
 ${tablaZona("pre")}
 ${notasPre.length ? "\n" + notasPre.join("\n") + "\n" : ""}
@@ -2456,9 +2491,85 @@ ${memoriaExcepciones()}`;
 
 /* ---------- Documento subido: lectura ---------- */
 const CLAVE_DOC = "configurador-estilo-documento-v1";
-let SUBIDO = null;
-try { SUBIDO = JSON.parse(localStorage.getItem(CLAVE_DOC) || "null"); } catch (e) { SUBIDO = null; }
-if (SUBIDO && !Array.isArray(SUBIDO.ajustes)) SUBIDO.ajustes = [];
+/* ENTREGA = { archivos, activo }: uno o varios archivos con sus ajustes. SUBIDO es siempre el activo. */
+function normalizarArchivo(o) {
+  if (!o || typeof o !== "object" || typeof o.html !== "string") return null;
+  const ajustes = (Array.isArray(o.ajustes) ? o.ajustes : []).filter(a => a && Array.isArray(a.bloques))
+    .map(a => Object.assign({}, a, { valores: a.valores || {}, colores: a.colores || {} }));
+  return { nombre: String(o.nombre || "documento"), html: o.html, ajustes };
+}
+// También acepta el formato anterior, { nombre, html, ajustes }, de un solo archivo.
+function normalizarEntrega(o) {
+  if (!o || typeof o !== "object") return null;
+  const archivos = (Array.isArray(o.archivos) ? o.archivos : [o]).map(normalizarArchivo).filter(Boolean);
+  if (!archivos.length) return null;
+  return { archivos, activo: Number.isInteger(o.activo) && o.activo >= 0 && o.activo < archivos.length ? o.activo : 0 };
+}
+let ENTREGA = null, SUBIDO = null;
+function fijarEntrega(e) { ENTREGA = e; SUBIDO = e ? e.archivos[e.activo] : null; }
+try { fijarEntrega(normalizarEntrega(JSON.parse(localStorage.getItem(CLAVE_DOC) || "null"))); } catch (e) { fijarEntrega(null); }
+function hayNavegacion() { return !!ENTREGA && ENTREGA.archivos.length > 1; }
+function numeroDeArchivo(nombre) {
+  if (nombre === indiceEntrega(S)) return null;
+  let grupos = 0;
+  const cuerpo = patronEntrega(S).split(/(NN|Nombre)/).map(t => t === "NN" ? (grupos++ ? "\\1" : "(\\d+)") : t === "Nombre" ? ".+" : t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("");
+  // Un punto en otro formato (01 - Alcance.docx) no cumple el patrón, pero su número ordena igual.
+  const m = nombre.match(new RegExp(`^${cuerpo}$`)) || nombre.match(/^(\d+)/);
+  return m ? Number(m[1]) : null;
+}
+// Índice, puntos por número y, al final, lo demás por nombre.
+function ordenarEntrega(archivos) {
+  const clave = a => { const n = numeroDeArchivo(a.nombre); return a.nombre === indiceEntrega(S) ? [0, 0] : n === null ? [2, 0] : [1, n]; };
+  return [...archivos].sort((a, b) => { const x = clave(a), y = clave(b); return x[0] - y[0] || x[1] - y[1] || a.nombre.localeCompare(b.nombre); });
+}
+function restablecerEntrega() {
+  if (ENTREGA) ENTREGA.archivos.forEach(a => { a.ajustes = []; });
+  reordenarEntrega();
+}
+function reordenarEntrega() {
+  if (!hayNavegacion()) return;
+  ENTREGA.archivos = ordenarEntrega(ENTREGA.archivos); ENTREGA.activo = ENTREGA.archivos.indexOf(SUBIDO);
+  guardarSubido();
+}
+function textoHtml(html) {
+  return html.replace(/<[^>]+>/g, "").replace(/&nbsp;|&#160;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&").trim();
+}
+function titulosH1(html) { return [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1\s*>/gi)].map(m => quitarNum(textoHtml(m[1])).replace(/\.$/, "")).filter(Boolean); }
+function empiezaConH1(html) { const m = html.match(/<h([1-6])\b/i); return !!m && m[1] === "1"; }
+function nombresConocidos() { return new Set([...lineas(S.estructura).map(norm), ...S.pretextuales.map(norm), ...S.postextuales.map(norm), ...SIN_TITULO]); }
+// Capítulos de un archivo: el primer H1 del primer archivo es el título del documento si no es una parte conocida.
+function capitulosDeArchivo(i) {
+  const a = ENTREGA.archivos[i], t = titulosH1(a.html).map(norm);
+  return i === 0 && t.length && empiezaConH1(a.html) && !nombresConocidos().has(t[0]) ? t.slice(1) : t;
+}
+function revisarEstructura() {
+  const presentes = ENTREGA ? ENTREGA.archivos.flatMap((_, i) => capitulosDeArchivo(i)) : [];
+  const txt = lineas(S.estructura), estructura = txt.map(norm);
+  const orden = presentes.filter(p => estructura.includes(p));
+  return { faltan: txt.filter((_, k) => !presentes.includes(estructura[k])), desordenada: orden.join("|") !== estructura.filter(e => orden.includes(e)).join("|") };
+}
+// Desde qué número sigue la vista previa del archivo activo: el de su archivo o, con `unico`, a continuación de los anteriores.
+function inicioNumeracion() {
+  const prefijo = S.entrega === "multiarchivo" ? numeroDeArchivo(SUBIDO.nombre) : null;
+  if (prefijo !== null) return { capitulo: prefijo - 1, prefijo };
+  const sinNum = new Set(lineas(S.sin_numerar).map(norm));
+  let capitulo = 0;
+  if (S.entrega !== "multiarchivo") for (let i = 0; i < ENTREGA.activo; i++) capitulo += capitulosDeArchivo(i).filter(c => !sinNum.has(c)).length;
+  return { capitulo, prefijo };
+}
+function esperadoLeyenda(prefijo, k) { return prefijo === null ? String(k) : `${prefijo}.${k}`; }
+// En un punto, el H1 lleva el número de su archivo aunque sea una parte de `sin_numerar`, como en el verificador.
+function h1LlevaNumero(clave, sinNum, prefijo) { return !sinNum.has(clave) || (prefijo !== null && !sinNumeroTextual(S)); }
+// El texto del número de un título, o null si todavía no se puede numerar. El punto 00 admite el capítulo 0.
+function numeroVisible(cnt, nivel, prefijo) {
+  const partes = cnt.slice(0, nivel);
+  return partes.some((v, i) => v < 0 || (v === 0 && !(i === 0 && prefijo === 0))) ? null : partes.join(".");
+}
+function leyendasPrevias(clase) {
+  if (S.entrega === "multiarchivo") return 0;
+  const re = new RegExp(`^${clase}\\s+\\d+(?:\\.\\d+)*\\s*[.:](?!\\d)`);
+  return ENTREGA.archivos.slice(0, ENTREGA.activo).reduce((n, a) => n + [...a.html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p\s*>/gi)].filter(m => re.test(textoHtml(m[1]))).length, 0);
+}
 let EDIT = null, SEL = new Set(), ANCLA = null, ultimoArrastre = 0;
 const LOCALES = new Set(["f_titulos", "f_cuerpo", "f_codigo", "d_cuerpo", "d_h1", "d_h2", "d_h3", "d_tabla", "d_codigo", "d_nota", "d_interlineado",
   "p_cuerpo", "p_h1", "p_h2", "p_h3", "p_tabla", "p_codigo", "p_nota", "p_interlineado", "peso_titulos", "alineacion", "sangria", "comillas", "pct_espacio"]);
@@ -2471,11 +2582,20 @@ const ETIQUETA = {
 const ETQ_AVISO = { nota: "Nota", consejo: "Consejo", advertencia: "Advertencia", peligro: "Peligro" };
 const ICO_AVISO = { nota: "ℹ", consejo: "✔", advertencia: "⚠", peligro: "✖" };
 
+const AVISO_SIN_GUARDAR = "No se pudo guardar el documento: al recargar se pierde todo, con sus ajustes.";
+// Devuelve false si el documento no quedó guardado; nunca deja una versión vieja en su lugar.
 function guardarSubido() {
+  let guardado = true;
   try {
-    if (SUBIDO && JSON.stringify(SUBIDO).length < 2500000) localStorage.setItem(CLAVE_DOC, JSON.stringify(SUBIDO));
-    else localStorage.removeItem(CLAVE_DOC);
-  } catch (e) { /* sin almacenamiento o documento muy grande */ }
+    const datos = ENTREGA ? JSON.stringify(ENTREGA) : "";
+    if (datos && datos.length < 2500000) localStorage.setItem(CLAVE_DOC, datos);
+    else { localStorage.removeItem(CLAVE_DOC); guardado = !datos; }
+  } catch (e) {
+    guardado = false;
+    try { localStorage.removeItem(CLAVE_DOC); } catch (e2) { /* sin almacenamiento */ }
+  }
+  if (!guardado) aviso(AVISO_SIN_GUARDAR, true, 8000);
+  return guardado;
 }
 
 /* Markdown (subconjunto habitual: títulos, párrafos, listas, tablas, citas, código, enlaces, imágenes) */
@@ -2552,8 +2672,10 @@ function inlineMd(t) {
   t = t.replace(/(`+)([\s\S]*?[^`])\1(?!`)/g, (_, a, c) => { cod.push(`<code>${esc(c.trim())}</code>`); return `\u0000${cod.length - 1}\u0000`; });
   t = t.replace(/<\/?(kbd|br|sub|sup|b|i|em|strong|mark|small|del|s)(\s[^<>]*)?\/?>/gi, x => { raw.push(x); return `\u0001${raw.length - 1}\u0001`; });
   t = esc(t);
-  t = t.replace(/!\[([^\]]*)\]\(\s*([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\s*\)/g, (_, a, s) => `<img alt="${a}" src="${s}">`);
-  t = t.replace(/\[([^\]]+)\]\(\s*([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\s*\)/g, (_, a, h) => `<a href="${h}">${a}</a>`);
+  // El destino puede ir entre <…> para admitir espacios (ya escapados como &lt;…&gt;).
+  const destino = d => d.replace(/^&lt;|&gt;$/g, "").replace(/ /g, "%20");
+  t = t.replace(/!\[([^\]]*)\]\(\s*(&lt;(?:(?!&gt;).)*?&gt;|[^)\s]+)(?:\s+&quot;[^&]*&quot;)?\s*\)/g, (_, a, s) => `<img alt="${a}" src="${destino(s)}">`);
+  t = t.replace(/\[([^\]]+)\]\(\s*(&lt;(?:(?!&gt;).)*?&gt;|[^)\s]+)(?:\s+&quot;[^&]*&quot;)?\s*\)/g, (_, a, h) => `<a href="${destino(h)}">${a}</a>`);
   t = t.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, '<a href="$1">$1</a>');
   t = t.replace(/(\*\*|__)(?=\S)([\s\S]*?\S)\1/g, "<strong>$2</strong>");
   t = t.replace(/(^|[^*\p{L}\p{N}])\*(?=\S)([^*]*?\S)\*(?!\*)/gu, "$1<em>$2</em>");
@@ -2743,21 +2865,47 @@ function sanear(html) {
   return raiz.innerHTML;
 }
 
-async function cargarDocumento(f) {
-  if (!f) return;
-  const ext = (f.name.split(".").pop() || "").toLowerCase();
-  try {
-    let html;
-    if (ext === "docx") html = await docxAHtml(await f.arrayBuffer());
-    else if (ext === "html" || ext === "htm") { const d = new DOMParser().parseFromString(await f.text(), "text/html"); html = d.body ? d.body.innerHTML : ""; }
-    else if (["md", "markdown", "txt"].includes(ext)) html = mdAHtml(await f.text());
-    else { aviso("Formato no soportado: usa .md, .docx, .html o .txt"); return; }
-    SUBIDO = { nombre: f.name, html: sanear(html), ajustes: [] };
-    EDIT = null; SEL = new Set(); S.fuente_vista = "documento";
-    guardarSubido(); pintarBarraDoc(); pintarFormulario(); actualizar();
-    document.getElementById("t-vista").click();
-    aviso(`Documento cargado: ${f.name}`);
-  } catch (err) { aviso("No se pudo leer el documento: " + err.message); }
+const FORMATOS_DOC = ["docx", "html", "htm", "md", "markdown", "txt"];
+function extensionDe(nombre) { return (nombre.split(".").pop() || "").toLowerCase(); }
+async function leerArchivoSubido(f) {
+  const ext = extensionDe(f.name);
+  if (ext === "docx") return docxAHtml(await f.arrayBuffer());
+  if (ext === "html" || ext === "htm") { const d = new DOMParser().parseFromString(await f.text(), "text/html"); return d.body ? d.body.innerHTML : ""; }
+  return mdAHtml(await f.text());
+}
+// Pedirlo antes de perder los ajustes de lo que ya está cargado.
+function confirmarPerderAjustes() {
+  return !(ENTREGA && ENTREGA.archivos.some(a => a.ajustes.length)) || confirm("¿Quitar el documento? También se pierden sus ajustes locales.");
+}
+const ARCHIVOS_DE_APOYO = ["prompt-estilo.md", "decisiones-estilo.md"];
+async function cargarDocumentos(lista) {
+  const elegidos = [...(lista || [])]; if (!elegidos.length) return;
+  const apoyo = elegidos.length > 1 ? elegidos.filter(f => ARCHIVOS_DE_APOYO.includes(f.name)) : [];
+  const validos = elegidos.filter(f => FORMATOS_DOC.includes(extensionDe(f.name)) && !apoyo.includes(f));
+  if (!validos.length) { aviso(apoyo.length ? "Solo elegiste el prompt o la memoria: no son parte del documento" : "Formato no soportado: usa .md, .docx, .html o .txt"); return; }
+  if (!confirmarPerderAjustes()) return;
+  const omitidos = [...apoyo.map(f => `${f.name} (no es parte del documento)`), ...elegidos.filter(f => !validos.includes(f) && !apoyo.includes(f)).map(f => `${f.name} (formato no admitido)`)], archivos = [];
+  let ultimoError = "";
+  for (const f of validos) {
+    try { archivos.push({ nombre: f.name, html: sanear(await leerArchivoSubido(f)), ajustes: [] }); }
+    catch (err) { ultimoError = err.message; omitidos.push(`${f.name} (no se pudo leer)`); }
+  }
+  if (!archivos.length) { aviso("No se pudo leer el documento: " + ultimoError); return; }
+  fijarEntrega({ archivos: ordenarEntrega(archivos), activo: 0 });
+  EDIT = null; SEL = new Set(); ANCLA = null; S.fuente_vista = "documento";
+  const guardado = guardarSubido(); pintarBarraDoc(); pintarFormulario(); actualizar();
+  document.getElementById("t-vista").click();
+  const cargado = archivos.length > 1 ? `Entrega cargada: ${archivos.length} archivos.${S.entrega === "multiarchivo" ? "" : " Si tiene índice y puntos, elige «Varios archivos» en Documento."}` : `Documento cargado: ${archivos[0].nombre}`;
+  const texto = [cargado, omitidos.length ? `Se omitió: ${omitidos.join(", ")}.` : "", guardado ? "" : AVISO_SIN_GUARDAR].filter(Boolean).join(" ");
+  if (omitidos.length || !guardado) aviso(texto, true, 8000); else aviso(texto);
+}
+let IR_ARRIBA = false;
+function irAArchivo(i) {
+  if (!ENTREGA || !Number.isInteger(i) || i < 0 || i >= ENTREGA.archivos.length || i === ENTREGA.activo) return;
+  if (EDIT) salirLocal();
+  SEL = new Set(); ANCLA = null; IR_ARRIBA = true;
+  ENTREGA.activo = i; SUBIDO = ENTREGA.archivos[i];
+  guardarSubido(); pintarBarraDoc(); actualizar();
 }
 
 /* ---------- Documento subido: estilo, ajustes locales y revisión ---------- */
@@ -2796,7 +2944,7 @@ function textoSinCodigo(el) {
 function renderSubido(doc, impreso) {
   const cont = document.createElement("div"); cont.className = "cuerpo-doc"; cont.innerHTML = SUBIDO.html;
   [...cont.children].forEach((b, i) => b.dataset.b = i);
-  const estructuraTxt = lineas(S.estructura), estructura = estructuraTxt.map(norm), sinNum = new Set(lineas(S.sin_numerar).map(norm));
+  const sinNum = new Set(lineas(S.sin_numerar).map(norm));
   const desvios = [];
   const marcar = (el, msg) => { desvios.push({ el, msg }); if (el && S.marcar_desvios) { el.classList.add("desvio"); el.title = (el.title ? el.title + "\n" : "") + msg; } };
   const bloqueDe = el => { const b = el && el.closest("[data-b]"); return b ? +b.dataset.b : -1; };
@@ -2832,12 +2980,12 @@ function renderSubido(doc, impreso) {
   });
   cont.querySelectorAll("p").forEach(p => {
     const t2 = p.textContent.trim();
-    if (/^(Tabla|Figura)\s+\d+\s*[.:]/.test(t2)) {
+    if (/^(Tabla|Figura)\s+\d+(?:\.\d+)*\s*[.:](?!\d)/.test(t2)) {
       p.classList.add("leyenda");
       if (!p.querySelector("strong, b")) {
         const w2 = document.createTreeWalker(p, NodeFilter.SHOW_TEXT); let n;
         while ((n = w2.nextNode())) if (n.nodeValue.trim()) {
-          const m2 = n.nodeValue.match(/^(\s*(Tabla|Figura)\s+\d+\s*[.:])([\s\S]*)$/);
+          const m2 = n.nodeValue.match(/^(\s*(Tabla|Figura)\s+\d+(?:\.\d+)*\s*[.:])(?!\d)([\s\S]*)$/);
           if (m2) { const b = document.createElement("b"); b.textContent = m2[1]; n.nodeValue = m2[3]; n.parentNode.insertBefore(b, n); }
           break;
         }
@@ -2849,27 +2997,27 @@ function renderSubido(doc, impreso) {
   // Títulos: título del documento, numeración y capítulos
   const hs = [...cont.querySelectorAll("h1,h2,h3,h4,h5,h6")];
   let titulo = null;
-  const conocidos = new Set([...estructura, ...S.pretextuales.map(norm), ...S.postextuales.map(norm), ...SIN_TITULO]);
-  if (hs[0] && hs[0].tagName === "H1" && !conocidos.has(norm(quitarNum(hs[0].textContent).replace(/\.$/, "")))) { titulo = hs[0]; titulo.classList.add("titulo-doc"); }
-  let cnt = [0, 0, 0], enNumerado = false; const capitulos = [];
+  const conocidos = nombresConocidos(), inicio = inicioNumeracion();
+  if (ENTREGA.activo === 0 && hs[0] && hs[0].tagName === "H1" && !conocidos.has(norm(quitarNum(hs[0].textContent).replace(/\.$/, "")))) { titulo = hs[0]; titulo.classList.add("titulo-doc"); }
+  let cnt = [inicio.capitulo, 0, 0], enNumerado = false; const capitulos = [];
   hs.forEach(h => {
     if (h === titulo) return;
     const nivel = +h.tagName[1], limpio = quitarNum(h.textContent.trim());
     if (nivel > 4) marcar(h, `Título de nivel ${nivel}: el máximo es 4.`);
     if (/[^.]\.$/.test(limpio)) marcar(h, "El título termina en punto.");
-    if (nivel === 1) { const k = norm(limpio.replace(/\.$/, "")); capitulos.push({ h, k }); enNumerado = !sinNum.has(k); }
+    if (nivel === 1) { const k = norm(limpio.replace(/\.$/, "")); capitulos.push({ h, k }); enNumerado = h1LlevaNumero(k, sinNum, inicio.prefijo); }
     if (!S.numerar_subido || nivel > 3) return;
     quitarNumeroDeNodo(h);
     if (!enNumerado) return;
     cnt = nivel === 1 ? [cnt[0] + 1, 0, 0] : nivel === 2 ? [cnt[0], cnt[1] + 1, 0] : [cnt[0], cnt[1], cnt[2] + 1];
-    if (cnt.slice(0, nivel).includes(0)) return;
-    h.insertAdjacentHTML("afterbegin", `<span class="num">${cnt.slice(0, nivel).join(".")} </span>`);
+    const numero = numeroVisible(cnt, nivel, inicio.prefijo);
+    if (numero !== null) h.insertAdjacentHTML("afterbegin", `<span class="num">${numero} </span>`);
   });
-  const presentes = capitulos.map(c => c.k);
-  estructura.forEach((e, k) => { if (!presentes.includes(e)) marcar(null, `Falta el capítulo «${estructuraTxt[k]}» de la estructura.`); });
+  // Sobre toda la entrega: un capítulo que está en otro archivo no falta.
+  const revision = revisarEstructura();
+  revision.faltan.forEach(c => marcar(null, `Falta el capítulo «${c}» de la estructura.`));
   capitulos.filter(c => !conocidos.has(c.k)).forEach(c => marcar(c.h, "Este capítulo no está en la estructura del estilo."));
-  const orden = presentes.filter(p => estructura.includes(p));
-  if (orden.join("|") !== estructura.filter(e => orden.includes(e)).join("|")) marcar(null, "Los capítulos no siguen el orden de la estructura.");
+  if (revision.desordenada) marcar(null, "Los capítulos no siguen el orden de la estructura.");
 
   // Texto: comillas y % (global con la opción, o local si un ajuste los cambia)
   const w = document.createTreeWalker(cont, NodeFilter.SHOW_TEXT, { acceptNode: n => n.parentElement.closest("pre, code") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
@@ -2898,8 +3046,13 @@ function renderSubido(doc, impreso) {
     if (!(sig && sig.classList.contains("leyenda") && /^Figura/.test(sig.textContent.trim()))) marcar(pre, "Diagrama sin la leyenda «Figura N. Título» después.");
   });
   ["Tabla", "Figura"].forEach(cl => {
-    let k = 0;
-    cont.querySelectorAll("p.leyenda").forEach(p => { const m = p.textContent.trim().match(new RegExp("^" + cl + "\\s+(\\d+)")); if (m && +m[1] !== ++k) marcar(p, `${cl} ${m[1]}: la numeración no es continua (se esperaba ${k}).`); });
+    let k = leyendasPrevias(cl);
+    cont.querySelectorAll("p.leyenda").forEach(p => {
+      const m = p.textContent.trim().match(new RegExp("^" + cl + "\\s+(\\d+(?:\\.\\d+)*)")); if (!m) return;
+      k++;
+      const esperado = esperadoLeyenda(inicio.prefijo, k);
+      if (m[1].split(".").map(Number).join(".") !== esperado) marcar(p, `${cl} ${m[1]}: la numeración no es continua (se esperaba ${esperado}).`);
+    });
   });
 
   // Normas de escritura por bloque de texto
@@ -2965,19 +3118,19 @@ function pintarRevision(desvios) {
 }
 
 /* Descripción de bloques para el prompt y la memoria */
-let CACHE_BLOQUES = null;
-function infoBloques() {
-  if (!SUBIDO) return [];
-  if (CACHE_BLOQUES && CACHE_BLOQUES.html === SUBIDO.html) return CACHE_BLOQUES.items;
-  const d = document.createElement("div"); d.innerHTML = SUBIDO.html;
+const CACHE_BLOQUES = new WeakMap();
+function infoBloques(archivo = SUBIDO) {
+  if (!archivo) return [];
+  if (CACHE_BLOQUES.has(archivo)) return CACHE_BLOQUES.get(archivo);
+  const d = document.createElement("div"); d.innerHTML = archivo.html;
   let seccion = ""; const items = [...d.children].map(b => {
     if (/^H[1-3]$/.test(b.tagName)) seccion = b.textContent.trim();
     return { texto: b.textContent.trim().replace(/\s+/g, " "), seccion, titulo: /^H[1-6]$/.test(b.tagName) };
   });
-  CACHE_BLOQUES = { html: SUBIDO.html, items }; return items;
+  CACHE_BLOQUES.set(archivo, items); return items;
 }
-function describirAjuste(a) {
-  const it = infoBloques(), primero = it[a.bloques[0]] || { texto: "", seccion: "" };
+function describirAjuste(a, archivo = SUBIDO) {
+  const it = infoBloques(archivo), primero = it[a.bloques[0]] || { texto: "", seccion: "" };
   const inicio = primero.texto.slice(0, 60) + (primero.texto.length > 60 ? "…" : "");
   const rango = a.bloques.length === 1 ? `bloque ${a.bloques[0] + 1}` : `${a.bloques.length} bloques desde el ${a.bloques[0] + 1}`;
   return { donde: `«${inicio}» (${rango}${primero.seccion && !primero.titulo ? `, en «${primero.seccion}»` : ""})`, cambios: cambiosAjuste(a) };
@@ -2987,16 +3140,24 @@ function cambiosAjuste(a) {
   Object.entries(a.colores).forEach(([k, v]) => c.push(`color ${(COLORES.find(x => x[0] === k) || [k, k])[1].toLowerCase()}: ${v.toUpperCase()}`));
   return c;
 }
-function ajustesConCambios() { return SUBIDO ? SUBIDO.ajustes.filter(a => cambiosAjuste(a).length) : []; }
+// Los ajustes con cambios de todos los archivos, cada uno con el nombre de su archivo si hay más de uno.
+function excepcionesEntrega() {
+  if (!ENTREGA) return [];
+  return ENTREGA.archivos.flatMap(arch => arch.ajustes.filter(a => cambiosAjuste(a).length).map(a => {
+    const d = describirAjuste(a, arch);
+    return { donde: (hayNavegacion() ? `en «${arch.nombre}», ` : "") + d.donde, cambios: d.cambios };
+  }));
+}
+function objetoExcepciones() { return hayNavegacion() ? "los archivos de la entrega" : `«${SUBIDO.nombre}»`; }
 function seccionExcepciones() {
-  const lista = ajustesConCambios(); if (!lista.length) return "";
-  return `\n## 8. Excepciones locales\n\nEl usuario pidió estas excepciones sobre partes concretas de «${SUBIDO.nombre}». Aplícalas solo en esas partes; el resto del documento sigue las reglas anteriores. Si una parte equivalente aparece en otro documento, pregunta si la excepción también vale ahí.\n\n` +
-    lista.map(a => { const d = describirAjuste(a); return `- ${d.donde}: ${d.cambios.join("; ")}.`; }).join("\n") + "\n";
+  const lista = excepcionesEntrega(); if (!lista.length) return "";
+  return `\n## 8. Excepciones locales\n\nEl usuario pidió estas excepciones sobre partes concretas de ${objetoExcepciones()}. Aplícalas solo en esas partes; el resto del documento sigue las reglas anteriores. Si una parte equivalente aparece en otro documento, pregunta si la excepción también vale ahí.\n\n` +
+    lista.map(d => `- ${d.donde}: ${d.cambios.join("; ")}.`).join("\n") + "\n";
 }
 function memoriaExcepciones() {
-  const lista = ajustesConCambios(); if (!lista.length) return "";
-  return `\nExcepciones locales sobre «${SUBIDO.nombre}» (alcance: proyecto)\n` +
-    lista.map((a, k) => { const d = describirAjuste(a); return `  ${k + 1}. ${d.donde}: ${d.cambios.join("; ")}.`; }).join("\n") +
+  const lista = excepcionesEntrega(); if (!lista.length) return "";
+  return `\nExcepciones locales sobre ${objetoExcepciones()} (alcance: proyecto)\n` +
+    lista.map((d, k) => `  ${k + 1}. ${d.donde}: ${d.cambios.join("; ")}.`).join("\n") +
     `\n  Instrucción: registra cada excepción en la memoria del proyecto (decisiones-estilo.md) y pregunta al usuario si alguna debe pasar a ser regla del agente.\n`;
 }
 
@@ -3007,7 +3168,8 @@ function pintarBarraDoc() {
   if (!enDoc) { S.seleccionando = false; SEL = new Set(); }
   document.querySelectorAll("#fuente-vista button").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.fuente === S.fuente_vista)); if (b.dataset.fuente === "documento") b.disabled = !SUBIDO; });
   document.getElementById("archivo-doc").hidden = !SUBIDO;
-  document.getElementById("nombre-doc").textContent = SUBIDO ? SUBIDO.nombre : "";
+  document.getElementById("nombre-doc").textContent = hayNavegacion() ? `${ENTREGA.archivos.length} archivos` : SUBIDO ? SUBIDO.nombre : "";
+  pintarNavegacion(enDoc);
   document.getElementById("opciones-doc").hidden = !enDoc;
   document.querySelectorAll("[data-v]").forEach(c => c.checked = !!S[c.dataset.v]);
   document.getElementById("seleccionar").setAttribute("aria-pressed", String(!!S.seleccionando));
@@ -3022,6 +3184,16 @@ function pintarBarraDoc() {
   const banner = document.getElementById("banner-local"), a = ajusteActual();
   banner.hidden = !a; form.classList.toggle("editando-local", !!a);
   if (a) document.getElementById("banner-desc").textContent = describirAjuste(a).donde;
+}
+function pintarNavegacion(enDoc) {
+  const ver = enDoc && hayNavegacion();
+  document.getElementById("nav-entrega").hidden = !ver;
+  if (!ver) return;
+  const n = a => a.ajustes.length;
+  document.getElementById("archivo-activo").innerHTML = ENTREGA.archivos.map((a, i) =>
+    `<option value="${i}"${i === ENTREGA.activo ? " selected" : ""}>${esc(a.nombre)}${n(a) ? ` · ${n(a)} ajuste${n(a) === 1 ? "" : "s"}` : ""}</option>`).join("");
+  document.getElementById("archivo-anterior").disabled = ENTREGA.activo === 0;
+  document.getElementById("archivo-siguiente").disabled = ENTREGA.activo === ENTREGA.archivos.length - 1;
 }
 function pintarChips() {
   const enDoc = S.fuente_vista === "documento";
@@ -3059,7 +3231,16 @@ docEl.addEventListener("mouseup", e => {
   if (bloques.length) { SEL = new Set(bloques); ANCLA = bloques[0]; ultimoArrastre = Date.now(); }
   sel.removeAllRanges(); pintarBarraDoc(); actualizar();
 });
+// Un enlace del documento a otro archivo de la entrega navega en la vista previa.
+function archivoDeEnlace(href) {
+  let nombre = String(href).split(/[#?]/)[0].replace(/^(\.\/)+/, "");
+  try { nombre = decodeURIComponent(nombre); } catch (e) { /* se compara tal cual */ }
+  return ENTREGA ? ENTREGA.archivos.findIndex(a => a.nombre === nombre) : -1;
+}
 docEl.addEventListener("click", e => {
+  const enlace = !S.seleccionando && S.fuente_vista === "documento" && hayNavegacion() ? e.target.closest("a[href]") : null;
+  const destino = enlace ? archivoDeEnlace(enlace.getAttribute("href")) : -1;
+  if (destino >= 0) { e.preventDefault(); irAArchivo(destino); return; }
   if (!S.seleccionando || S.fuente_vista !== "documento") return;
   e.preventDefault();
   if (Date.now() - ultimoArrastre < 400) return;
@@ -3099,22 +3280,28 @@ document.getElementById("ajustar-seleccion").addEventListener("click", () => {
   aviso("Cambia tipografía, tamaños, color o comillas: solo se aplica a la selección");
 });
 document.getElementById("salir-local").addEventListener("click", salirLocal);
-document.getElementById("subir-doc").addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; cargarDocumento(f); });
+document.getElementById("subir-doc").addEventListener("change", e => { const f = [...e.target.files]; e.target.value = ""; cargarDocumentos(f); });
+document.getElementById("archivo-activo").addEventListener("change", e => irAArchivo(Number(e.target.value)));
+document.getElementById("archivo-anterior").addEventListener("click", () => irAArchivo(ENTREGA.activo - 1));
+document.getElementById("archivo-siguiente").addEventListener("click", () => irAArchivo(ENTREGA.activo + 1));
 document.getElementById("quitar-doc").addEventListener("click", () => {
-  if (SUBIDO && SUBIDO.ajustes.length && !confirm("¿Quitar el documento? También se pierden sus ajustes locales.")) return;
-  SUBIDO = null; EDIT = null; SEL = new Set(); S.fuente_vista = "ejemplo"; guardarSubido(); pintarBarraDoc(); pintarFormulario(); actualizar();
+  if (!confirmarPerderAjustes()) return;
+  fijarEntrega(null); EDIT = null; SEL = new Set(); S.fuente_vista = "ejemplo"; guardarSubido(); pintarBarraDoc(); pintarFormulario(); actualizar();
 });
 document.querySelectorAll("#fuente-vista button").forEach(b => b.addEventListener("click", () => {
   if (b.disabled) return; S.fuente_vista = b.dataset.fuente; if (S.fuente_vista !== "documento" && EDIT) salirLocal(); pintarBarraDoc(); actualizar();
 }));
 document.querySelectorAll("[data-v]").forEach(c => c.addEventListener("change", () => { S[c.dataset.v] = c.checked; actualizar(); }));
+function capitulosSubidos() { return ENTREGA.archivos.flatMap(a => titulosH1(a.html)); }
+// Los capítulos de toda la entrega y, aparte, el título del documento si el primer H1 lo es.
+function separarTitulo() {
+  const caps = capitulosSubidos();
+  const conTitulo = empiezaConH1(ENTREGA.archivos[0].html) && caps.length > 1 && !lineas(S.estructura).map(norm).includes(norm(caps[0]));
+  return { titulo: conTitulo ? caps.shift() : null, caps };
+}
 document.getElementById("usar-capitulos").addEventListener("click", () => {
   if (!SUBIDO) return;
-  const d = document.createElement("div"); d.innerHTML = SUBIDO.html;
-  const primero = d.querySelector("h1,h2,h3,h4,h5,h6");
-  let caps = [...d.querySelectorAll("h1")].map(h => quitarNum(h.textContent.trim()).replace(/\.$/, "")).filter(Boolean);
-  let titulo = null;
-  if (primero && primero.tagName === "H1" && caps.length > 1 && !lineas(S.estructura).map(norm).includes(norm(caps[0]))) titulo = caps.shift();
+  const { caps, titulo } = separarTitulo();
   if (!caps.length) { aviso("El documento no tiene títulos de nivel 1"); return; }
   if (!confirm(`¿Reemplazar la estructura por los ${caps.length} capítulos del documento?${titulo ? `\nEl título del documento pasará a ser «${titulo}».` : ""}`)) return;
   if (titulo) S.documento = titulo;
@@ -3131,7 +3318,7 @@ document.getElementById("imprimir").addEventListener("click", () => {
 const lienzoEl = document.getElementById("lienzo");
 ["dragenter", "dragover"].forEach(ev => lienzoEl.addEventListener(ev, e => { e.preventDefault(); lienzoEl.classList.add("arrastrando"); }));
 ["dragleave", "drop"].forEach(ev => lienzoEl.addEventListener(ev, e => { e.preventDefault(); lienzoEl.classList.remove("arrastrando"); }));
-lienzoEl.addEventListener("drop", e => cargarDocumento(e.dataTransfer.files[0]));
+lienzoEl.addEventListener("drop", e => cargarDocumentos(e.dataTransfer.files));
 
 /* ---------- Salidas ---------- */
 let pendiente = false;
@@ -3182,10 +3369,13 @@ function actualizar() {
     document.getElementById("nota-metodologia").textContent = NOTA_METODOLOGIA[S.metodologia] || "";
     document.getElementById("nota-divulgacion").textContent = esDivulgacion(S)
       ? `Ámbito ${AMBITO_NOMBRE[S.ambito]}, lector público general y propósito ${PROPOSITO_NOMBRE[S.proposito]}: el prompt suma las reglas de divulgación.` : "";
+    document.getElementById("campos-entrega").hidden = document.getElementById("nota-entrega").hidden = S.entrega !== "multiarchivo";
     document.getElementById("alerta-numeros").hidden = !((S.decimal === "coma" && S.miles === "coma") || (S.decimal === "punto" && S.miles === "punto"));
     document.getElementById("ruta-prompt").textContent = S.ubicacion_prompt === "documento" ? S.salida.replace(/\/?$/, "/") + "prompt-estilo.md" : "docs/prompt-estilo.md";
     pintarContraste();
-    const ancla = anclaVista(); vistaPrevia(); restaurarAncla(ancla);
+    const arriba = IR_ARRIBA; IR_ARRIBA = false;
+    const ancla = arriba ? null : anclaVista(); vistaPrevia(); restaurarAncla(ancla);
+    if (arriba) { const sc = contenedorVista(); if (sc) sc.scrollTop = 0; }
     if (SUBIDO && S.fuente_vista === "documento") pintarChips();
     document.getElementById("prompt").textContent = generarPrompt();
     document.getElementById("memoria").textContent = generarMemoria();
@@ -3214,7 +3404,7 @@ document.getElementById("importar").addEventListener("change", async e => {
   const m = txt.match(/<!-- configurador:v1 ([\s\S]*?) -->/);
   try { datos = JSON.parse(m ? m[1] : txt); } catch (err) { datos = null; }
   if (!datos) { aviso("El archivo no tiene una configuración de este configurador"); return; }
-  S = combinar(datos); S.modo = S.medio === "impreso" ? "impreso" : "digital"; EDIT = null; pintarBarraDoc();
+  S = combinar(datos); S.modo = S.medio === "impreso" ? "impreso" : "digital"; EDIT = null; reordenarEntrega(); pintarBarraDoc();
   pintarFormulario(); actualizar(); aviso(combinar.aviso || "Configuración importada");
 });
 
@@ -3284,6 +3474,8 @@ if (AVISO_INICIAL) aviso(AVISO_INICIAL);
     "lector:mixto": "Lectores expertos y no expertos a la vez.",
     "medio:digital": "Se lee en pantalla.", "medio:impreso": "Se imprime en papel.", "medio:ambos": "Pantalla y papel.",
     "formato:markdown": "Texto plano versionable.", "formato:docx": "Documento de Word.", "formato:pdf": "Listo para imprimir o enviar.",
+    "entrega:unico": "Un documento lógico, en uno o varios archivos, con numeración continua.",
+    "entrega:multiarchivo": "Un índice y un archivo por punto; tablas y figuras con el número del archivo como prefijo.",
     "ubicacion_prompt:proyecto": "Un solo prompt para todo el repositorio.",
     "ubicacion_prompt:documento": "Un prompt junto a cada documento.",
     "diag_herramienta:mermaid": "Diagramas como texto dentro del Markdown.",
@@ -3439,10 +3631,10 @@ if (AVISO_INICIAL) aviso(AVISO_INICIAL);
   ponerVista(abierta);
 
   /* 7. Avisos en el banner del encabezado, como la referencia */
-  aviso = function (msg, falla) {
+  aviso = function (msg, falla, ms = 3500) {
     const b = document.getElementById("banner");
     b.textContent = msg; b.classList.toggle("fail", !!falla); b.classList.add("show");
-    clearTimeout(aviso.t); aviso.t = setTimeout(() => b.classList.remove("show"), 3500);
+    clearTimeout(aviso.t); aviso.t = setTimeout(() => b.classList.remove("show"), ms);
   };
   document.getElementById("descargar").addEventListener("click", () => aviso("✓ Descargado. Ahora escribe «listo» en la terminal del agente."));
 
