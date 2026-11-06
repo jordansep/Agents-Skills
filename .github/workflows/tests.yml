@@ -20,5 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Instalar pymupdf (tests de PDF)
+        run: pip install pymupdf
       - name: Tests (verificador y configurador)
         run: python -m unittest discover -s tests -v
