@@ -79,6 +79,21 @@ class Skill(unittest.TestCase):
                 texto = archivo.read_text(encoding="utf-8")
                 self.assertNotRegex(texto, r"(?i)grupo \d|\bmyd\b|trabajo integrador|\b[a-z]:\\(?!program files)")
 
+    def test_exhaustiva_no_lee_el_objetivo_en_el_hilo_principal(self):
+        self.assertIn("**El objetivo no entra en el hilo principal.**", SKILL)
+        self.assertIn("references/exhaustiva-por-lotes.md", SKILL)
+        self.assertIn("Nunca `fork`", SKILL)
+        for archivo in ("references/exhaustiva-por-lotes.md", "references/hoja-lector.md", "scripts/auditoria_lotes.py"):
+            self.assertTrue((CARPETA / archivo).exists(), archivo)
+
+    def test_subagentes_livianos_con_pocas_herramientas(self):
+        for nombre, herramientas in (("lector-auditoria", "Read, Write"), ("revisor-auditoria", "Read, Write, Bash")):
+            texto = (CARPETA / "agents" / f"{nombre}.md").read_text(encoding="utf-8")
+            self.assertIn(f"name: {nombre}", texto)
+            self.assertIn(f"tools: {herramientas}", texto)
+            self.assertIn(nombre, (CARPETA / "references" / "exhaustiva-por-lotes.md").read_text(encoding="utf-8"))
+        self.assertIn("-Subagentes", (RAIZ / "scripts" / "instalar_skills.ps1").read_text(encoding="utf-8"))
+
     def test_cada_nivel_suma_una_exigencia(self):
         self.assertIn("**Intento de refutar cada Completo**", SKILL)
         self.assertIn("**Segunda pasada independiente**", SKILL)
