@@ -12,7 +12,7 @@ description: >-
   Da por sentado un encuadre autorizado (sistema propio, pentest, CTF, investigación de seguridad,
   trabajo académico); si no está claro, pedilo antes de avanzar.
 metadata:
-  version: "1.8"
+  version: "1.9"
   baseline: "plantilla general; la variante de entrega académica queda en references/; versiones anteriores en versions/"
 ---
 
@@ -116,6 +116,11 @@ lo que tu nivel pide para un punto, ese punto no queda Completo: decí qué falt
 
 ### Exhaustiva (con investigación)
 Todo lo de *media*, y además:
+- **El objetivo no entra en el hilo principal.** Antes de abrirlo, corré
+  `scripts/auditoria_lotes.py preparar` (sólo PDF, Word, texto o carpetas; en otros objetivos, seguí la
+  misma regla: delegá la lectura y guardá el resultado en disco). Si da más de un lote, seguí
+  `references/exhaustiva-por-lotes.md`: los lectores leen todo, guardan fichas en disco y devuelven
+  una línea; vos trabajás con lo consolidado y con citas puntuales. Nunca leas el objetivo entero acá.
 - **Todas las fuentes**: el criterio de evaluación (consigna, rúbrica, norma), las
   devoluciones previas, los documentos originales (por ejemplo, el PDF del que salió un
   resumen), los correos o archivos que el usuario tenga del tema.
@@ -123,15 +128,18 @@ Todo lo de *media*, y además:
 - **Contexto externo**: WebSearch (modo `extended` si hace falta) para CVEs de las
   dependencias y versiones detectadas, buenas prácticas o normas citadas. Si la investigación
   necesita varias fuentes y síntesis, apoyate en la skill `deep-research`.
-- **Paralelismo**: con este nivel podés lanzar subagentes (`Explore` o `general-purpose`) para
-  barrer frentes independientes (por ejemplo, un agente por documento o por módulo). Juntá sus
-  resultados y verificá vos cada hallazgo antes de reportarlo.
+- **Paralelismo**: con este nivel lanzás subagentes, de a tres por vez, para los frentes
+  independientes: `lector-auditoria` y `revisor-auditoria` si alcanzan sus herramientas, porque
+  cuestan una fracción de `general-purpose`. Nunca `fork` (arrastra todo el contexto) y, para leer
+  todo el texto, nunca `Explore` (lee fragmentos). Cada uno escribe su resultado en disco y responde
+  una línea.
 - **Runtime**: proponé la fase 5 si confirmaría algo, y esperá la autorización.
-- **Doble verificación**: cada hallazgo se confirma releyendo la fuente, y se contrasta contra
-  la versión más nueva.
+- **Doble verificación**: cada hallazgo se confirma releyendo sólo la fuente citada, y se contrasta
+  contra la versión más nueva. Puede hacerlo un subagente; los Crítica o Alta y los que no se
+  sostengan los relees vos.
 - **Segunda pasada independiente**: por cada punto que vaya a quedar Completo, lanzá un subagente
-  que audite ese punto con el mismo criterio y sin ver tus conclusiones. Cada diferencia se
-  resuelve releyendo la fuente y queda en un anexo de conciliación. Si no podés lanzar subagentes,
+  que audite sólo la parte de ese punto, con el mismo criterio y sin ver tus conclusiones. Cada
+  diferencia se resuelve releyendo la fuente y queda en un anexo de conciliación. Si no podés lanzar subagentes,
   no hay pasada independiente: decilo y no certifiques Completo.
 - **Matriz de cumplimiento** (anexo): un renglón por requisito del criterio de evaluación con
   Cumple / Parcial / No cumple y evidencia.
@@ -444,7 +452,7 @@ Al terminar **cada** auditoría, de cualquier nivel:
    ya hay uno con ese nombre; si lo hay, cambiá el `<distintivo>` en lugar de pisarlo. Así
    queda el historial de cómo evolucionó el sistema entre auditorías.
 5. Leé el PDF y revisá que no haya páginas casi vacías, acentos rotos ni tablas cortadas antes
-   de avisar.
+   de avisar. En exhaustiva por lotes, corré `revisar-pdf` y mirá sólo las páginas que marque.
 6. Decile al usuario la ruta exacta.
 
 Si el usuario también quiere compartirlo, ofrecé publicarlo como artifact.

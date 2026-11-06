@@ -2,6 +2,19 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.8.0] - 2026-11-05
+
+### Agregado
+
+- Exhaustiva por lotes: el objetivo queda fuera del hilo principal, con lectores que guardan fichas en disco y responden una línea
+- Subagentes livianos `lector-auditoria` y `revisor-auditoria`, con pocas herramientas; el instalador los copia en `~/.claude/agents`
+- Script auditoria_lotes.py: parte el objetivo, valida fichas y citas, cruza hechos, calcula estados y arma el HTML del informe
+
+### Cambiado
+
+- La corrida se puede retomar desde disco y el presupuesto se informa antes de lanzar los lectores
+- La verificación de hallazgos y la segunda pasada releen sólo lo citado o la parte del punto
+
 ## [0.7.0] - 2026-11-05
 
 ### Cambiado

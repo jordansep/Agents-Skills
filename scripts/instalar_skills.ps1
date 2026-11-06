@@ -11,6 +11,8 @@
        Si esa copia tiene cambios locales, se detiene y los muestra: nadie debería escribir ahí.
     2. Enlaza cada skill de los agentes (agentes/*/agente.json) en -Skills con una junction
        a esa copia. Solo reemplaza junctions o enlaces; si encuentra una carpeta real, se detiene.
+    3. Copia los subagentes de cada skill (skills/*/agents/*.md) en -Subagentes. Se cargan al
+       abrir una sesión nueva.
 
   Para actualizar los skills instalados después de un merge, vuelve a ejecutarlo.
 
@@ -20,6 +22,7 @@
 param(
   [string]$Destino = (Join-Path (Split-Path $PSScriptRoot -Parent | Split-Path -Parent) "Agents-Skills-instalado"),
   [string]$Skills = (Join-Path $env:USERPROFILE ".claude\skills"),
+  [string]$Subagentes = (Join-Path $env:USERPROFILE ".claude\agents"),
   [string]$Rama = "origin/main"
 )
 $ErrorActionPreference = "Stop"
@@ -65,5 +68,17 @@ foreach ($n in $nombres) {
   }
   New-Item -ItemType Junction -Path $enlace -Target $objetivo | Out-Null
   Write-Host "  $n -> $objetivo"
+}
+
+# 3. Subagentes de los skills
+foreach ($n in $nombres) {
+  $origen = Join-Path $Destino "skills\$n\agents"
+  if (Test-Path $origen) {
+    New-Item -ItemType Directory -Force $Subagentes | Out-Null
+    Get-ChildItem $origen -Filter *.md | ForEach-Object {
+      Copy-Item $_.FullName (Join-Path $Subagentes $_.Name) -Force
+      Write-Host "  subagente $($_.BaseName) -> $Subagentes"
+    }
+  }
 }
 Write-Host "Listo. Los skills instalados ya no dependen de la rama abierta en $repo."
