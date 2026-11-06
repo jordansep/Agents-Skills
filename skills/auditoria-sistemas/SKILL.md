@@ -12,7 +12,7 @@ description: >-
   Da por sentado un encuadre autorizado (sistema propio, pentest, CTF, investigación de seguridad,
   trabajo académico); si no está claro, pedilo antes de avanzar.
 metadata:
-  version: "1.9"
+  version: "1.10"
   baseline: "plantilla general; la variante de entrega académica queda en references/; versiones anteriores en versions/"
 ---
 
@@ -175,6 +175,7 @@ plataforma, se verifica ahí, no se supone. Las reglas:
 | Diseños | Figma (plugin `design`) | Comparar el prototipo con el diseño |
 | Jira/Confluence, Linear, Notion, Slack | Plugins de `design` | Requisitos, tickets y decisiones que el sistema cita |
 | Auditorías anteriores del mismo sistema | `engram` (`mem_search`, `mem_save`) | Antes: buscar hallazgos previos. Después: guardar el resumen |
+| Errores propios de auditorías anteriores | `scripts/auditoria_lotes.py errores-*` | Después: registrarlos y proponer reglas (`references/memoria-errores.md`) |
 | CVEs, normas, buenas prácticas | WebSearch | Nivel exhaustivo |
 
 En el informe, la línea chica del encabezado dice **qué MCP o API se usaron** y cuáles no se
@@ -462,6 +463,8 @@ Si el usuario también quiere compartirlo, ofrecé publicarlo como artifact.
   hayas abierto.
 - Guardá un resumen de la auditoría en `engram` (`mem_save`): sistema, versión, nivel,
   hallazgos principales y ruta del PDF, para que la próxima auditoría parta de ahí.
+- **Errores del auditor:** registralos y proponé reglas según `references/memoria-errores.md`. Esa memoria
+  no lleva datos del objetivo ni del usuario, y una regla sólo se activa si se repitió y el usuario la aprueba.
 
 ## Comparar versiones
 

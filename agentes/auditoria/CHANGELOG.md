@@ -2,6 +2,29 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.11.0] - 2026-11-06
+
+### Agregado
+
+- Memoria de errores: registra los errores del auditor sin datos del objetivo ni del usuario, y propone una regla cuando un error aparece en 2 auditorías; sólo se activa si el usuario la aprueba
+- Control estricto antes de guardar: sólo pasan palabras de un vocabulario cerrado, sin números ni datos de la corrida o del usuario, y se repite justo antes de cada escritura
+
+## [0.10.0] - 2026-11-06
+
+### Agregado
+
+- La exhaustiva por lotes cuenta los enlaces internos y externos de cada PDF y señala la numeración salteada de los identificadores, como señales para revisar
+- Preparar rasteriza las páginas con imagen y los prompts de los lectores nombran los PNG; sin pymupdf, avisa lo que no pudo hacer y conserva la instrucción anterior
+
+### Cambiado
+
+- Los prompts de verificación ya traen el texto citado, con lo que el patrón de secretos reconoce tapado (no todo secreto posible; `ver` muestra el texto sin tapar), y las citas sobre imágenes van en su propia tanda en sonnet, con los PNG; el resto, en haiku
+- Un hallazgo sin ningún número de página o línea no se verifica y queda en «Para decidir»
+
+### Corregido
+
+- Las citas «p. N», «pp. N-M», «pág.» y «página», también en listas, se reconocen en un lote de un solo PDF como citas de ese archivo; fuera de tramo dan un aviso y no invalidan la ficha
+
 ## [0.9.0] - 2026-11-06
 
 ### Cambiado
