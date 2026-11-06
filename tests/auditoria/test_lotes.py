@@ -251,6 +251,7 @@ class MedirLectores(unittest.TestCase):
         self.assertIsNone(r["corridas"]["sonnet-2"])
 
 
+@unittest.skipUnless(importlib.util.find_spec("pymupdf"), "Requiere pymupdf")
 class LotesPdf(unittest.TestCase):
     def test_pdf_por_indice_con_paginas_para_ver_como_imagen(self):
         import pymupdf
