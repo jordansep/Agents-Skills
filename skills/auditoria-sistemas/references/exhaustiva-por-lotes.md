@@ -18,11 +18,12 @@ Admite PDF, Word (con pandoc), texto y carpetas. Imprime el índice y el presupu
 - **Con consigna:** leé sólo la consigna y escribí `puntos.json`, usando el índice para ubicar cada punto:
   `[{"n": 1, "nombre": "…", "criterios": ["…"], "fuentes": ["a.pdf:10-30", "docs/b.md"]}]`.
 
-**Presupuesto.** Decile al usuario en una línea cuántos lotes y tokens estimó. Es una estimación: cada
-subagente liviano cuesta unos 12.000 tokens aunque lea poco, y uno `general-purpose`, unos 50.000. Si el script dice que supera el umbral, o si el usuario
-sabe que le queda poca cuota, preguntale antes de lanzar: seguir, partir en varias sesiones (el trabajo queda
-en disco), usar `sonnet` en los lectores o acotar puntos. Lo que no se lea queda `sin_leer` y ese punto
-no llega a Completo.
+**Presupuesto.** Decile al usuario en una línea cuántos lotes y tokens estimó. Es una estimación ajustada
+a una sola corrida real: no cuenta los frentes ni el hilo principal, y cambia con el documento y el modelo.
+Si el script dice que supera el umbral, o si el usuario sabe que le queda poca cuota, preguntale antes de
+lanzar: seguir, partir en varias sesiones (el trabajo queda en disco), acotar puntos o usar `sonnet` en los
+lectores, avisando que ese ahorro todavía no se midió contra hallazgos reales. Lo que no se lea queda
+`sin_leer` y ese punto no llega a Completo.
 
 ## 2. Leer
 
@@ -31,13 +32,14 @@ Por cada lote, un subagente `lector-auditoria` con este único prompt:
 
 **Si `lector-auditoria` o `revisor-auditoria` no figuran entre tus tipos de agente, frená y avisale al
 usuario:** se instalan con `scripts/instalar_skills.ps1` o copiando `agents/` del skill en `~/.claude/agents/`,
-y se cargan al abrir una sesión nueva. Sólo si elige seguir igual, usá `general-purpose`, que multiplica el
-piso por cuatro.
+y se cargan al abrir una sesión nueva. Sólo si elige seguir igual, usá `general-purpose`, que cuesta unos
+38.000 tokens más por subagente.
 
 - **De a tres por vez**, en segundo plano. No lances todos juntos: si se acaba la cuota, se pierde lo que
   esté en curso. Lanzá los siguientes a medida que terminan.
 - **Nunca `fork`** (arrastra todo el contexto) **ni `Explore`** (lee fragmentos, no todo el texto).
-- Usá el modelo que el usuario haya elegido para los lectores; si no eligió, el de la sesión.
+- Los lectores usan el modelo que el usuario haya elegido; si no eligió, el de la sesión. Otro modelo pierde
+  hallazgos que después nadie busca, así que no lo bajes por tu cuenta.
 - El archivo de cada lote ya trae las reglas y el texto. No lo leas ni lo copies en el prompt, y no pidas
   un resumen: la respuesta es una línea.
 - Si uno falla, corré `A estado` antes de relanzarlo: la ficha puede estar escrita. Relanzá sólo lo que
@@ -47,17 +49,22 @@ piso por cuatro.
 
 `A consolidar` escribe `consolidado.md`, que **es lo único que leés completo**, y genera los prompts de
 la revisión. Lanzá, con las mismas reglas de arriba, lo que indique: la segunda pasada con
-`lector-auditoria`, y la verificación y la coherencia con `revisor-auditoria`.
+`lector-auditoria`, y la verificación y la coherencia con `revisor-auditoria`. Pasale a cada uno el modelo
+que indica la salida, en el parámetro `model`:
 
-| Prompt | Qué hace | Cuándo |
-|---|---|---|
-| `lotes/Lxx.segunda.prompt.md` | Segunda pasada a ciegas del lote, sin ver la ficha | Lotes con un punto candidato a Completo |
-| `verifica/Vxx.prompt.md` | Relee sólo las páginas citadas, por tandas de 40 hallazgos | Si hay hallazgos |
-| `coherencia.prompt.md` | Busca contradicciones entre capítulos usando sólo los hechos | Una vez |
+| Prompt | Qué hace | Cuándo | Modelo |
+|---|---|---|---|
+| `lotes/Lxx.segunda.prompt.md` | Segunda pasada a ciegas del lote, sin ver la ficha | Lotes con un punto candidato a Completo | `opus` |
+| `verifica/Vxx.prompt.md` | Relee sólo las páginas citadas, por tandas de 40 hallazgos | Si hay hallazgos | `haiku`, o `sonnet` si alguna cita cae en una página con imagen |
+| `coherencia.prompt.md` | Busca contradicciones entre capítulos usando sólo los hechos | Una vez | `opus` |
+
+Si una verificación falla o su JSON no se puede leer, relanzala un escalón más arriba. El usuario puede
+pedir otro modelo para cualquiera de estas tareas, y eso manda sobre la tabla.
 
 Volvé a correr `A consolidar`: compara las pasadas, aplica la verificación y deja sólo lo que requiere
-decisión. Los otros frentes (historia, CVE, normas, devoluciones) van cada uno a un subagente que escribe
-`frentes/<tema>.md`, de 40 líneas como máximo, con citas.
+decisión. Los otros frentes (historia, CVE, normas, devoluciones) van cada uno a un subagente, con el modelo
+de la sesión, que escribe `frentes/<tema>.md`, de 40 líneas como máximo, con citas. Cruzar con el repo va en
+`opus`: es el frente que más hallazgos propios aportó.
 
 ## 4. Resolver sólo lo discutido
 

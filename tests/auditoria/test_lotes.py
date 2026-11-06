@@ -136,6 +136,32 @@ class Lotes(unittest.TestCase):
         self.assertTrue((self.trabajo / "coherencia.prompt.md").exists())
         self.assertTrue(list((self.trabajo / "verifica").glob("*.prompt.md")))
 
+    def test_presupuesto_ajustado_a_la_corrida_real(self):
+        p = self.plan["presupuesto"]
+        n = len(self.plan["lotes"])
+        self.assertEqual(p["primera_pasada"], p["fuente"] * 3 + n * 25000)
+        self.assertEqual(p["peor_caso"], p["primera_pasada"] * 2 + p["fuente"] * 5)
+
+    def test_consolidado_indica_el_modelo_de_cada_revision(self):
+        self.completar_fichas()
+        salida = correr("consolidar", "--trabajo", self.trabajo).stdout
+        consolidado = (self.trabajo / "consolidado.md").read_text(encoding="utf-8")
+        self.assertIn("(haiku)", consolidado)
+        self.assertIn("`coherencia.prompt.md`, modelo opus", consolidado)
+        self.assertIn("modelo opus): ", consolidado)
+        self.assertIn("(haiku)", salida)
+
+    def test_verificacion_sube_de_modelo_con_citas_sobre_imagenes(self):
+        spec = importlib.util.spec_from_file_location("auditoria_lotes", SCRIPT)
+        modulo = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modulo)
+        elegir = modulo.modelo_verificacion
+        imagenes = ["a.pdf:12"]
+        self.assertEqual(elegir([{"hallazgo": "Falla (a.pdf:11)"}, {"hallazgo": "Otra (b.pdf:12)"}], imagenes), "haiku")
+        self.assertEqual(elegir([{"hallazgo": "Falla (a.pdf:11)"}, {"hallazgo": "Otra (a.pdf:12)"}], imagenes), "sonnet")
+        self.assertEqual(elegir([{"hallazgo": "Tramo (a.pdf:10-13)"}], imagenes), "sonnet")
+        self.assertEqual(elegir([{"hallazgo": "Sin imágenes (a.pdf:12)"}], []), "haiku")
+
     def test_segunda_pasada_a_ciegas(self):
         prompt = (self.trabajo / "lotes" / "L01.segunda.prompt.md").read_text(encoding="utf-8")
         self.assertIn("no abras `fichas/`", prompt)
@@ -207,6 +233,24 @@ class Lotes(unittest.TestCase):
 
 
 @unittest.skipUnless(importlib.util.find_spec("pymupdf"), "requiere pymupdf")
+class MedirLectores(unittest.TestCase):
+    def test_cuenta_solo_hallazgos_y_separa_variantes(self):
+        spec = importlib.util.spec_from_file_location("medir_lectores", Path(__file__).with_name("medir_lectores.py"))
+        modulo = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modulo)
+        vara = [{"id": "uno", "patron": "CU-23"}, {"id": "dos", "patron": "CU-21"}]
+        with tempfile.TemporaryDirectory() as carpeta:
+            base = Path(carpeta)
+            for nombre, filas in (("opus-1", [fila("CU-23", "No")]), ("opus-2", [fila("CU-21", "Parcial")]), ("sonnet-1", [fila("CU-23")])):
+                (base / nombre / "fichas").mkdir(parents=True)
+                (base / nombre / "fichas" / "L01.json").write_text(json.dumps(ficha("L01", 1, filas)), encoding="utf-8")
+            (base / "sonnet-2").mkdir()
+            r = modulo.medir(vara, [base / n for n in ("opus-1", "opus-2", "sonnet-1", "sonnet-2")])
+        self.assertEqual(r["variantes"]["opus"], {"corridas": 2, "promedio": 1, "union": 2})
+        self.assertEqual(r["variantes"]["sonnet"]["union"], 0, "Una fila en Sí no es un hallazgo")
+        self.assertIsNone(r["corridas"]["sonnet-2"])
+
+
 class LotesPdf(unittest.TestCase):
     def test_pdf_por_indice_con_paginas_para_ver_como_imagen(self):
         import pymupdf
