@@ -2,6 +2,13 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.11.0] - 2026-11-06
+
+### Agregado
+
+- Memoria de errores: registra los errores del auditor sin datos del objetivo ni del usuario, y propone una regla cuando un error aparece en 2 auditorías; sólo se activa si el usuario la aprueba
+- Control estricto antes de guardar: sólo pasan palabras de un vocabulario cerrado, sin números ni datos de la corrida o del usuario, y se repite justo antes de cada escritura
+
 ## [0.10.0] - 2026-11-06
 
 ### Agregado

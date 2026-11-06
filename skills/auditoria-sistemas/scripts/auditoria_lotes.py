@@ -27,6 +27,9 @@ import sys
 import unicodedata
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import auditoria_memoria as memoria  # noqa: E402
+
 CHARS_POR_TOKEN = 3.5
 LIMITE_LOTE = 20000
 # Ajustados a una sola corrida real (141 páginas, Opus): cada lector gastó 25.000 + 3 veces su lote y
@@ -354,6 +357,9 @@ def preparar(a) -> None:
     (trabajo / "lotes").mkdir(parents=True, exist_ok=True)
     shutil.rmtree(trabajo / "paginas", ignore_errors=True)  # un PNG viejo pasaría por una página de este documento
     shutil.copyfile(Path(__file__).resolve().parents[1] / "references" / "hoja-lector.md", trabajo / "hoja-lector.md")
+    if reglas := memoria.bloque_reglas("lector"):
+        with (trabajo / "hoja-lector.md").open("a", encoding="utf-8") as hoja:
+            hoja.write(reglas)
     piezas, sin_indice = [], []
     hay_indice = False
     for objetivo in map(Path, a.objetivo):
@@ -640,7 +646,7 @@ def prompt_verificacion(trabajo: Path, tanda: str, items: list[tuple[dict, list]
             f"`[valor omitido]` tapa lo que parece un secreto, y el comando muestra el texto sin tapar: no copies valores.\n\n"
             f"{json.dumps([{**h, 'hallazgo': enmascarar(h['hallazgo'])} for h, _ in items], ensure_ascii=False, indent=0)}\n\nEscribí en `{(trabajo / 'verifica' / (tanda + '.json')).as_posix()}` una lista JSON de "
             '{"id", "veredicto": "confirmado|no_se_sostiene|corregir", "nota"}, con cada `id` tal cual, aunque se repita. Respondé sólo las cantidades, sin detalle: el detalle va en el archivo.\n'
-            f"{vistas}{no_hallado}\n# Texto citado\n\n{texto_de_citas(trabajo, citas)}\n")
+            f"{memoria.bloque_reglas('verificador')}{vistas}{no_hallado}\n# Texto citado\n\n{texto_de_citas(trabajo, citas)}\n")
 
 
 def consolidar(a) -> None:
@@ -727,6 +733,8 @@ def consolidar(a) -> None:
     l.append(f"- Segunda pasada (`lotes/Lxx.segunda.prompt.md`, modelo {MODELO_JUICIO}): {', '.join(faltan_seg) or 'nada'}")
     l.append(f"- Verificación (`verifica/Vxx.prompt.md`): {', '.join(faltan_ver) or 'nada'}")
     l.append(f"- Coherencia (`coherencia.prompt.md`, modelo {MODELO_JUICIO}): {'hecha' if coherencia is not None else 'pendiente'}")
+    if reglas := memoria.bloque_reglas("hilo"):
+        l += reglas.splitlines()
     l += ["", "## Puntos"]
     for p in plan["puntos"]:
         u = primera.get(p["n"])
@@ -1064,6 +1072,7 @@ def main() -> None:
     c.add_argument("--sintesis", required=True)
     c.add_argument("--salida", required=True)
     c.set_defaults(func=armar)
+    memoria.agregar_comandos(sub)
     c = sub.add_parser("revisar-pdf")
     c.add_argument("pdf")
     c.set_defaults(func=revisar_pdf)

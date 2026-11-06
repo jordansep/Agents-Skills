@@ -1,7 +1,7 @@
 {
   "nombre": "auditoria",
   "titulo": "Agente de auditoría",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "descripcion": "Audita un sistema en tres niveles (artefactos compilados, repositorios, documentación y boards) y entrega un informe de completitud en PDF.",
   "skills": [
     "skills/auditoria-sistemas"
