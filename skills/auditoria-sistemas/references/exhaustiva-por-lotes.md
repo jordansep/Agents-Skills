@@ -12,6 +12,9 @@ el scratchpad. Todo el estado queda ahí: si la corrida se corta, `A estado` dic
 `A preparar <objetivo…> --foco "<foco>" [--puntos puntos.json] [--limite 20000]`
 
 Admite PDF, Word (con pandoc), texto y carpetas. Imprime el índice y el presupuesto; no leas los lotes.
+También deja en `paginas/` un PNG por cada página con imagen y, en `barrido.json`, los enlaces de cada PDF y
+la numeración salteada. Las dos primeras cosas necesitan pymupdf: sin él, el script avisa y los lectores abren
+esas páginas del PDF.
 
 - **Sin consigna:** los puntos salen del índice del documento. Si avisa que no hay índice, mirá las
   primeras páginas con `A ver` y pasale `--puntos`.
@@ -55,11 +58,22 @@ que indica la salida, en el parámetro `model`:
 | Prompt | Qué hace | Cuándo | Modelo |
 |---|---|---|---|
 | `lotes/Lxx.segunda.prompt.md` | Segunda pasada a ciegas del lote, sin ver la ficha | Lotes con un punto candidato a Completo | `opus` |
-| `verifica/Vxx.prompt.md` | Relee sólo las páginas citadas, por tandas de 40 hallazgos | Si hay hallazgos | `haiku`, o `sonnet` si alguna cita cae en una página con imagen |
+| `verifica/Vxx.prompt.md` | Juzga los hallazgos con el texto citado, que ya viene en el prompt, por tandas de 40 | Si hay hallazgos ubicados | `haiku`; `sonnet` en las tandas de citas sobre imágenes, que van aparte y traen los PNG |
 | `coherencia.prompt.md` | Busca contradicciones entre capítulos usando sólo los hechos | Una vez | `opus` |
 
 Si una verificación falla o su JSON no se puede leer, relanzala un escalón más arriba. El usuario puede
 pedir otro modelo para cualquiera de estas tareas, y eso manda sobre la tabla.
+
+- **Citas:** el script entiende `archivo:N` y, en un lote de un solo PDF, también `p. N` y `pp. N-M`. Si no
+  encuentra una cita, o no puede saber de qué archivo es, el prompt lo dice y el verificador la pide con `A ver`.
+- **Sin PNG:** una cita sobre una página con imagen va igual en `sonnet`, con un aviso: el verificador no
+  confirma lo que depende de una imagen que no vio.
+- **Sin ubicar:** un hallazgo sin ningún número de ubicación no se verifica y queda en «Para decidir».
+- **Fuera de tramo:** una cita corta fuera del lote no invalida la ficha, porque puede ser una página que el
+  documento nombra: queda como aviso en «Para decidir». Una `archivo:N` fuera de tramo sí la invalida.
+- **Secretos:** los prompts de verificación tapan lo que el patrón del script reconoce, no todo secreto
+  posible, y `A ver` muestra el texto sin tapar. Nunca copies un valor.
+- **El script no juzga:** prepara el texto y señala. Sólo un agente o vos confirman o descartan un hallazgo.
 
 Volvé a correr `A consolidar`: compara las pasadas, aplica la verificación y deja sólo lo que requiere
 decisión. Los otros frentes (historia, CVE, normas, devoluciones) van cada uno a un subagente, con el modelo
@@ -71,6 +85,9 @@ de la sesión, que escribe `frentes/<tema>.md`, de 40 líneas como máximo, con 
 Por cada diferencia, hallazgo que no se sostuvo, hallazgo Crítica o Alta y contradicción, **releé vos** la
 fuente con `A ver a.pdf:12 docs/b.md:10-20`. No abras un lote entero: si una decisión exige más
 de unas páginas, lanzá un subagente sobre esas páginas. Lo que no sea discutido no se relee.
+
+Un hallazgo sin ubicar no se puede pedir con `A ver`: lanzá un subagente sobre su lote para que lo ubique, o
+descartalo, porque sin cita no hay hallazgo. Anotá la decisión en `conciliacion`: `A armar` avisa de los que falten.
 
 ## 5. Sintetizar y entregar
 
@@ -103,7 +120,8 @@ arma el detalle, las tareas y los anexos: no los redactes ni los copies.
 
 `puntos_extra` lleva los puntos que no salen de un lote: `Forma del documento`, `Datos personales y
 seguridad` o `Adicional · Seguridad y otros defectos`. Se evalúan con el barrido y las notas transversales
-del consolidado; el barrido no copia valores. En un punto extra, `segunda_pasada` va en `true` sólo si un
+del consolidado; el barrido da conteos, citas e identificadores, sin mirar lo que el patrón de secretos reconoce. Lo que señala (enlaces que nadie probó, un identificador
+salteado) es para revisar, no un hallazgo: un conteo de enlaces no dice si andan. En un punto extra, `segunda_pasada` va en `true` sólo si un
 subagente lo auditó a ciegas.
 
 `variante` es `general` o `academica`; con consigna, `"umbrales": [90, 50, 1]` fija otra escala de estados.
@@ -122,5 +140,5 @@ Después:
 - **Completo:** el script sólo lo da con 100 %, sin defectos abiertos, sin partes sin leer, con intento de
   refutar y con la segunda pasada conciliada. Si no podés lanzar subagentes, decilo: no hay lectores ni
   segunda pasada, y ningún punto queda Completo.
-- **Texto extraído:** las páginas con imagen o sin texto figuran en el prompt de cada lector, que las mira
-  como imagen. Si no puede, quedan en `cobertura.parcial`.
+- **Texto extraído:** las páginas con imagen o sin texto figuran en el prompt de cada lector, con su PNG si
+  lo hay, y las mira como imagen. Si no puede, quedan en `cobertura.parcial`.
