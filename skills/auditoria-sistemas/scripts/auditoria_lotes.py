@@ -78,7 +78,7 @@ SECRETOS = [
     (re.compile(r"""(?im)(?<![\w.-])(["']?(?:[\w.-]*[_.-])?(?:password|contraseña|clave|passwd|token|api[_ -]?key|secret)(?:[_.-][\w.-]*)?["']?)[ \t]*[:=][ \t]*\S.*$"""), r"\1: [valor omitido]"),
 ]
 MAX_FALTANTES = 15
-# Familia, separador y número: PRF-CSD-05 o CU-04.01. Exige el separador, así «Tabla 3» o «CAP 24» no cuentan.
+# Familia, separador y número: ABC-XYZ-05 o AB-04.01. Exige el separador, así «Tabla 3» o «CAP 24» no cuentan.
 ID_NUMERADO = re.compile(r"(?<![\w.-])([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ0-9]*(?:-[A-ZÁÉÍÓÚÑ0-9]+)*(?:[-.]\d+)*?)([-.])(\d{1,4})(?![\w-]|\.\d)")
 MIN_IDS_FAMILIA = 3
 
