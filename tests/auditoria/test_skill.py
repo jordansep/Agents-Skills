@@ -11,6 +11,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 CARPETA = RAIZ / "skills" / "auditoria-sistemas"
 SKILL = (CARPETA / "SKILL.md").read_text(encoding="utf-8")
 VARIANTE = (CARPETA / "references" / "variante-entrega-academica.md").read_text(encoding="utf-8")
+PLAN = (CARPETA / "references" / "plan-de-auditoria.md").read_text(encoding="utf-8")
 
 
 class Skill(unittest.TestCase):
@@ -57,15 +58,35 @@ class Skill(unittest.TestCase):
 
     def test_documento_sin_consigna_con_puntos_y_filas_fijos(self):
         self.assertIn("**Documentos sin consigna.**", SKILL)
-        self.assertIn("uno por cada título con nombre del primer nivel del índice", SKILL)
-        self.assertIn("`Forma del documento` y `Datos personales y seguridad`", SKILL)
+        self.assertIn("sección *Documentos sin consigna* de `references/plan-de-auditoria.md`", SKILL)
+        self.assertIn("uno por cada título con nombre del primer nivel del índice", PLAN)
+        self.assertIn("`Forma del documento` y `Datos personales y seguridad`", PLAN)
         for fila in ("Contenido anunciado presente", "Cuentas correctas", "Formalidades declaradas"):
-            self.assertIn(fila, SKILL)
+            self.assertIn(fila, PLAN)
 
     def test_documento_sin_consigna_con_severidad_y_veredicto_fijos(self):
         self.assertIn("cambia el resultado de una decisión del documento", SKILL)
-        self.assertIn("o un error que no cambia lo decidido", SKILL)
+        self.assertIn("deja sin saber si algo entra al alcance o en qué etapa", SKILL)
+        self.assertIn("(fecha, horario, DNI), salvo las firmas", SKILL)
         self.assertIn("**No listo** si alguna pregunta abierta cambia el alcance", SKILL)
+
+    def test_plan_de_auditoria_fija_puntos_filas_y_chequeos(self):
+        self.assertIn("`references/plan-de-auditoria.md`", SKILL)
+        self.assertIn("El nivel simple no usa plan", SKILL)
+        self.assertIn("plan y su versión", SKILL)
+        self.assertIn("esperá su aprobación", PLAN)
+        self.assertIn("Los números no se reciclan", PLAN)
+        self.assertIn("Los PROBABLE no entran", PLAN)
+        self.assertIn("Lo que va entre corchetes es la fila donde se informa", PLAN)
+        self.assertIn("El plan nunca va dentro de la skill ni del sistema auditado", PLAN)
+
+    def test_reglas_para_juzgar_igual_en_cada_corrida(self):
+        self.assertIn("**Juzgar igual en cada corrida.**", SKILL)
+        self.assertIn("**Cada defecto va en una sola fila del punto.**", SKILL)
+        self.assertIn("Lo que un punto exige y otro no trae va en el punto que lo exige", SKILL)
+        self.assertIn("Parcial no quiere decir \"cumple a medias\"", SKILL)
+        self.assertIn("\"FUERA DEL DOCUMENTO:\"", SKILL)
+        self.assertIn("Los rótulos y títulos de tablas y figuras no van acá", PLAN)
 
     def test_documento_sin_consigna_no_pisa_la_variante(self):
         self.assertIn("aplican si hay consigna, norma o variante de entrega académica", SKILL)

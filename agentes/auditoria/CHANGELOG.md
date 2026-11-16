@@ -2,6 +2,17 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.12.0] - 2026-11-15
+
+### Agregado
+
+- Plan de auditoría por sistema (references/plan-de-auditoria.md): en nivel medio y exhaustivo, toda corrida usa los mismos puntos, filas y chequeos; el plan se aprueba antes de auditar y crece con chequeos aprobados.
+- Reglas para juzgar igual en cada corrida: un defecto va en una sola fila, qué cubre cada fila fija, cuándo es Parcial, secciones históricas y lo que está fuera del documento.
+
+### Cambiado
+
+- Severidad de Documentos sin consigna con ejemplos para los cortes Baja/Media y Media/Alta; sus puntos y filas pasan a references/plan-de-auditoria.md, y una fila que no aplica queda en el plan con su motivo. Medido en tres corridas sobre el mismo documento: veredicto igual 91-95 %, gravedad igual 78-84 %.
+
 ## [0.11.0] - 2026-11-06
 
 ### Agregado
