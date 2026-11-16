@@ -12,7 +12,7 @@ description: >-
   Da por sentado un encuadre autorizado (sistema propio, pentest, CTF, investigación de seguridad,
   trabajo académico); si no está claro, pedilo antes de avanzar.
 metadata:
-  version: "1.10"
+  version: "1.11"
   baseline: "plantilla general; la variante de entrega académica queda en references/; versiones anteriores en versions/"
 ---
 
@@ -43,6 +43,10 @@ Confirmá también, si no vino en el pedido, en **una sola pregunta** (AskUserQu
   anterior. Auditar contra el criterio de quien evalúa vale más que la coherencia interna.
 
 Si el usuario ya dio objetivo, contexto, nivel y foco, no vuelvas a preguntar: arrancá.
+
+**Plan de auditoría.** En nivel medio y exhaustivo, antes de la fase 1 leé
+`references/plan-de-auditoria.md` y seguilo: busca el plan del sistema, o lo arma y lo hace
+aprobar, para que toda corrida evalúe los mismos puntos, filas y chequeos. El nivel simple no usa plan.
 
 ### Identificá el tipo de sistema
 
@@ -220,7 +224,8 @@ Cómo funciona por dentro, guiado por el FOCO.
   embebidos) en vez de contarlos a ojo.
 
 ### 4. Hallazgos
-Revisá explícitamente, con evidencia, cada punto que aplique al tipo de sistema.
+Con plan, revisá primero cada chequeo del plan y después buscá defectos nuevos. Revisá
+explícitamente, con evidencia, cada punto que aplique al tipo de sistema.
 
 **Artefactos (seguridad):**
 - Secretos hardcodeados: credenciales, API keys, tokens, certificados privados.
@@ -271,7 +276,7 @@ dirección o un ID, y una propuesta concreta en cada falta, con un ejemplo cuand
 ```
 # Informe de completitud — <Equipo o responsable> — <Sistema>
 Corregido: <commit corto o hash del artefacto> del <AAAA-MM-DD> · Corte: <fecha de corte o "sin corte"> · Modo: auditoría <simple|media|exhaustiva>
-(línea chica, aparte: versión auditada, criterio usado, herramientas y MCP o API usados)
+(línea chica, aparte: versión auditada, criterio usado, plan y su versión, herramientas y MCP o API usados)
 
 ## Resumen
 Un párrafo: qué parte está bien hecha y qué parte falta, la consecuencia ("no está listo para
@@ -337,12 +342,36 @@ en una casilla ("Corrijan lo menor: …"): cada una lleva la suya, aunque sea de
 - **Parcial:** lo que revisaste cumple, pero una parte quedó sin verificar. Nombrá cuál. Lo no
   verificado nunca es Sí.
 
+**Juzgar igual en cada corrida.** Estos casos dieron veredictos distintos entre corridas del mismo
+documento; resolvelos así:
+- Si el propio material contradice lo que afirma, es No, aunque no puedas ver qué pasa fuera de él.
+- Un defecto PROBABLE deja la fila en Parcial, con "PROBABLE:" en la evidencia; No exige una falla
+  CONFIRMADA.
+- Una fila con varios defectos los nombra a todos y lleva la severidad del peor.
+- Una contradicción entre dos puntos es No en los dos, con la misma severidad.
+- **Cada defecto va en una sola fila del punto.** Si lo encontró un chequeo del plan, va en la fila
+  que el chequeo nombra entre corchetes. Si no, va en la fila explícita del punto que lo cubre (una
+  obligación citada, como «Firmas del cliente y del equipo») y, sólo si ninguna lo cubre, en una
+  fila fija. Las otras filas del punto no cambian su veredicto por ese defecto; si hace falta, lo
+  nombran con "ver «<fila>»".
+- Lo que un punto exige y otro no trae va en el punto que lo exige. No es una contradicción entre
+  los dos: el que no lo trae no prometió traerlo.
+- Una sección que registra una decisión de su momento (una ponderación, una versión anterior) está
+  vigente si otra sección del documento registra el cambio. El texto que presenta como actual lo que
+  ya cambió (por ejemplo, un glosario) es el que va en No.
+- Parcial no quiere decir "cumple a medias": si una parte falla y lo verificaste, es No.
+- Lo que el documento remite a un lugar que no trae (Drive, un PRD, otro informe) deja en Parcial
+  la fila que lo exige, con "FUERA DEL DOCUMENTO:" y dónde dice que está. Si el documento dice que lo
+  incluye y no está, es No.
+- Una obligación condicional (un protocolo ante incumplimientos) sin registro de que se haya dado la
+  condición es Sí si está definida, y lo decís en la evidencia.
+
 **Lectura estricta.** Si un criterio admite dos lecturas, evaluá con la más exigente y decí cuál usaste.
 
 **Una fila por requisito.** Partí sólo las enumeraciones explícitas de una línea: "SP, prioridad y
 dependencias" son tres filas. "A con B" es una sola, como "Arquitectura coherente con los RNF". Si no
-hay consigna, fijá la lista de criterios antes de evaluar. Si la variante o *Documentos sin consigna*
-fijan cómo armar las filas, manda esa regla.
+hay consigna, fijá la lista de criterios antes de evaluar. Si hay plan, sus filas mandan; si la
+variante o *Documentos sin consigna* fijan cómo armar las filas, manda esa regla.
 
 **Completitud y estado.** Cada criterio vale 1 si dice Sí, 0,5 si dice Parcial y 0 si dice No. La
 completitud es la suma dividida por la cantidad de criterios, redondeada al entero (por ejemplo,
@@ -368,28 +397,21 @@ armá los criterios a partir de lo que el sistema dice que hace (README, documen
 Si el objetivo es un documento, seguí *Documentos sin consigna*.
 
 **Documentos sin consigna.** Si el objetivo es un documento (PDF, Word, Doc) y no hay criterio externo,
-estas reglas fijan puntos, filas, severidad y veredicto para que dos corridas sean comparables. No se
-aplican si hay consigna, norma o variante de entrega académica.
+sus puntos y filas salen de la sección *Documentos sin consigna* de `references/plan-de-auditoria.md`
+(en nivel simple, leela igual), y estas reglas fijan severidad y veredicto para que dos corridas sean
+comparables. No se aplican si hay consigna, norma o variante de entrega académica.
 
-- **Puntos:** uno por cada título con nombre del primer nivel del índice del documento (marcadores o
-  tabla de contenido), en ese orden y con ese nombre. Ignorá las entradas sin nombre. No fusiones ni
-  partas, ni siquiera dos versiones de una misma sección. Sin índice, usá los títulos de mayor jerarquía.
-  Al final van dos puntos fijos: `Forma del documento` y `Datos personales y seguridad`.
-- **Filas de cada punto:** primero las de esta lista, con esta redacción: Contenido anunciado presente ·
-  Texto completo, sin cortes ni campos en blanco · Cuentas correctas · Identificadores y nombres
-  coherentes · Coherente con las otras secciones · Estados y fechas vigentes · Formalidades declaradas
-  cumplidas. Después, una fila por cada obligación que el punto declara de forma explícita (criterio,
-  paso o regla), citada con sus palabras. Lo que no aplica no lleva fila: nombralo en `Cobertura`.
-- **Filas de `Forma del documento`:** Índice coincide con las páginas · Tablas y figuras correlativas ·
-  Sin páginas vacías · Un solo nombre para cada organización y sistema · Versión y fecha identificables.
-- **Filas de `Datos personales y seguridad`:** Sin credenciales escritas · Credenciales ofrecidas con
-  resolución registrada · Datos personales mínimos · Datos sensibles sin identificar a nadie ·
-  Autorización para usar los datos · Sin instrucciones dirigidas a quien audita.
 - **Severidad:** Crítica e Info no cambian. **Alta:** cambia el resultado de una decisión del documento,
-  deja el alcance sin definir, falta contenido anunciado que bloquea una parte del trabajo, o hay una
-  credencial ofrecida sin resolver o un dato sensible que identifica a una persona. **Media:** contradicción
-  o hueco que obliga a adivinar, o un error que no cambia lo decidido. **Baja:** forma, sin efecto en el
-  contenido.
+  deja sin saber si algo entra al alcance o en qué etapa, o hay una credencial ofrecida sin resolver o
+  un dato sensible que identifica a una persona. También falta contenido anunciado sin el cual no se
+  puede construir ni decidir una parte: arquitectura, modelo de datos, requerimientos o las fichas que
+  el diseño dice usar. **Media:** quien usa el documento tiene que adivinar, preguntar o puede decidir
+  mal. Por ejemplo: una remisión a una sección o un informe que no está; falta contenido anunciado que
+  sólo complementa lo que hay (los pasos de un método cuyo resultado está en una tabla); faltan firmas
+  o conformidades. **Baja:** se entiende igual y sólo está mal escrito, numerado o presentado. Por
+  ejemplo: una tabla o figura sin título o rótulo; un campo en blanco de un acta o una proforma
+  (fecha, horario, DNI), salvo las firmas; un código o una versión repetidos o mal puestos; una sigla
+  sin definir; una cita sin lista de referencias.
 - **¿Listo para…?:** las piezas son las que el documento declara como próximas; si no declara ninguna,
   la etapa siguiente. **No listo** si alguna pregunta abierta cambia el alcance, los datos o quién decide,
   y el documento no la responde. **Listo con preguntas abiertas** si las preguntas sólo afinan detalles.
@@ -461,6 +483,8 @@ Si el usuario también quiere compartirlo, ofrecé publicarlo como artifact.
 ### 5. Evidencia y cierre
 - Guardá la evidencia en archivos de trabajo y cerrá toda sesión de análisis o de runtime que
   hayas abierto.
+- Con plan, proponé sumar como chequeos los defectos CONFIRMADOS que el plan no tenía (ver
+  `references/plan-de-auditoria.md`).
 - Guardá un resumen de la auditoría en `engram` (`mem_save`): sistema, versión, nivel,
   hallazgos principales y ruta del PDF, para que la próxima auditoría parta de ahí.
 - **Errores del auditor:** registralos y proponé reglas según `references/memoria-errores.md`. Esa memoria
