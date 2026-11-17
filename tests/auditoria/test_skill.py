@@ -82,11 +82,25 @@ class Skill(unittest.TestCase):
 
     def test_reglas_para_juzgar_igual_en_cada_corrida(self):
         self.assertIn("**Juzgar igual en cada corrida.**", SKILL)
-        self.assertIn("**Cada defecto va en una sola fila del punto.**", SKILL)
-        self.assertIn("Lo que un punto exige y otro no trae va en el punto que lo exige", SKILL)
+        self.assertIn("**Dónde va cada defecto**", SKILL)
+        self.assertIn("pide y otro no trae va en el que lo pide", SKILL)
         self.assertIn("Parcial no quiere decir \"cumple a medias\"", SKILL)
         self.assertIn("\"FUERA DEL DOCUMENTO:\"", SKILL)
         self.assertIn("Los rótulos y títulos de tablas y figuras no van acá", PLAN)
+
+    def test_un_defecto_en_cada_chequeo_o_en_la_seccion_a_corregir(self):
+        self.assertIn("va en **cada una** de esas filas, con el mismo veredicto y la misma severidad", SKILL)
+        self.assertIn("la del punto cuya sección hay que", SKILL)
+        self.assertIn("recibe lo que falta en otra", SKILL)
+        self.assertNotIn("Una contradicción entre dos puntos es No en los dos", SKILL)
+        self.assertIn("La etiqueta tiene que señalar una sola fila del mismo punto", PLAN)
+
+    def test_reglas_de_la_medicion_de_consistencia(self):
+        self.assertIn("El PROBABLE lleva la severidad que tendría si se confirmara", SKILL)
+        self.assertIn("\"FUERA DEL DOCUMENTO:\" nunca va en una fila No", SKILL)
+        self.assertIn("\"definida; sin registro de cumplimiento\" y sin severidad", SKILL)
+        self.assertIn("se cuenta con lo vigente", SKILL)
+        self.assertIn("**Imágenes leídas**", SKILL)
 
     def test_documento_sin_consigna_no_pisa_la_variante(self):
         self.assertIn("aplican si hay consigna, norma o variante de entrega académica", SKILL)

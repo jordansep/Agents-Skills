@@ -2,6 +2,20 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.13.0] - 2026-11-17
+
+### Agregado
+
+- En nivel medio se leen todas las imágenes con texto o cifras; una imagen sin leer deja en Parcial las filas que dependen de ella.
+- La etiqueta de un chequeo del plan señala una sola fila del mismo punto.
+
+### Cambiado
+
+- Dónde va cada defecto: si lo cubren chequeos del plan, va en cada una de esas filas con la misma severidad; si no, en una sola fila, la del punto cuya sección hay que corregir. Una sección que sólo lo nombra o lo resume (glosario, índice) nunca recibe lo que falta en otra. Reemplaza «una contradicción entre dos puntos es No en los dos», que duplicaba defectos.
+- FUERA DEL DOCUMENTO va siempre en Parcial y sin severidad, y cubre sólo el contenido detrás de una remisión que sí está; lo que la sección dice traer y no trae es No.
+- Un PROBABLE lleva la severidad que tendría si se confirmara; una regla de conducta o de proceso sin registro de cumplimiento es Parcial y sin severidad; las cantidades declaradas se cuentan con lo vigente.
+- Más ejemplos de severidad (confidencialidad con servicios de terceros y etapa contradictoria como Alta; subtotal que no cierra, cita atribuida a otra persona, cargo contradictorio, regla propia incumplida, casillas excluyentes y acción ejecutada en parte como Media; número de sprint contra sus fechas como Baja). Medido en tres corridas sobre el mismo documento: veredicto igual 96-97 %, gravedad igual 86-88 %, Crítica y Alta coinciden al 100 %.
+
 ## [0.12.0] - 2026-11-15
 
 ### Agregado
