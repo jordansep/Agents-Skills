@@ -12,7 +12,7 @@ description: >-
   Da por sentado un encuadre autorizado (sistema propio, pentest, CTF, investigación de seguridad,
   trabajo académico); si no está claro, pedilo antes de avanzar.
 metadata:
-  version: "1.11"
+  version: "1.12"
   baseline: "plantilla general; la variante de entrega académica queda en references/; versiones anteriores en versions/"
 ---
 
@@ -111,6 +111,10 @@ lo que tu nivel pide para un punto, ese punto no queda Completo: decí qué falt
   relaciones entre tablas y diagramas. Por cada regla que el material dice proteger ("sólo por X",
   "nunca", "siempre"), listá los métodos públicos o los caminos de las clases involucradas y comprobá
   que ninguno la saltee.
+- **Imágenes leídas**: las imágenes con texto o cifras (diagramas, organigramas, capturas, tablas
+  pegadas como imagen) son parte del objetivo. Leelas todas, mirando la página como imagen, de a
+  tandas si son muchas. Una imagen sin leer deja en Parcial las filas que dependen de ella, y la
+  cobertura la nombra.
 - **Registro de cobertura**: en cada punto, qué leíste completo, qué leíste en parte y qué no
   leíste (ver la plantilla).
 - **Intento de refutar cada Completo**: antes de dar un punto por Completo, tratá de voltearlo.
@@ -346,27 +350,53 @@ en una casilla ("Corrijan lo menor: …"): cada una lleva la suya, aunque sea de
 documento; resolvelos así:
 - Si el propio material contradice lo que afirma, es No, aunque no puedas ver qué pasa fuera de él.
 - Un defecto PROBABLE deja la fila en Parcial, con "PROBABLE:" en la evidencia; No exige una falla
-  CONFIRMADA.
+  CONFIRMADA. El PROBABLE lleva la severidad que tendría si se confirmara.
 - Una fila con varios defectos los nombra a todos y lleva la severidad del peor.
-- Una contradicción entre dos puntos es No en los dos, con la misma severidad.
-- **Cada defecto va en una sola fila del punto.** Si lo encontró un chequeo del plan, va en la fila
-  que el chequeo nombra entre corchetes. Si no, va en la fila explícita del punto que lo cubre (una
-  obligación citada, como «Firmas del cliente y del equipo») y, sólo si ninguna lo cubre, en una
-  fila fija. Las otras filas del punto no cambian su veredicto por ese defecto; si hace falta, lo
-  nombran con "ver «<fila>»".
-- Lo que un punto exige y otro no trae va en el punto que lo exige. No es una contradicción entre
-  los dos: el que no lo trae no prometió traerlo.
+- **Dónde va cada defecto**, también cuando toca dos o más puntos (una contradicción entre
+  secciones, algo que dos secciones piden y no está). Un defecto es el mismo si señala el mismo hecho
+  del documento (el mismo dato, la misma ausencia), aunque cada punto lo vea desde su lado.
+  1. **Con chequeo:** si lo cubren uno o más chequeos del plan (las filas que los nombran entre
+     corchetes), va en **cada una** de esas filas, con el mismo veredicto y la misma severidad en
+     todas: el plan pidió revisarlo en cada lugar. No lo saques de ninguna ni lo muevas a otro punto.
+  2. **Sin chequeo:** va en una sola fila de todo el informe, la del punto cuya sección hay que
+     corregir para resolverlo. Lo que falta va en la sección que tenía que traerlo (lo que un punto
+     pide y otro no trae va en el que lo pide); un dato que no coincide, en la sección que lo tiene
+     mal. Una sección que sólo lo nombra o lo resume (glosario, índice, resumen, introducción) nunca
+     recibe lo que falta en otra. Sólo si las dos secciones podrían corregirse por igual (una
+     contradicción sin un lado vigente), va en el punto que aparece después en el documento.
+  3. Dentro de ese punto, en la fila explícita que lo cubre (una obligación citada, como «Firmas del
+     cliente y del equipo») y, sólo si ninguna lo cubre, en una fila fija.
+  Las demás filas, de ese punto y de los otros, no cambian su veredicto por ese defecto: lo nombran
+  con "ver punto N, «<fila>»" y se juzgan por lo que les queda. Una fila que sólo tiene ese defecto
+  queda en Sí. Antes de armar el informe, revisá dos cosas: que ningún defecto sin chequeo esté en
+  dos filas, y que cada defecto con chequeo esté en todas sus filas con la misma severidad.
+- Una instrucción de una plantilla («una ficha por cada requerimiento») se juzga por cómo se usa en
+  el documento: si el documento trae una tabla en lugar de fichas, ese defecto va en la fila de la
+  instrucción, y la fila del punto que la usa lo nombra con "ver punto N".
 - Una sección que registra una decisión de su momento (una ponderación, una versión anterior) está
   vigente si otra sección del documento registra el cambio. El texto que presenta como actual lo que
   ya cambió (por ejemplo, un glosario) es el que va en No.
 - Parcial no quiere decir "cumple a medias": si una parte falla y lo verificaste, es No.
 - Lo que el documento remite a un lugar que no trae (Drive, un PRD, otro informe) deja en Parcial
-  la fila que lo exige, con "FUERA DEL DOCUMENTO:" y dónde dice que está. Si el documento dice que lo
-  incluye y no está, es No.
+  la fila que lo exige, con "FUERA DEL DOCUMENTO:", dónde dice que está y sin severidad: no es un
+  defecto del documento, sino algo que la auditoría no puede ver. Vale aunque la remisión no tenga
+  enlace ni ruta. "FUERA DEL DOCUMENTO:" nunca va en una fila No. Es No, y no FUERA DEL DOCUMENTO,
+  en dos casos: (a) el documento dice que la sección lo trae («este diseño presenta la arquitectura»)
+  y no está, aunque en otro lugar también remita a un documento externo; (b) lo que se exige es la
+  remisión misma («cada sección remite a su fuente», «cada nombre enlaza») y la remisión no está en
+  el documento. FUERA DEL DOCUMENTO cubre sólo el contenido que está detrás de una remisión que sí
+  está.
 - Una obligación condicional (un protocolo ante incumplimientos) sin registro de que se haya dado la
   condición es Sí si está definida, y lo decís en la evidencia.
+- Una regla que rige siempre (de conducta o de proceso: reuniones, tolerancia, avisos, medios,
+  revisiones, pruebas en cada entrega) y que el documento define pero no registra cumplida es
+  Parcial, con "definida; sin registro de cumplimiento" y sin severidad. Es Sí si el documento
+  registra que se cumplió, y No si registra algo que la contradice. La regla de la obligación
+  condicional no se extiende a estas.
 
 **Lectura estricta.** Si un criterio admite dos lecturas, evaluá con la más exigente y decí cuál usaste.
+Una cantidad declarada («tiene 35 requerimientos») se cuenta con lo vigente: lo «Retirado» o
+«Descartado» no suma.
 
 **Una fila por requisito.** Partí sólo las enumeraciones explícitas de una línea: "SP, prioridad y
 dependencias" son tres filas. "A con B" es una sola, como "Arquitectura coherente con los RNF". Si no
@@ -403,15 +433,25 @@ comparables. No se aplican si hay consigna, norma o variante de entrega académi
 
 - **Severidad:** Crítica e Info no cambian. **Alta:** cambia el resultado de una decisión del documento,
   deja sin saber si algo entra al alcance o en qué etapa, o hay una credencial ofrecida sin resolver o
-  un dato sensible que identifica a una persona. También falta contenido anunciado sin el cual no se
-  puede construir ni decidir una parte: arquitectura, modelo de datos, requerimientos o las fichas que
-  el diseño dice usar. **Media:** quien usa el documento tiene que adivinar, preguntar o puede decidir
-  mal. Por ejemplo: una remisión a una sección o un informe que no está; falta contenido anunciado que
-  sólo complementa lo que hay (los pasos de un método cuyo resultado está en una tabla); faltan firmas
-  o conformidades. **Baja:** se entiende igual y sólo está mal escrito, numerado o presentado. Por
+  un dato sensible que identifica a una persona. También un compromiso de confidencialidad o de uso
+  de datos que el propio documento puede estar rompiendo (servicios de terceros que procesan los
+  datos comprometidos), aunque sea PROBABLE porque no consta qué datos pasaron. Una etapa que
+  contradice la de otra sección (la etapa de una necesidad, de un requerimiento o de una fase) es
+  Alta, aunque parezca un error de copia. También falta contenido anunciado sin el cual no se puede
+  construir ni decidir una parte: arquitectura, modelo de datos, requerimientos o las fichas que el
+  diseño o una plantilla dicen usar. **Media:** quien usa el documento tiene que adivinar, preguntar o
+  puede decidir mal. Por ejemplo: una remisión a una sección del propio documento que no está; falta
+  contenido anunciado que sólo complementa lo que hay (los pasos de un método cuyo resultado está en
+  una tabla); faltan firmas o conformidades; un total o subtotal que no cierra; una cita atribuida a
+  otra persona; el cargo o el rol de una persona que contradice otra parte del documento; algo que se
+  usa o se hace en contra de una regla que el documento fija (una herramienta fuera de las
+  declaradas); casillas excluyentes marcadas a la vez; una acción que una sección anuncia y otra
+  ejecuta en parte (tres herramientas en el plan, una en el cronograma). **Baja:** se entiende igual
+  y sólo está mal escrito, numerado o presentado. Por
   ejemplo: una tabla o figura sin título o rótulo; un campo en blanco de un acta o una proforma
   (fecha, horario, DNI), salvo las firmas; un código o una versión repetidos o mal puestos; una sigla
-  sin definir; una cita sin lista de referencias.
+  sin definir; una cita sin lista de referencias; un número de sprint, semana o fase que no coincide
+  con sus fechas, si las fechas están.
 - **¿Listo para…?:** las piezas son las que el documento declara como próximas; si no declara ninguna,
   la etapa siguiente. **No listo** si alguna pregunta abierta cambia el alcance, los datos o quién decide,
   y el documento no la responde. **Listo con preguntas abiertas** si las preguntas sólo afinan detalles.

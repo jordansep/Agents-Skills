@@ -30,7 +30,7 @@ Al versionar:
 
 ## Chequeos
 
-Cada chequeo dice qué se compara contra qué y dónde: `[Cuentas correctas] Tabla 7 contra el detalle semanal (p. 20-22)`. Lo que va entre corchetes es la fila donde se informa lo que el chequeo encuentra, y ninguna otra. Al proponer un chequeo, poné la fila explícita del punto si alguna lo cubre; si no, la fija. En la fase 4, revisá primero cada chequeo del plan y después buscá defectos nuevos. Un chequeo que ya no encuentra el defecto se informa como resuelto, no se saca.
+Cada chequeo dice qué se compara contra qué y dónde: `[Cuentas correctas] Tabla 7 contra el detalle semanal (p. 20-22)`. Lo que va entre corchetes es la fila donde se informa lo que el chequeo encuentra, y ninguna otra. Al proponer un chequeo, poné la fila explícita del punto si alguna lo cubre; si no, la fija. La etiqueta tiene que señalar una sola fila del mismo punto: la fija (`F3`) o la obligación con sus primeras palabras tal como figura en *Filas*. Si un chequeo toca dos filas, partilo en dos. Si lo que revisa pertenece a otro punto (una página vacía va en `Forma del documento`), va como chequeo de ese punto. En la fase 4, revisá primero cada chequeo del plan y después buscá defectos nuevos. Un chequeo que ya no encuentra el defecto se informa como resuelto, no se saca.
 
 Al cerrar la auditoría, listá los defectos CONFIRMADOS que el plan no tenía como chequeo y proponé sumarlos, todos en una sola pregunta. Lo aprobado entra como una versión nueva del plan. Los PROBABLE no entran: un falso positivo en el plan se repetiría en todas las corridas siguientes.
 
