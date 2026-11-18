@@ -2,6 +2,12 @@
 
 Cambios relevantes del agente (`skills/auditoria-sistemas`). El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones siguen [SemVer](https://semver.org/lang/es/), según las reglas de [`VERSIONADO.md`](../../VERSIONADO.md).
 
+## [0.13.1] - 2026-11-17
+
+### Corregido
+
+- La regla de dónde va cada defecto se contradecía: decía que lo que falta va en la sección que tenía que traerlo y, entre paréntesis, que va en la que lo pide. Ahora lo que un requisito pide y un diagrama, una ficha o un caso de uso no desarrolla va en el punto del diagrama, la ficha o el caso, nunca en el del requisito; «el punto que aparece después» queda sólo para datos que no coinciden. En dos de seis corridas sobre un mismo documento, el defecto había caído en el punto del requisito.
+
 ## [0.13.0] - 2026-11-17
 
 ### Agregado

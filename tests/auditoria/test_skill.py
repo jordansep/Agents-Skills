@@ -83,7 +83,8 @@ class Skill(unittest.TestCase):
     def test_reglas_para_juzgar_igual_en_cada_corrida(self):
         self.assertIn("**Juzgar igual en cada corrida.**", SKILL)
         self.assertIn("**Dónde va cada defecto**", SKILL)
-        self.assertIn("pide y otro no trae va en el que lo pide", SKILL)
+        self.assertIn("Lo que falta va en la sección que tenía que traerlo, no en la que lo", SKILL)
+        self.assertNotIn("va en el que lo pide", SKILL)
         self.assertIn("Parcial no quiere decir \"cumple a medias\"", SKILL)
         self.assertIn("\"FUERA DEL DOCUMENTO:\"", SKILL)
         self.assertIn("Los rótulos y títulos de tablas y figuras no van acá", PLAN)

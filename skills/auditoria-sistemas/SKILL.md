@@ -12,7 +12,7 @@ description: >-
   Da por sentado un encuadre autorizado (sistema propio, pentest, CTF, investigación de seguridad,
   trabajo académico); si no está claro, pedilo antes de avanzar.
 metadata:
-  version: "1.12"
+  version: "1.12.1"
   baseline: "plantilla general; la variante de entrega académica queda en references/; versiones anteriores en versions/"
 ---
 
@@ -359,11 +359,14 @@ documento; resolvelos así:
      corchetes), va en **cada una** de esas filas, con el mismo veredicto y la misma severidad en
      todas: el plan pidió revisarlo en cada lugar. No lo saques de ninguna ni lo muevas a otro punto.
   2. **Sin chequeo:** va en una sola fila de todo el informe, la del punto cuya sección hay que
-     corregir para resolverlo. Lo que falta va en la sección que tenía que traerlo (lo que un punto
-     pide y otro no trae va en el que lo pide); un dato que no coincide, en la sección que lo tiene
-     mal. Una sección que sólo lo nombra o lo resume (glosario, índice, resumen, introducción) nunca
-     recibe lo que falta en otra. Sólo si las dos secciones podrían corregirse por igual (una
-     contradicción sin un lado vigente), va en el punto que aparece después en el documento.
+     corregir para resolverlo. Lo que falta va en la sección que tenía que traerlo, no en la que lo
+     pide: si un requisito pide algo que un diagrama, una ficha o un caso de uso no desarrolla, va en
+     el punto del diagrama, la ficha o el caso; la sección del requisito no recibe ese defecto,
+     aunque la corrección pueda hacerse en cualquiera de los dos lados. Una sección que sólo lo
+     nombra o lo resume (glosario, índice, resumen, introducción) nunca recibe lo que falta en otra.
+     Un dato que no coincide va en la sección que lo tiene mal; sólo si las dos podrían corregirse
+     por igual (una contradicción sin un lado vigente), va en el punto que aparece después en el
+     documento.
   3. Dentro de ese punto, en la fila explícita que lo cubre (una obligación citada, como «Firmas del
      cliente y del equipo») y, sólo si ninguna lo cubre, en una fila fija.
   Las demás filas, de ese punto y de los otros, no cambian su veredicto por ese defecto: lo nombran
